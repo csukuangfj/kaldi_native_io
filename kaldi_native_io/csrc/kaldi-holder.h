@@ -52,6 +52,10 @@ class BasicPairVectorHolder;
 /// headers.
 class TokenHolder;
 
+/// Class TokenVectorHolder is a Holder class for vectors of Tokens
+/// (T == std::string).
+class TokenVectorHolder;
+
 // In SequentialTableReaderScriptImpl and RandomAccessTableReaderScriptImpl, for
 // cases where the scp contained 'range specifiers' (things in square brackets
 // identifying parts of objects like matrices), use this function to separate

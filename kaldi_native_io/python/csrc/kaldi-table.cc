@@ -81,6 +81,38 @@ void PybindKaldiTable(py::module &m) {
       m, "_SequentialInt32PairVectorReader");
   PybindRandomAccessTableReader<BasicPairVectorHolder<int32_t>>(
       m, "_RandomAccessInt32PairVectorReader");
+
+  PybindTableWriter<BasicHolder<float>>(m, "_FloatWriter");
+  PybindSequentialTableReader<BasicHolder<float>>(m, "_SequentialFloatReader");
+  PybindRandomAccessTableReader<BasicHolder<float>>(m,
+                                                    "_RandomAccessFloatReader");
+
+  PybindTableWriter<BasicPairVectorHolder<float>>(m, "_FloatPairVectorWriter");
+  PybindSequentialTableReader<BasicPairVectorHolder<float>>(
+      m, "_SequentialFloatPairVectorReader");
+  PybindRandomAccessTableReader<BasicPairVectorHolder<float>>(
+      m, "_RandomAccessFloatPairVectorReader");
+
+  PybindTableWriter<BasicHolder<double>>(m, "_DoubleWriter");
+  PybindSequentialTableReader<BasicHolder<double>>(m,
+                                                   "_SequentialDoubleReader");
+  PybindRandomAccessTableReader<BasicHolder<double>>(
+      m, "_RandomAccessDoubleReader");
+
+  PybindTableWriter<BasicHolder<bool>>(m, "_BoolWriter");
+  PybindSequentialTableReader<BasicHolder<bool>>(m, "_SequentialBoolReader");
+  PybindRandomAccessTableReader<BasicHolder<bool>>(m,
+                                                   "_RandomAccessBoolReader");
+
+  PybindTableWriter<TokenHolder>(m, "_TokenWriter");
+  PybindSequentialTableReader<TokenHolder>(m, "_SequentialTokenReader");
+  PybindRandomAccessTableReader<TokenHolder>(m, "_RandomAccessTokenReader");
+
+  PybindTableWriter<TokenVectorHolder>(m, "_TokenVectorWriter");
+  PybindSequentialTableReader<TokenVectorHolder>(
+      m, "_SequentialTokenVectorReader");
+  PybindRandomAccessTableReader<TokenVectorHolder>(
+      m, "_RandomAccessTokenVectorReader");
 }
 
 }  // namespace kaldiio

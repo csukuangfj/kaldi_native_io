@@ -584,6 +584,64 @@ class TokenHolder {
   T t_;
 };
 
+// A Token is a nonempty, whitespace-free std::string.
+// Class TokenVectorHolder is a Holder class for vectors of these.
+class TokenVectorHolder {
+ public:
+  typedef std::vector<std::string> T;
+
+  TokenVectorHolder() {}
+
+  static bool Write(std::ostream &os, bool, const T &t) {  // ignore binary-mode
+    for (std::vector<std::string>::const_iterator iter = t.begin();
+         iter != t.end(); ++iter) {
+      KALDIIO_ASSERT(IsToken(*iter));  // make sure it's whitespace-free,
+      // printable and nonempty.
+      os << *iter << ' ';
+    }
+    os << '\n';
+    return os.good();
+  }
+
+  void Clear() { t_.clear(); }
+
+  // Reads into the holder.
+  bool Read(std::istream &is) {
+    t_.clear();
+
+    // there is no binary/non-binary mode.
+
+    std::string line;
+    getline(is, line);  // this will discard the \n, if present.
+    if (is.fail()) {
+      KALDIIO_WARN << "BasicVectorHolder::Read, error reading line "
+                   << (is.eof() ? "[eof]" : "");
+      return false;  // probably eof.  fail in any case.
+    }
+    const char *white_chars = " \t\n\r\f\v";
+    SplitStringToVector(line, white_chars, true, &t_);  // true== omit
+    // empty strings e.g. between spaces.
+    return true;
+  }
+
+  // Read in text format since it's basically a text-mode thing.. doesn't really
+  // matter, it would work either way since we ignore the extra '\r'.
+  static bool IsReadInBinary() { return false; }
+
+  T &Value() { return t_; }
+
+  void Swap(TokenVectorHolder *other) { t_.swap(other->t_); }
+
+  bool ExtractRange(const TokenVectorHolder &other, const std::string &range) {
+    KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
+    return false;
+  }
+
+ private:
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(TokenVectorHolder);
+  T t_;
+};
+
 }  // namespace kaldiio
 
 #endif  // KALDI_NATIVE_IO_CSRC_KALDI_HOLDER_INL_H_
