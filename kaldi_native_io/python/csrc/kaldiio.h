@@ -6,6 +6,7 @@
 #define KALDI_NATIVE_IO_PYTHON_CSRC_KALDIIO_H_
 
 #include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
 
 namespace py = pybind11;
 

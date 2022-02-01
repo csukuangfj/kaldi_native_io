@@ -21,6 +21,14 @@ namespace kaldiio {
 template <class BasicType>
 class BasicHolder;
 
+/// A Holder for a vector of basic types, e.g.
+/// std::vector<int32>, std::vector<float>, and so on.
+/// Note: a basic type is defined as a type for which ReadBasicType
+/// and WriteBasicType are implemented, i.e. integer and floating
+/// types, and bool.
+template <class BasicType>
+class BasicVectorHolder;
+
 /// We define a Token (not a typedef, just a word) as a nonempty, printable,
 /// whitespace-free std::string.  The binary and text formats here are the same
 /// (newline-terminated) and as such we don't bother with the binary-mode

@@ -61,6 +61,12 @@ void PybindKaldiTable(py::module &m) {
                                                     "_SequentialInt32Reader");
   PybindRandomAccessTableReader<BasicHolder<int32_t>>(
       m, "_RandomAccessInt32Reader");
+
+  PybindTableWriter<BasicVectorHolder<int32_t>>(m, "_Int32VectorWriter");
+  PybindSequentialTableReader<BasicVectorHolder<int32_t>>(
+      m, "_SequentialInt32VectorReader");
+  PybindRandomAccessTableReader<BasicVectorHolder<int32_t>>(
+      m, "_RandomAccessInt32VectorReader");
 }
 
 }  // namespace kaldiio
