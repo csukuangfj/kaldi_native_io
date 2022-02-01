@@ -37,6 +37,15 @@ class BasicVectorHolder;
 template <class BasicType>
 class BasicVectorVectorHolder;
 
+// A holder for vectors of pairs of basic types, e.g.
+// std::vector<std::pair<int32, int32> >, and so on.
+// Note: a basic type is defined as a type for which ReadBasicType
+// and WriteBasicType are implemented, i.e. integer and floating
+// types, and bool.  Text format is (e.g. for integers),
+// "1 12 ; 43 61 ; 17 8 \n"
+template <class BasicType>
+class BasicPairVectorHolder;
+
 /// We define a Token (not a typedef, just a word) as a nonempty, printable,
 /// whitespace-free std::string.  The binary and text formats here are the same
 /// (newline-terminated) and as such we don't bother with the binary-mode
