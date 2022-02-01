@@ -5,18 +5,36 @@
 from typing import Any, Tuple
 
 from _kaldi_native_io import (
+    _BoolWriter,
+    _DoubleWriter,
+    _FloatPairVectorWriter,
+    _FloatWriter,
     _Int32PairVectorWriter,
     _Int32VectorVectorWriter,
     _Int32VectorWriter,
     _Int32Writer,
+    _RandomAccessBoolReader,
+    _RandomAccessDoubleReader,
+    _RandomAccessFloatPairVectorReader,
+    _RandomAccessFloatReader,
     _RandomAccessInt32PairVectorReader,
     _RandomAccessInt32Reader,
     _RandomAccessInt32VectorReader,
     _RandomAccessInt32VectorVectorReader,
+    _RandomAccessTokenReader,
+    _RandomAccessTokenVectorReader,
+    _SequentialBoolReader,
+    _SequentialDoubleReader,
+    _SequentialFloatPairVectorReader,
+    _SequentialFloatReader,
     _SequentialInt32PairVectorReader,
     _SequentialInt32Reader,
     _SequentialInt32VectorReader,
     _SequentialInt32VectorVectorReader,
+    _SequentialTokenReader,
+    _SequentialTokenVectorReader,
+    _TokenVectorWriter,
+    _TokenWriter,
 )
 
 
@@ -238,3 +256,93 @@ class SequentialInt32PairVectorReader(_SequentialTableReader):
 class RandomAccessInt32PairVectorReader(_RandomAccessTableReader):
     def open(self, rspecifier: str) -> None:
         self._impl = _RandomAccessInt32PairVectorReader(rspecifier)
+
+
+class FloatWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _FloatWriter(wspecifier)
+
+
+class SequentialFloatReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialFloatReader(rspecifier)
+
+
+class RandomAccessFloatReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessFloatReader(rspecifier)
+
+
+class FloatPairVectorWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _FloatPairVectorWriter(wspecifier)
+
+
+class SequentialFloatPairVectorReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialFloatPairVectorReader(rspecifier)
+
+
+class RandomAccessFloatPairVectorReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessFloatPairVectorReader(rspecifier)
+
+
+class TokenWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _TokenWriter(wspecifier)
+
+
+class SequentialTokenReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialTokenReader(rspecifier)
+
+
+class RandomAccessTokenReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessTokenReader(rspecifier)
+
+
+class TokenVectorWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _TokenVectorWriter(wspecifier)
+
+
+class SequentialTokenVectorReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialTokenVectorReader(rspecifier)
+
+
+class RandomAccessTokenVectorReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessTokenVectorReader(rspecifier)
+
+
+class BoolWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _BoolWriter(wspecifier)
+
+
+class SequentialBoolReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialBoolReader(rspecifier)
+
+
+class RandomAccessBoolReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessBoolReader(rspecifier)
+
+
+class DoubleWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _DoubleWriter(wspecifier)
+
+
+class SequentialDoubleReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialDoubleReader(rspecifier)
+
+
+class RandomAccessDoubleReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessDoubleReader(rspecifier)

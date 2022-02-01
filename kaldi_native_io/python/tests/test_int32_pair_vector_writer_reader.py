@@ -13,17 +13,17 @@ rspecifier = f"scp:{base}.scp"
 
 def test_int32_pair_vector_writer():
     with kaldi_native_io.Int32PairVectorWriter(wspecifier) as ko:
-        ko.write("a", [(10, 20), (-1, -2)])
-        ko["b"] = [(3, 4), (6, 8), (9, 0)]
+        ko.write("a", [(10, 20), (2, 3)])
+        ko["b"] = [(1, 2)]
 
 
 def test_sequential_int32_pair_vector_reader():
     with kaldi_native_io.SequentialInt32PairVectorReader(rspecifier) as ki:
         for key, value in ki:
             if key == "a":
-                assert value == [(10, 20), (-1, -2)]
+                assert value == [(10, 20), (2, 3)]
             elif key == "b":
-                assert value == [(3, 4), (6, 8), (9, 0)]
+                assert value == [(1, 2)]
             else:
                 raise ValueError(f"Unknown key {key} with value {value}")
 
@@ -32,8 +32,8 @@ def test_random_access_int32_pair_vector_reader():
     with kaldi_native_io.RandomAccessInt32PairVectorReader(rspecifier) as ki:
         assert "b" in ki
         assert "a" in ki
-        assert ki["a"] == [(10, 20), (-1, -2)]
-        assert ki["b"] == [(3, 4), (6, 8), (9, 0)]
+        assert ki["a"] == [(10, 20), (2, 3)]
+        assert ki["b"] == [(1, 2)]
 
 
 def main():
