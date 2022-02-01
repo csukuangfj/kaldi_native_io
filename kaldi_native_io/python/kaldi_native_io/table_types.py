@@ -5,12 +5,15 @@
 from typing import Any, Tuple
 
 from _kaldi_native_io import (
+    _Int32VectorVectorWriter,
     _Int32VectorWriter,
     _Int32Writer,
     _RandomAccessInt32Reader,
     _RandomAccessInt32VectorReader,
+    _RandomAccessInt32VectorVectorReader,
     _SequentialInt32Reader,
     _SequentialInt32VectorReader,
+    _SequentialInt32VectorVectorReader,
 )
 
 
@@ -202,3 +205,18 @@ class SequentialInt32VectorReader(_SequentialTableReader):
 class RandomAccessInt32VectorReader(_RandomAccessTableReader):
     def open(self, rspecifier: str) -> None:
         self._impl = _RandomAccessInt32VectorReader(rspecifier)
+
+
+class Int32VectorVectorWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _Int32VectorVectorWriter(wspecifier)
+
+
+class SequentialInt32VectorVectorReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialInt32VectorVectorReader(rspecifier)
+
+
+class RandomAccessInt32VectorVectorReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessInt32VectorVectorReader(rspecifier)

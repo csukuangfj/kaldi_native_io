@@ -237,6 +237,156 @@ class BasicVectorHolder {
   T t_;
 };
 
+/// BasicVectorVectorHolder is a Holder for a vector of vector of
+/// a basic type, e.g. std::vector<std::vector<int32_t> >.
+/// Note: a basic type is defined as a type for which ReadBasicType
+/// and WriteBasicType are implemented, i.e. integer and floating
+/// types, and bool.
+template <class BasicType>
+class BasicVectorVectorHolder {
+ public:
+  typedef std::vector<std::vector<BasicType>> T;
+
+  BasicVectorVectorHolder() {}
+
+  static bool Write(std::ostream &os, bool binary, const T &t) {
+    InitKaldiOutputStream(os, binary);  // Puts binary header if binary mode.
+    try {
+      if (binary) {  // need to write the size, in binary mode.
+        KALDIIO_ASSERT(static_cast<size_t>(static_cast<int32_t>(t.size())) ==
+                       t.size());
+        // Or this Write routine cannot handle such a large vector.
+        // use int32_t because it's fixed size regardless of compilation.
+        // change to int64 (plus in Read function) if this becomes a problem.
+        WriteBasicType(os, binary, static_cast<int32_t>(t.size()));
+        for (typename std::vector<std::vector<BasicType>>::const_iterator iter =
+                 t.begin();
+             iter != t.end(); ++iter) {
+          KALDIIO_ASSERT(static_cast<size_t>(static_cast<int32_t>(
+                             iter->size())) == iter->size());
+          WriteBasicType(os, binary, static_cast<int32_t>(iter->size()));
+          for (typename std::vector<BasicType>::const_iterator iter2 =
+                   iter->begin();
+               iter2 != iter->end(); ++iter2) {
+            WriteBasicType(os, binary, *iter2);
+          }
+        }
+      } else {  // text mode...
+        // In text mode, we write out something like (for integers):
+        // "1 2 3 ; 4 5 ; 6 ; ; 7 8 9 ;\n"
+        // where the semicolon is a terminator, not a separator
+        // (a separator would cause ambiguity between an
+        // empty list, and a list containing a single empty list).
+        for (typename std::vector<std::vector<BasicType>>::const_iterator iter =
+                 t.begin();
+             iter != t.end(); ++iter) {
+          for (typename std::vector<BasicType>::const_iterator iter2 =
+                   iter->begin();
+               iter2 != iter->end(); ++iter2)
+            WriteBasicType(os, binary, *iter2);
+          os << "; ";
+        }
+        os << '\n';
+      }
+      return os.good();
+    } catch (const std::exception &e) {
+      KALDIIO_WARN << "Exception caught writing Table object. " << e.what();
+      return false;  // Write failure.
+    }
+  }
+
+  void Clear() { t_.clear(); }
+
+  // Reads into the holder.
+  bool Read(std::istream &is) {
+    t_.clear();
+    bool is_binary;
+    if (!InitKaldiInputStream(is, &is_binary)) {
+      KALDIIO_WARN << "Failed reading binary header\n";
+      return false;
+    }
+    if (!is_binary) {
+      // In text mode, we terminate with newline.
+      try {                        // catching errors from ReadBasicType..
+        std::vector<BasicType> v;  // temporary vector
+        while (1) {
+          int i = is.peek();
+          if (i == -1) {
+            KALDIIO_WARN << "Unexpected EOF";
+            return false;
+          } else if (static_cast<char>(i) == '\n') {
+            if (!v.empty()) {
+              KALDIIO_WARN << "No semicolon before newline (wrong format)";
+              return false;
+            } else {
+              is.get();
+              return true;
+            }
+          } else if (std::isspace(i)) {
+            is.get();
+          } else if (static_cast<char>(i) == ';') {
+            t_.push_back(v);
+            v.clear();
+            is.get();
+          } else {  // some object we want to read...
+            BasicType b;
+            ReadBasicType(is, false, &b);  // throws on error.
+            v.push_back(b);
+          }
+        }
+      } catch (const std::exception &e) {
+        KALDIIO_WARN << "BasicVectorVectorHolder::Read, read error. "
+                     << e.what();
+        return false;
+      }
+    } else {  // binary mode.
+      size_t filepos = is.tellg();
+      try {
+        int32_t size;
+        ReadBasicType(is, true, &size);
+        t_.resize(size);
+        for (typename std::vector<std::vector<BasicType>>::iterator iter =
+                 t_.begin();
+             iter != t_.end(); ++iter) {
+          int32_t size2;
+          ReadBasicType(is, true, &size2);
+          iter->resize(size2);
+          for (typename std::vector<BasicType>::iterator iter2 = iter->begin();
+               iter2 != iter->end(); ++iter2)
+            ReadBasicType(is, true, &(*iter2));
+        }
+        return true;
+      } catch (...) {
+        KALDIIO_WARN
+            << "Read error or unexpected data at archive entry beginning"
+               " at file position "
+            << filepos;
+        return false;
+      }
+    }
+  }
+
+  // Objects read/written with the Kaldi I/O functions always have the stream
+  // open in binary mode for reading.
+  static bool IsReadInBinary() { return true; }
+
+  T &Value() { return t_; }
+
+  void Swap(BasicVectorVectorHolder<BasicType> *other) { t_.swap(other->t_); }
+
+  bool ExtractRange(BasicVectorVectorHolder<BasicType> &other,
+                    const std::string &range) {
+    KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
+    return false;
+  }
+
+  ~BasicVectorVectorHolder() {}
+
+ private:
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicVectorVectorHolder);
+  T t_;
+};
+
 // We define a Token as a nonempty, printable, whitespace-free std::string.
 // The binary and text formats here are the same (newline-terminated)
 // and as such we don't bother with the binary-mode headers.

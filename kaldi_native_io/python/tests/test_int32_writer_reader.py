@@ -6,8 +6,9 @@ import os
 
 import kaldi_native_io
 
-wspecifier = "ark,scp,t:int32.ark,int32.scp"
-rspecifier = "scp:int32.scp"
+base = "int32"
+wspecifier = f"ark,scp,t:{base}.ark,{base}.scp"
+rspecifier = f"scp:{base}.scp"
 
 
 def test_int32_writer():
@@ -40,8 +41,8 @@ def main():
     test_sequential_int32_reader()
     test_random_access_int32_reader()
 
-    os.remove("int32.scp")
-    os.remove("int32.ark")
+    os.remove(f"{base}.scp")
+    os.remove(f"{base}.ark")
 
 
 if __name__ == "__main__":

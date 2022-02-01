@@ -17,6 +17,7 @@ endfunction()
 
 # please sort the files in alphabetic order
 set(py_test_files
+  test_int32_vector_vector_writer_reader.py
   test_int32_vector_writer_reader.py
   test_int32_writer_reader.py
 )
