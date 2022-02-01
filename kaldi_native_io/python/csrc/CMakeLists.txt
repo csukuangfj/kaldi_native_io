@@ -1,0 +1,11 @@
+include_directories(${CMAKE_SOURCE_DIR})
+
+pybind11_add_module(_kaldi_native_io
+  kaldiio.cc
+  kaldi-table.cc
+)
+
+target_link_libraries(_kaldi_native_io PRIVATE kaldi_native_io_core)
+if(UNIX AND NOT APPLE)
+  target_link_libraries(_kaldi_native_io PUBLIC ${PYTHON_LIBRARY})
+endif()

@@ -1,0 +1,25 @@
+function(kaldi_native_io_add_py_test source)
+  get_filename_component(name ${source} NAME_WE)
+  set(name "${name}_py")
+
+  add_test(NAME ${name}
+    COMMAND
+      "${PYTHON_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+  )
+
+  get_filename_component(kaldi_native_io_path ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
+
+  set_property(TEST ${name}
+    PROPERTY ENVIRONMENT "PYTHONPATH=${kaldi_native_io_path}:$<TARGET_FILE_DIR:_kaldi_native_io>:$ENV{PYTHONPATH}"
+  )
+endfunction()
+
+# please sort the files in alphabetic order
+set(py_test_files
+  test_int32_writer_reader.py
+)
+
+foreach(source IN LISTS py_test_files)
+  kaldi_native_io_add_py_test(${source})
+endforeach()
