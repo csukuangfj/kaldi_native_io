@@ -642,6 +642,89 @@ class TokenVectorHolder {
   T t_;
 };
 
+// KaldiObjectHolder is valid only for Kaldi objects with
+// copy constructors, default constructors, and "normal"
+// Kaldi Write and Read functions.  E.g. it works for
+// Matrix and Vector.
+template <class KaldiType>
+class KaldiObjectHolder {
+ public:
+  typedef KaldiType T;
+
+  KaldiObjectHolder() : t_(NULL) {}
+
+  static bool Write(std::ostream &os, bool binary, const T &t) {
+    InitKaldiOutputStream(os, binary);  // Puts binary header if binary mode.
+    try {
+      t.Write(os, binary);
+      return os.good();
+    } catch (const std::exception &e) {
+      KALDIIO_WARN << "Exception caught writing Table object. " << e.what();
+      return false;  // Write failure.
+    }
+  }
+
+  void Clear() {
+    if (t_) {
+      delete t_;
+      t_ = NULL;
+    }
+  }
+
+  // Reads into the holder.
+  bool Read(std::istream &is) {
+    delete t_;
+    t_ = new T;
+    // Don't want any existing state to complicate the read function: get new
+    // object.
+    bool is_binary;
+    if (!InitKaldiInputStream(is, &is_binary)) {
+      KALDIIO_WARN << "Reading Table object, failed reading binary header\n";
+      return false;
+    }
+
+    try {
+      t_->Read(is, is_binary);
+      return true;
+    } catch (const std::exception &e) {
+      KALDIIO_WARN << "Exception caught reading Table object. " << e.what();
+      delete t_;
+      t_ = NULL;
+      return false;
+    }
+  }
+
+  // Kaldi objects always have the stream open in binary mode for
+  // reading.
+  static bool IsReadInBinary() { return true; }
+
+  T &Value() {
+    // code error if !t_.
+    if (!t_) KALDIIO_ERR << "KaldiObjectHolder::Value() called wrongly.";
+    return *t_;
+  }
+
+  void Swap(KaldiObjectHolder<T> *other) {
+    // the t_ values are pointers so this is a shallow swap.
+    std::swap(t_, other->t_);
+  }
+
+  bool ExtractRange(const KaldiObjectHolder<T> &other,
+                    const std::string &range) {
+    KALDIIO_ASSERT(other.t_ != NULL);
+    delete t_;
+    t_ = new T;
+    // this call will fail for most object types.
+    return ExtractObjectRange(*(other.t_), range, t_);
+  }
+
+  ~KaldiObjectHolder() { delete t_; }
+
+ private:
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(KaldiObjectHolder);
+  T *t_;
+};
+
 }  // namespace kaldiio
 
 #endif  // KALDI_NATIVE_IO_CSRC_KALDI_HOLDER_INL_H_
