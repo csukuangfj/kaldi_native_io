@@ -12,6 +12,8 @@
 
 #include <string>
 
+#include "kaldi_native_io/csrc/kaldi-vector.h"
+
 namespace kaldiio {
 
 /// BasicHolder is valid for float, double, bool, and integer
@@ -56,6 +58,11 @@ class TokenHolder;
 /// (T == std::string).
 class TokenVectorHolder;
 
+/// KaldiObjectHolder works for Kaldi objects that have the "standard" Read
+/// and Write functions, and a copy constructor.
+template <class KaldiType>
+class KaldiObjectHolder;
+
 // In SequentialTableReaderScriptImpl and RandomAccessTableReaderScriptImpl, for
 // cases where the scp contained 'range specifiers' (things in square brackets
 // identifying parts of objects like matrices), use this function to separate
@@ -67,6 +74,27 @@ class TokenVectorHolder;
 // error.
 bool ExtractRangeSpecifier(const std::string &rxfilename_with_range,
                            std::string *data_rxfilename, std::string *range);
+
+/// This templated function exists so that we can write .scp files with
+/// 'object ranges' specified: the canonical example is a [first:last] range
+/// of rows of a matrix, or [first-row:last-row,first-column,last-column]
+/// of a matrix.  We can also support [begin-time:end-time] of a wave
+/// file.  The string 'range' is whatever is in the square brackets; it is
+/// parsed inside this function.
+/// This function returns true if the partial object was successfully extracted,
+/// and false if there was an error such as an invalid range.
+/// The generic version of this function just fails; we overload the template
+/// whenever we need it for a specific class.
+template <class T>
+bool ExtractObjectRange(const T &input, const std::string &range, T *output) {
+  KALDIIO_ERR << "Ranges not supported for objects of this type.";
+  return false;
+}
+
+/// The template is specialized types Vector<float> and Vector<double>.
+template <class Real>
+bool ExtractObjectRange(const Vector<Real> &input, const std::string &range,
+                        Vector<Real> *output);
 
 }  // namespace kaldiio
 

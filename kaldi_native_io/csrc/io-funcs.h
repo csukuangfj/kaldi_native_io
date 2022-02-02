@@ -68,5 +68,39 @@ inline void ReadBasicType(std::istream &is, bool binary, T *t, bool add) {
   }
 }
 
+/// The WriteToken functions are for writing nonempty sequences of non-space
+/// characters. They are not for general strings.
+void WriteToken(std::ostream &os, bool binary, const char *token);
+void WriteToken(std::ostream &os, bool binary, const std::string &token);
+
+/// Peek consumes whitespace (if binary == false) and then returns the peek()
+/// value of the stream.
+int Peek(std::istream &is, bool binary);
+
+/// ReadToken gets the next token and puts it in str (exception on failure). If
+/// PeekToken() had been previously called, it is possible that the stream had
+/// failed to unget the starting '<' character. In this case ReadToken() returns
+/// the token string without the leading '<'. You must be prepared to handle
+/// this case. ExpectToken() handles this internally, and is not affected.
+void ReadToken(std::istream &is, bool binary, std::string *token);
+
+/// PeekToken will return the first character of the next token, or -1 if end of
+/// file.  It's the same as Peek(), except if the first character is '<' it will
+/// skip over it and will return the next character. It will attempt to unget
+/// the '<' so the stream is where it was before you did PeekToken(), however,
+/// this is not guaranteed (see ReadToken()).
+int PeekToken(std::istream &is, bool binary);
+
+/// ExpectToken tries to read in the given token, and throws an exception
+/// on failure.
+void ExpectToken(std::istream &is, bool binary, const char *token);
+void ExpectToken(std::istream &is, bool binary, const std::string &token);
+
+/// ExpectPretty attempts to read the text in "token", but only in non-binary
+/// mode.  Throws exception on failure.  It expects an exact match except that
+/// arbitrary whitespace matches arbitrary whitespace.
+void ExpectPretty(std::istream &is, bool binary, const char *token);
+void ExpectPretty(std::istream &is, bool binary, const std::string &token);
+
 }  // namespace kaldiio
 #endif  // KALDI_NATIVE_IO_CSRC_IO_FUNCS_H_

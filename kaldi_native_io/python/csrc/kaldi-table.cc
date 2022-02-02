@@ -5,6 +5,7 @@
 #include "kaldi_native_io/csrc/kaldi-table.h"
 
 #include "kaldi_native_io/csrc/kaldi-holder.h"
+#include "kaldi_native_io/csrc/kaldi-vector.h"
 #include "kaldi_native_io/python/csrc/kaldi-table.h"
 
 namespace kaldiio {
@@ -52,7 +53,8 @@ void PybindRandomAccessTableReader(py::module &m, const std::string &class_name,
       .def_property_readonly("is_open", &PyClass::IsOpen)
       .def("close", &PyClass::Close)
       .def("__contains__", &PyClass::HasKey)
-      .def("__getitem__", &PyClass::Value, py::arg("key"));
+      .def("__getitem__", &PyClass::Value, py::arg("key"),
+           py::return_value_policy::reference);
 }
 
 void PybindKaldiTable(py::module &m) {
@@ -113,6 +115,21 @@ void PybindKaldiTable(py::module &m) {
       m, "_SequentialTokenVectorReader");
   PybindRandomAccessTableReader<TokenVectorHolder>(
       m, "_RandomAccessTokenVectorReader");
+
+  {
+    using PyClass = KaldiObjectHolder<Vector<float>>;
+    PybindTableWriter<PyClass>(m, "_FloatVectorWriter");
+    PybindSequentialTableReader<PyClass>(m, "_SequentialFloatVectorReader");
+    PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessFloatVectorReader");
+  }
+
+  {
+    using PyClass = KaldiObjectHolder<Vector<double>>;
+    PybindTableWriter<PyClass>(m, "_DoubleVectorWriter");
+    PybindSequentialTableReader<PyClass>(m, "_SequentialDoubleVectorReader");
+    PybindRandomAccessTableReader<PyClass>(m,
+                                           "_RandomAccessDoubleVectorReader");
+  }
 }
 
 }  // namespace kaldiio

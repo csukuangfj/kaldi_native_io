@@ -7,8 +7,9 @@ set(srcs
   kaldi-semaphore.cc
   kaldi-table.cc
   kaldi-utils.cc
+  kaldi-vector.cc
   parse-options.cc
   text-utils.cc
-  )
+)
 
 add_library(kaldi_native_io_core SHARED ${srcs})

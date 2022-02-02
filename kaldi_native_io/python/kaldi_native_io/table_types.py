@@ -4,10 +4,15 @@
 
 from typing import Any, Tuple
 
+import numpy as np
 from _kaldi_native_io import (
     _BoolWriter,
+    _DoubleVector,
+    _DoubleVectorWriter,
     _DoubleWriter,
     _FloatPairVectorWriter,
+    _FloatVector,
+    _FloatVectorWriter,
     _FloatWriter,
     _Int32PairVectorWriter,
     _Int32VectorVectorWriter,
@@ -15,8 +20,10 @@ from _kaldi_native_io import (
     _Int32Writer,
     _RandomAccessBoolReader,
     _RandomAccessDoubleReader,
+    _RandomAccessDoubleVectorReader,
     _RandomAccessFloatPairVectorReader,
     _RandomAccessFloatReader,
+    _RandomAccessFloatVectorReader,
     _RandomAccessInt32PairVectorReader,
     _RandomAccessInt32Reader,
     _RandomAccessInt32VectorReader,
@@ -25,8 +32,10 @@ from _kaldi_native_io import (
     _RandomAccessTokenVectorReader,
     _SequentialBoolReader,
     _SequentialDoubleReader,
+    _SequentialDoubleVectorReader,
     _SequentialFloatPairVectorReader,
     _SequentialFloatReader,
+    _SequentialFloatVectorReader,
     _SequentialInt32PairVectorReader,
     _SequentialInt32Reader,
     _SequentialInt32VectorReader,
@@ -346,3 +355,75 @@ class SequentialDoubleReader(_SequentialTableReader):
 class RandomAccessDoubleReader(_RandomAccessTableReader):
     def open(self, rspecifier: str) -> None:
         self._impl = _RandomAccessDoubleReader(rspecifier)
+
+
+class FloatVectorWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _FloatVectorWriter(wspecifier)
+
+    def write(self, key: str, value: np.ndarray) -> None:
+        """
+        Args:
+          key:
+            Key of the value.
+          value:
+            A 1-D array with dtype torch.float32.
+        """
+        assert value.dtype == np.float32
+        assert value.ndim == 1
+        super().write(key, _FloatVector(value))
+
+
+class SequentialFloatVectorReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialFloatVectorReader(rspecifier)
+
+    @property
+    def value(self) -> np.ndarray:
+        """Return a 1-D array with dtype np.float32."""
+        return self._impl.value.numpy()
+
+
+class RandomAccessFloatVectorReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessFloatVectorReader(rspecifier)
+
+    def __getitem__(self, key) -> np.ndarray:
+        """Return a 1-D array of type np.float32."""
+        return self._impl[key].numpy()
+
+
+class DoubleVectorWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _DoubleVectorWriter(wspecifier)
+
+    def write(self, key: str, value: np.ndarray) -> None:
+        """
+        Args:
+          key:
+            Key of the value.
+          value:
+            A 1-D array with dtype torch.float64.
+        """
+        assert value.dtype == np.float64
+        assert value.ndim == 1
+        super().write(key, _DoubleVector(value))
+
+
+class SequentialDoubleVectorReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialDoubleVectorReader(rspecifier)
+
+    @property
+    def value(self) -> np.ndarray:
+        """Return a 1-D array with dtype np.float64."""
+        return self._impl.value.numpy()
+
+
+class RandomAccessDoubleVectorReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessDoubleVectorReader(rspecifier)
+
+    def __getitem__(self, key) -> np.ndarray:
+        """Return a 1-D array of type np.float64."""
+        return self._impl[key].numpy()
