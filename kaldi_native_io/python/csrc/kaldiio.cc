@@ -4,6 +4,7 @@
 
 #include "kaldi_native_io/python/csrc/kaldiio.h"
 
+#include "kaldi_native_io/python/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/python/csrc/kaldi-table.h"
 #include "kaldi_native_io/python/csrc/kaldi-vector.h"
 
@@ -13,6 +14,7 @@ PYBIND11_MODULE(_kaldi_native_io, m) {
   m.doc() = "Python wrapper for kaldi native I/O";
   PybindKaldiTable(m);
   PybindKaldiVector(m);
+  PybindKaldiMatrix(m);
 }
 
 }  // namespace kaldiio

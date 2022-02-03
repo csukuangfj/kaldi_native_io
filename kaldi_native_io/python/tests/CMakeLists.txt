@@ -18,8 +18,10 @@ endfunction()
 # please sort the files in alphabetic order
 set(py_test_files
   test_bool_writer_reader.py
+  test_double_matrix_writer_reader.py
   test_double_vector_writer_reader.py
   test_double_writer_reader.py
+  test_float_matrix_writer_reader.py
   test_float_pair_vector_writer_reader.py
   test_float_vector_writer_reader.py
   test_float_writer_reader.py

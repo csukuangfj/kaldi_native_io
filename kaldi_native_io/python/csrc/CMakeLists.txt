@@ -1,6 +1,7 @@
 include_directories(${CMAKE_SOURCE_DIR})
 
 pybind11_add_module(_kaldi_native_io
+  kaldi-matrix.cc
   kaldi-table.cc
   kaldi-vector.cc
   kaldiio.cc

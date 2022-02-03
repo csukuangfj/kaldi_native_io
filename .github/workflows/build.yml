@@ -19,6 +19,11 @@ jobs:
         with:
           python-version: 3.6
 
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade numpy
+
       - name: Build
         shell: bash
         run: |
@@ -27,6 +32,11 @@ jobs:
           cmake -D KALDI_NATIVE_IO_BUILD_TESTS=ON ..
           make -j2 VERBOSE=1
 
-          ls -l lib
-          # ls -l bin
+          ls -lh lib
+
+      - name: Test
+        shell: bash
+        run: |
+          cd build
+
           ctest --verbose --output-on-failure

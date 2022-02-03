@@ -5,6 +5,7 @@
 #include "kaldi_native_io/csrc/kaldi-table.h"
 
 #include "kaldi_native_io/csrc/kaldi-holder.h"
+#include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
 #include "kaldi_native_io/python/csrc/kaldi-table.h"
 
@@ -129,6 +130,21 @@ void PybindKaldiTable(py::module &m) {
     PybindSequentialTableReader<PyClass>(m, "_SequentialDoubleVectorReader");
     PybindRandomAccessTableReader<PyClass>(m,
                                            "_RandomAccessDoubleVectorReader");
+  }
+
+  {
+    using PyClass = KaldiObjectHolder<Matrix<float>>;
+    PybindTableWriter<PyClass>(m, "_FloatMatrixWriter");
+    PybindSequentialTableReader<PyClass>(m, "_SequentialFloatMatrixReader");
+    PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessFloatMatrixReader");
+  }
+
+  {
+    using PyClass = KaldiObjectHolder<Matrix<double>>;
+    PybindTableWriter<PyClass>(m, "_DoubleMatrixWriter");
+    PybindSequentialTableReader<PyClass>(m, "_SequentialDoubleMatrixReader");
+    PybindRandomAccessTableReader<PyClass>(m,
+                                           "_RandomAccessDoubleMatrixReader");
   }
 }
 
