@@ -7,9 +7,13 @@ from typing import Any, Tuple
 import numpy as np
 from _kaldi_native_io import (
     _BoolWriter,
+    _DoubleMatrix,
+    _DoubleMatrixWriter,
     _DoubleVector,
     _DoubleVectorWriter,
     _DoubleWriter,
+    _FloatMatrix,
+    _FloatMatrixWriter,
     _FloatPairVectorWriter,
     _FloatVector,
     _FloatVectorWriter,
@@ -19,8 +23,10 @@ from _kaldi_native_io import (
     _Int32VectorWriter,
     _Int32Writer,
     _RandomAccessBoolReader,
+    _RandomAccessDoubleMatrixReader,
     _RandomAccessDoubleReader,
     _RandomAccessDoubleVectorReader,
+    _RandomAccessFloatMatrixReader,
     _RandomAccessFloatPairVectorReader,
     _RandomAccessFloatReader,
     _RandomAccessFloatVectorReader,
@@ -31,8 +37,10 @@ from _kaldi_native_io import (
     _RandomAccessTokenReader,
     _RandomAccessTokenVectorReader,
     _SequentialBoolReader,
+    _SequentialDoubleMatrixReader,
     _SequentialDoubleReader,
     _SequentialDoubleVectorReader,
+    _SequentialFloatMatrixReader,
     _SequentialFloatPairVectorReader,
     _SequentialFloatReader,
     _SequentialFloatVectorReader,
@@ -426,4 +434,76 @@ class RandomAccessDoubleVectorReader(_RandomAccessTableReader):
 
     def __getitem__(self, key) -> np.ndarray:
         """Return a 1-D array of type np.float64."""
+        return self._impl[key].numpy()
+
+
+class FloatMatrixWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _FloatMatrixWriter(wspecifier)
+
+    def write(self, key: str, value: np.ndarray) -> None:
+        """
+        Args:
+          key:
+            Key of the value.
+          value:
+            A 2-D array with dtype torch.float32.
+        """
+        assert value.dtype == np.float32
+        assert value.ndim == 2
+        super().write(key, _FloatMatrix(value))
+
+
+class SequentialFloatMatrixReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialFloatMatrixReader(rspecifier)
+
+    @property
+    def value(self) -> np.ndarray:
+        """Return a 2-D array with dtype np.float32."""
+        return self._impl.value.numpy()
+
+
+class RandomAccessFloatMatrixReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessFloatMatrixReader(rspecifier)
+
+    def __getitem__(self, key) -> np.ndarray:
+        """Return a 2-D array of type np.float32."""
+        return self._impl[key].numpy()
+
+
+class DoubleMatrixWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _DoubleMatrixWriter(wspecifier)
+
+    def write(self, key: str, value: np.ndarray) -> None:
+        """
+        Args:
+          key:
+            Key of the value.
+          value:
+            A 2-D array with dtype torch.float64.
+        """
+        assert value.dtype == np.float64
+        assert value.ndim == 2
+        super().write(key, _DoubleMatrix(value))
+
+
+class SequentialDoubleMatrixReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialDoubleMatrixReader(rspecifier)
+
+    @property
+    def value(self) -> np.ndarray:
+        """Return a 2-D array with dtype np.float64."""
+        return self._impl.value.numpy()
+
+
+class RandomAccessDoubleMatrixReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessDoubleMatrixReader(rspecifier)
+
+    def __getitem__(self, key) -> np.ndarray:
+        """Return a 2-D array of type np.float64."""
         return self._impl[key].numpy()

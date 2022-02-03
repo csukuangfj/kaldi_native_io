@@ -10,7 +10,21 @@
 
 namespace kaldiio {
 
-typedef enum { kSetZero, kUndefined, kCopyData } MatrixResizeType;
+typedef enum {
+  kTrans = 112,   // = CblasTrans
+  kNoTrans = 111  // = CblasNoTrans
+} MatrixTransposeType;
+
+typedef enum {
+  kSetZero,
+  kUndefined,
+  kCopyData,
+} MatrixResizeType;
+
+typedef enum {
+  kDefaultStride,
+  kStrideEqualNumCols,
+} MatrixStrideType;
 
 template <typename Real>
 class VectorBase;

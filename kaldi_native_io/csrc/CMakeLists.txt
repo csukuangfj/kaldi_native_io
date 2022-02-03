@@ -4,6 +4,7 @@ set(srcs
   io-funcs.cc
   kaldi-holder.cc
   kaldi-io.cc
+  kaldi-matrix.cc
   kaldi-semaphore.cc
   kaldi-table.cc
   kaldi-utils.cc
