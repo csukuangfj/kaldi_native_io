@@ -26,11 +26,13 @@ set(py_test_files
   test_float_pair_vector_writer_reader.py
   test_float_vector_writer_reader.py
   test_float_writer_reader.py
+  test_gauss_post_writer_reader.py
   test_htk_matrix_writer_reader.py
   test_int32_pair_vector_writer_reader.py
   test_int32_vector_vector_writer_reader.py
   test_int32_vector_writer_reader.py
   test_int32_writer_reader.py
+  test_posterior_writer_reader.py
   test_token_vector_writer_reader.py
   test_token_writer_reader.py
 )

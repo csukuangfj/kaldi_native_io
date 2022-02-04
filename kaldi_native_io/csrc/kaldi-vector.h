@@ -123,6 +123,18 @@ class Vector : public VectorBase<Real> {
     Resize(s, resize_type);
   }
 
+  /// Copy constructor.  The need for this is controversial.
+  Vector(const Vector<Real> &v) : VectorBase<Real>() {  //  (cannot be explicit)
+    Resize(v.Dim(), kUndefined);
+    this->CopyFromVec(v);
+  }
+
+  /// Copy-constructor from base-class, needed to copy from SubVector.
+  explicit Vector(const VectorBase<Real> &v) : VectorBase<Real>() {
+    Resize(v.Dim(), kUndefined);
+    this->CopyFromVec(v);
+  }
+
   /// Swaps the contents of *this and *other.  Shallow swap.
   void Swap(Vector<Real> *other);
 

@@ -8,6 +8,7 @@
 #include "kaldi_native_io/csrc/kaldi-holder.h"
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
+#include "kaldi_native_io/csrc/posterior.h"
 #include "kaldi_native_io/python/csrc/kaldi-table.h"
 
 namespace kaldiio {
@@ -157,6 +158,20 @@ void PybindKaldiTable(py::module &m) {
 
   PybindTableWriter<KaldiObjectHolder<CompressedMatrix>>(
       m, "_CompressedMatrixWriter");
+
+  {
+    using PyClass = PosteriorHolder;
+    PybindTableWriter<PyClass>(m, "_PosteriorWriter");
+    PybindSequentialTableReader<PyClass>(m, "_SequentialPosteriorReader");
+    PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessPosteriorReader");
+  }
+
+  {
+    using PyClass = GaussPostHolder;
+    PybindTableWriter<PyClass>(m, "_GaussPostWriter");
+    PybindSequentialTableReader<PyClass>(m, "_SequentialGaussPostReader");
+    PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessGaussPostReader");
+  }
 }
 
 }  // namespace kaldiio
