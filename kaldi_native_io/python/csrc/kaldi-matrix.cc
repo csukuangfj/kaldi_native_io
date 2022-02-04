@@ -52,9 +52,49 @@ void PybindKaldiMatrixTpl(py::module &m, const std::string &class_name,
       });
 }
 
+static void PybindHtkHeader(py::module &m) {
+  using PyClass = HtkHeader;
+  py::class_<PyClass>(
+      m, "HtkHeader",
+      "See https://labrosa.ee.columbia.edu/doc/HTKBook21/node58.html for help.")
+      .def(py::init<>())
+      .def(py::init<int32_t, int32_t, int16_t, uint16_t>(),
+           py::arg("num_samples"), py::arg("sample_period"),
+           py::arg("sample_size"), py::arg("sample_kind"))
+      .def_readwrite("num_samples", &PyClass::mNSamples)
+      .def_readwrite("sample_period", &PyClass::mSamplePeriod)
+      .def_readwrite("sample_size", &PyClass::mSampleSize)
+      .def_readwrite("sample_kind", &PyClass::mSampleKind)
+      .def("__eq__",
+           [](const PyClass &self, const PyClass &other) {
+             return self.mNSamples == other.mNSamples &&
+                    self.mSamplePeriod == other.mSamplePeriod &&
+                    self.mSampleSize == other.mSampleSize &&
+                    self.mSampleKind == other.mSampleKind;
+           })
+      .def("__str__",
+           [](const PyClass &self) -> std::string {
+             std::ostringstream os;
+             os << "HtkHeader(num_samples=" << self.mNSamples << ",\n"
+                << "          sample_period=" << self.mSamplePeriod << ",\n"
+                << "          sample_size=" << self.mSampleSize << ",\n"
+                << "          sample_kind=" << self.mSampleKind << ")\n";
+             return os.str();
+           })
+      .def("__repr__", [](const PyClass &self) -> std::string {
+        std::ostringstream os;
+        os << "HtkHeader(num_samples=" << self.mNSamples << ",\n"
+           << "          sample_period=" << self.mSamplePeriod << ",\n"
+           << "          sample_size=" << self.mSampleSize << ",\n"
+           << "          sample_kind=" << self.mSampleKind << ")\n";
+        return os.str();
+      });
+}
+
 void PybindKaldiMatrix(py::module &m) {
   PybindKaldiMatrixTpl<float>(m, "_FloatMatrix");
   PybindKaldiMatrixTpl<double>(m, "_DoubleMatrix");
+  PybindHtkHeader(m);
 }
 
 }  // namespace kaldiio

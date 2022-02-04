@@ -1,3 +1,5 @@
+from _kaldi_native_io import HtkHeader
+
 from .table_types import (
     BoolWriter,
     DoubleMatrixWriter,
@@ -7,6 +9,7 @@ from .table_types import (
     FloatPairVectorWriter,
     FloatVectorWriter,
     FloatWriter,
+    HtkMatrixWriter,
     Int32PairVectorWriter,
     Int32VectorVectorWriter,
     Int32VectorWriter,
@@ -19,6 +22,7 @@ from .table_types import (
     RandomAccessFloatPairVectorReader,
     RandomAccessFloatReader,
     RandomAccessFloatVectorReader,
+    RandomAccessHtkMatrixReader,
     RandomAccessInt32PairVectorReader,
     RandomAccessInt32Reader,
     RandomAccessInt32VectorReader,
@@ -33,6 +37,7 @@ from .table_types import (
     SequentialFloatPairVectorReader,
     SequentialFloatReader,
     SequentialFloatVectorReader,
+    SequentialHtkMatrixReader,
     SequentialInt32PairVectorReader,
     SequentialInt32Reader,
     SequentialInt32VectorReader,
