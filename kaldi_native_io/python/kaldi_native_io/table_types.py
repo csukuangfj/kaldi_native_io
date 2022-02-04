@@ -2,7 +2,7 @@
 # See ../../../LICENSE for clarification regarding multiple authors
 
 
-from typing import Any, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 import numpy as np
 from _kaldi_native_io import (
@@ -22,11 +22,13 @@ from _kaldi_native_io import (
     _FloatVector,
     _FloatVectorWriter,
     _FloatWriter,
+    _GaussPostWriter,
     _HtkMatrixWriter,
     _Int32PairVectorWriter,
     _Int32VectorVectorWriter,
     _Int32VectorWriter,
     _Int32Writer,
+    _PosteriorWriter,
     _RandomAccessBoolReader,
     _RandomAccessDoubleMatrixReader,
     _RandomAccessDoubleReader,
@@ -35,11 +37,13 @@ from _kaldi_native_io import (
     _RandomAccessFloatPairVectorReader,
     _RandomAccessFloatReader,
     _RandomAccessFloatVectorReader,
+    _RandomAccessGaussPostReader,
     _RandomAccessHtkMatrixReader,
     _RandomAccessInt32PairVectorReader,
     _RandomAccessInt32Reader,
     _RandomAccessInt32VectorReader,
     _RandomAccessInt32VectorVectorReader,
+    _RandomAccessPosteriorReader,
     _RandomAccessTokenReader,
     _RandomAccessTokenVectorReader,
     _SequentialBoolReader,
@@ -50,11 +54,13 @@ from _kaldi_native_io import (
     _SequentialFloatPairVectorReader,
     _SequentialFloatReader,
     _SequentialFloatVectorReader,
+    _SequentialGaussPostReader,
     _SequentialHtkMatrixReader,
     _SequentialInt32PairVectorReader,
     _SequentialInt32Reader,
     _SequentialInt32VectorReader,
     _SequentialInt32VectorVectorReader,
+    _SequentialPosteriorReader,
     _SequentialTokenReader,
     _SequentialTokenVectorReader,
     _TokenVectorWriter,
@@ -609,3 +615,91 @@ class CompressedMatrixWriter(_TableWriter):
         else:
             assert isinstance(value, tuple)
         self.write(key, *value)
+
+
+class PosteriorWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _PosteriorWriter(wspecifier)
+
+    def write(self, key: str, value: List[List[Tuple[int, float]]]) -> None:
+        """
+        Args:
+          key:
+            Key of the value.
+          value:
+            A list-of-list of tuples. Each tuple contains a pair of int
+            and float, where the `int` is the transition ID and the `float`
+            is a probability (typically between zero and one).
+        """
+        super().write(key, value)
+
+
+class SequentialPosteriorReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialPosteriorReader(rspecifier)
+
+
+class RandomAccessPosteriorReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessPosteriorReader(rspecifier)
+
+
+class GaussPostWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _GaussPostWriter(wspecifier)
+
+    def write(
+        self, key: str, value: List[List[Tuple[int, np.ndarray]]]
+    ) -> None:
+        """
+        Args:
+          key:
+            Key of the value.
+          value:
+            A list-of-list of tuples. Each tuple contains a pair of int
+            and float, where the `int` is the pdf-id and the `np.ndarray`
+            is a 1-D array with dtype np.float32
+        """
+        for v in value:
+            for i, k in enumerate(v):
+                v[i] = (k[0], _FloatVector(k[1]))
+        super().write(key, value)
+
+    __setitem__ = write
+
+
+class SequentialGaussPostReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialGaussPostReader(rspecifier)
+
+    @property
+    def value(self) -> List[List[Tuple[int, np.ndarray]]]:
+        """Return a list-of-list of tuples. Each tuple contains a pair of int
+        and float, where the `int` is the pdf-id and the `np.ndarray` is a 1-D
+        array with dtype np.float32
+        """
+        value = self._impl.value
+
+        for v in value:
+            for i, k in enumerate(v):
+                v[i] = (k[0], k[1].numpy())
+
+        return value
+
+
+class RandomAccessGaussPostReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessGaussPostReader(rspecifier)
+
+    def __getitem__(self, key) -> List[List[Tuple[int, np.ndarray]]]:
+        """Return a list-of-list of tuples. Each tuple contains a pair of int
+        and float, where the `int` is the pdf-id and the `np.ndarray` is a 1-D
+        array with dtype np.float32
+        """
+        value = self._impl[key]
+
+        for v in value:
+            for i, k in enumerate(v):
+                v[i] = (k[0], k[1].numpy())
+
+        return value

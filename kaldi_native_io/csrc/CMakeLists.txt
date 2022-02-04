@@ -11,6 +11,7 @@ set(srcs
   kaldi-utils.cc
   kaldi-vector.cc
   parse-options.cc
+  posterior.cc
   text-utils.cc
 )
 
