@@ -92,6 +92,14 @@ class Voidifier {
   Class(const Class &) = delete;                \
   Class &operator=(const Class &) = delete;
 
+using int32 = int32_t;
+using int16 = int16_t;
+using int8 = int8_t;
+
+using uint32 = uint32_t;
+using uint8 = uint8_t;
+using uint16 = uint16_t;
+
 }  // namespace kaldiio
 
 #endif  // KALDI_NATIVE_IO_CSRC_LOG_H_

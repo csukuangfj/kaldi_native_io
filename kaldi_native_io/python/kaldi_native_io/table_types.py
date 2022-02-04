@@ -2,12 +2,15 @@
 # See ../../../LICENSE for clarification regarding multiple authors
 
 
-from typing import Any, Tuple
+from typing import Any, Tuple, Union
 
 import numpy as np
 from _kaldi_native_io import (
+    CompressionMethod,
     HtkHeader,
     _BoolWriter,
+    _CompressedMatrix,
+    _CompressedMatrixWriter,
     _DoubleMatrix,
     _DoubleMatrixWriter,
     _DoubleVector,
@@ -556,3 +559,53 @@ class RandomAccessHtkMatrixReader(_RandomAccessTableReader):
         header."""
         value = self._impl[key]
         return (value[0].numpy(), value[1])
+
+
+class CompressedMatrixWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _CompressedMatrixWriter(wspecifier)
+
+    def write(
+        self,
+        key: str,
+        value: np.ndarray,
+        method: CompressionMethod.kAutomaticMethod,
+    ) -> None:
+        """
+        Args:
+          key:
+            Key of the value.
+          value:
+            A 2-D array with dtype torch.float32 or torch.float64.
+          method:
+            See the documentation for :enum:`CompressionMethod`.
+        """
+        assert value.ndim == 2
+        assert value.dtype in (np.float32, np.float64)
+
+        if value.dtype == np.float32:
+            m = _CompressedMatrix(_FloatMatrix(value), method)
+        else:
+            m = _CompressedMatrix(_DoubleMatrix(value), method)
+
+        super().write(key, m)
+
+    def __setitem__(
+        self,
+        key: str,
+        value: Union[np.ndarray, Tuple[np.ndarray, CompressionMethod]],
+    ) -> None:
+        """
+        Args:
+          key:
+            Key of the value.
+          value:
+            A tuple containing:
+              - A 2-D array with dtype np.float32 or np.float64
+              - compression method.
+        """
+        if isinstance(value, np.ndarray):
+            value = (value, CompressionMethod.kAutomaticMethod)
+        else:
+            assert isinstance(value, tuple)
+        self.write(key, *value)

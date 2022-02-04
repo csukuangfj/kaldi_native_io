@@ -4,6 +4,7 @@
 
 #include "kaldi_native_io/csrc/kaldi-table.h"
 
+#include "kaldi_native_io/csrc/compressed-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-holder.h"
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
@@ -153,6 +154,9 @@ void PybindKaldiTable(py::module &m) {
     PybindSequentialTableReader<PyClass>(m, "_SequentialHtkMatrixReader");
     PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessHtkMatrixReader");
   }
+
+  PybindTableWriter<KaldiObjectHolder<CompressedMatrix>>(
+      m, "_CompressedMatrixWriter");
 }
 
 }  // namespace kaldiio

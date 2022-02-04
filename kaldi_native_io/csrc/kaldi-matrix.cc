@@ -16,6 +16,7 @@
 
 #include <vector>
 
+#include "kaldi_native_io/csrc/compressed-matrix.h"
 #include "kaldi_native_io/csrc/io-funcs.h"
 #include "kaldi_native_io/csrc/kaldi-utils.h"
 
@@ -46,6 +47,26 @@ void MatrixBase<Real>::SetZero() {
   else
     for (MatrixIndexT row = 0; row < num_rows_; row++)
       memset(data_ + row * stride_, 0, sizeof(Real) * num_cols_);
+}
+
+template <typename Real>
+Real MatrixBase<Real>::Max() const {
+  KALDIIO_ASSERT(num_rows_ > 0 && num_cols_ > 0);
+  Real ans = *data_;
+  for (MatrixIndexT r = 0; r < num_rows_; r++)
+    for (MatrixIndexT c = 0; c < num_cols_; c++)
+      if (data_[c + stride_ * r] > ans) ans = data_[c + stride_ * r];
+  return ans;
+}
+
+template <typename Real>
+Real MatrixBase<Real>::Min() const {
+  KALDIIO_ASSERT(num_rows_ > 0 && num_cols_ > 0);
+  Real ans = *data_;
+  for (MatrixIndexT r = 0; r < num_rows_; r++)
+    for (MatrixIndexT c = 0; c < num_cols_; c++)
+      if (data_[c + stride_ * r] < ans) ans = data_[c + stride_ * r];
+  return ans;
 }
 
 // Constructor... note that this is not const-safe as it would
@@ -280,7 +301,7 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
 
   if (binary) {  // Read in binary mode.
     int peekval = Peek(is, binary);
-#if 0
+#if 1
     if (peekval == 'C') {
       // This code enables us to read CompressedMatrix as a regular matrix.
       CompressedMatrix compressed_mat;

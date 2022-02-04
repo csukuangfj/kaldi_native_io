@@ -106,6 +106,12 @@ class MatrixBase {
     return SubVector<Real>(data_ + (i * stride_), NumCols());
   }
 
+  /// Returns maximum element of matrix.
+  Real Max() const;
+
+  /// Returns minimum element of matrix.
+  Real Min() const;
+
   /// write to stream.
   void Write(std::ostream &out, bool binary) const;
 
