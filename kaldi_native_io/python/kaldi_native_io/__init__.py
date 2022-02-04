@@ -1,7 +1,8 @@
-from _kaldi_native_io import HtkHeader
+from _kaldi_native_io import CompressionMethod, HtkHeader
 
 from .table_types import (
     BoolWriter,
+    CompressedMatrixWriter,
     DoubleMatrixWriter,
     DoubleVectorWriter,
     DoubleWriter,

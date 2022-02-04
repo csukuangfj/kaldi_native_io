@@ -1,6 +1,7 @@
 include_directories(${CMAKE_SOURCE_DIR})
 
 set(srcs
+  compressed-matrix.cc
   io-funcs.cc
   kaldi-holder.cc
   kaldi-io.cc
