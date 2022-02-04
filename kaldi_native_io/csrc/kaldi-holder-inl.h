@@ -14,6 +14,7 @@
 #include <string>
 
 #include "kaldi_native_io/csrc/io-funcs.h"
+#include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-utils.h"
 #include "kaldi_native_io/csrc/log.h"
 #include "kaldi_native_io/csrc/text-utils.h"
@@ -723,6 +724,51 @@ class KaldiObjectHolder {
  private:
   KALDIIO_DISALLOW_COPY_AND_ASSIGN(KaldiObjectHolder);
   T *t_;
+};
+
+class HtkMatrixHolder {
+ public:
+  typedef std::pair<Matrix<float>, HtkHeader> T;
+
+  HtkMatrixHolder() {}
+
+  static bool Write(std::ostream &os, bool binary, const T &t) {
+    if (!binary) KALDIIO_ERR << "Non-binary HTK-format write not supported.";
+    bool ans = WriteHtk(os, t.first, t.second);
+    if (!ans) KALDIIO_WARN << "Error detected writing HTK-format matrix.";
+    return ans;
+  }
+
+  void Clear() { t_.first.Resize(0, 0); }
+
+  // Reads into the holder.
+  bool Read(std::istream &is) {
+    bool ans = ReadHtk(is, &t_.first, &t_.second);
+    if (!ans) {
+      KALDIIO_WARN << "Error detected reading HTK-format matrix.";
+      return false;
+    }
+    return ans;
+  }
+
+  // HTK-format matrices only read in binary.
+  static bool IsReadInBinary() { return true; }
+
+  T &Value() { return t_; }
+
+  void Swap(HtkMatrixHolder *other) {
+    t_.first.Swap(&(other->t_.first));
+    std::swap(t_.second, other->t_.second);
+  }
+
+  bool ExtractRange(const HtkMatrixHolder &other, const std::string &range) {
+    KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
+    return false;
+  }
+  // Default destructor.
+ private:
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(HtkMatrixHolder);
+  T t_;
 };
 
 }  // namespace kaldiio

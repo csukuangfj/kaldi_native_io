@@ -63,6 +63,10 @@ class TokenVectorHolder;
 template <class KaldiType>
 class KaldiObjectHolder;
 
+/// A class for reading/writing HTK-format matrices.
+/// T == std::pair<Matrix<BaseFloat>, HtkHeader>
+class HtkMatrixHolder;
+
 // In SequentialTableReaderScriptImpl and RandomAccessTableReaderScriptImpl, for
 // cases where the scp contained 'range specifiers' (things in square brackets
 // identifying parts of objects like matrices), use this function to separate

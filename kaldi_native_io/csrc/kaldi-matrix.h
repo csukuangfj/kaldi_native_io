@@ -154,6 +154,8 @@ class Matrix : public MatrixBase<Real> {
   /// Empty constructor.
   Matrix();
 
+  Matrix(const Matrix<Real> &M);  //  (cannot make explicit)
+
   Matrix(const MatrixIndexT r, const MatrixIndexT c,
          MatrixResizeType resize_type = kSetZero,
          MatrixStrideType stride_type = kDefaultStride)

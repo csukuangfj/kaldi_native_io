@@ -6,6 +6,7 @@ from typing import Any, Tuple
 
 import numpy as np
 from _kaldi_native_io import (
+    HtkHeader,
     _BoolWriter,
     _DoubleMatrix,
     _DoubleMatrixWriter,
@@ -18,6 +19,7 @@ from _kaldi_native_io import (
     _FloatVector,
     _FloatVectorWriter,
     _FloatWriter,
+    _HtkMatrixWriter,
     _Int32PairVectorWriter,
     _Int32VectorVectorWriter,
     _Int32VectorWriter,
@@ -30,6 +32,7 @@ from _kaldi_native_io import (
     _RandomAccessFloatPairVectorReader,
     _RandomAccessFloatReader,
     _RandomAccessFloatVectorReader,
+    _RandomAccessHtkMatrixReader,
     _RandomAccessInt32PairVectorReader,
     _RandomAccessInt32Reader,
     _RandomAccessInt32VectorReader,
@@ -44,6 +47,7 @@ from _kaldi_native_io import (
     _SequentialFloatPairVectorReader,
     _SequentialFloatReader,
     _SequentialFloatVectorReader,
+    _SequentialHtkMatrixReader,
     _SequentialInt32PairVectorReader,
     _SequentialInt32Reader,
     _SequentialInt32VectorReader,
@@ -507,3 +511,48 @@ class RandomAccessDoubleMatrixReader(_RandomAccessTableReader):
     def __getitem__(self, key) -> np.ndarray:
         """Return a 2-D array of type np.float64."""
         return self._impl[key].numpy()
+
+
+class HtkMatrixWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _HtkMatrixWriter(wspecifier)
+
+    def write(self, key: str, value: Tuple[np.ndarray, HtkHeader]) -> None:
+        """
+        Args:
+          key:
+            Key of the value.
+          value:
+            A tuple containing a 2-D array with dtype torch.float32 and
+            a htk header. See
+            https://labrosa.ee.columbia.edu/doc/HTKBook21/node58.html
+            for the format of the header.
+        """
+        assert isinstance(value, tuple)
+        assert value[0].dtype == np.float32
+        assert value[0].ndim == 2
+
+        super().write(key, (_FloatMatrix(value[0]), value[1]))
+
+
+class SequentialHtkMatrixReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialHtkMatrixReader(rspecifier)
+
+    @property
+    def value(self) -> Tuple[np.ndarray, HtkHeader]:
+        """Return a tuple containing a 2-D array of type np.float32 and a
+        header."""
+        value = self._impl.value
+        return (value[0].numpy(), value[1])
+
+
+class RandomAccessHtkMatrixReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessHtkMatrixReader(rspecifier)
+
+    def __getitem__(self, key) -> Tuple[np.ndarray, HtkHeader]:
+        """Return a tuple containing a 2-D array of type np.float32 and a
+        header."""
+        value = self._impl[key]
+        return (value[0].numpy(), value[1])

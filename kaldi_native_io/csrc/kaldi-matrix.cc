@@ -21,6 +21,13 @@
 
 namespace kaldiio {
 
+// Copy constructor.  Copies data to newly allocated memory.
+template <typename Real>
+Matrix<Real>::Matrix(const Matrix<Real> &M) : MatrixBase<Real>() {
+  Resize(M.num_rows_, M.num_cols_);
+  this->CopyFromMat(M);
+}
+
 template <typename Real>
 void Matrix<Real>::Swap(Matrix<Real> *other) {
   std::swap(this->data_, other->data_);
@@ -443,6 +450,169 @@ bad:
               << " File position at start is " << pos_at_start << ", currently "
               << is.tellg();
 }
+
+template <typename Real>
+bool ReadHtk(std::istream &is, Matrix<Real> *M_ptr, HtkHeader *header_ptr) {
+  // check instantiated with double or float.
+  static_assert(std::is_floating_point<Real>::value, "");
+  Matrix<Real> &M = *M_ptr;
+  HtkHeader htk_hdr;
+
+  // TODO(arnab): this fails if the HTK file has CRC cheksum or is compressed.
+  is.read((char *)&htk_hdr, sizeof(htk_hdr));  // we're being really POSIX here!
+  if (is.fail()) {
+    KALDIIO_WARN << "Could not read header from HTK feature file ";
+    return false;
+  }
+
+  KALDIIO_SWAP4(htk_hdr.mNSamples);
+  KALDIIO_SWAP4(htk_hdr.mSamplePeriod);
+  KALDIIO_SWAP2(htk_hdr.mSampleSize);
+  KALDIIO_SWAP2(htk_hdr.mSampleKind);
+
+  bool has_checksum = false;
+  {
+    // See HParm.h in HTK code for sources of these things.
+    enum BaseParmKind {
+      Waveform,
+      Lpc,
+      Lprefc,
+      Lpcepstra,
+      Lpdelcep,
+      Irefc,
+      Mfcc,
+      Fbank,
+      Melspec,
+      User,
+      Discrete,
+      Plp,
+      Anon
+    };
+
+    const int32_t IsCompressed = 02000, HasChecksum = 010000, HasVq = 040000,
+                  Problem = IsCompressed | HasVq;
+    int32_t base_parm = htk_hdr.mSampleKind & (077);
+    has_checksum = (base_parm & HasChecksum) != 0;
+    htk_hdr.mSampleKind &= ~HasChecksum;  // We don't support writing with
+                                          // checksum so turn it off.
+    if (htk_hdr.mSampleKind & Problem)
+      KALDIIO_ERR << "Code to read HTK features does not support compressed "
+                     "features, or features with VQ.";
+    if (base_parm == Waveform || base_parm == Irefc || base_parm == Discrete)
+      KALDIIO_ERR << "Attempting to read HTK features from unsupported type "
+                     "(e.g. waveform or discrete features.";
+  }
+
+  // KALDIIO_VLOG(3) << "HTK header: Num Samples: " << htk_hdr.mNSamples
+  //                 << "; Sample period: " << htk_hdr.mSamplePeriod
+  //                 << "; Sample size: " << htk_hdr.mSampleSize
+  //                 << "; Sample kind: " << htk_hdr.mSampleKind;
+
+  M.Resize(htk_hdr.mNSamples, htk_hdr.mSampleSize / sizeof(float));
+
+  MatrixIndexT i;
+  MatrixIndexT j;
+  if (sizeof(Real) == sizeof(float)) {
+    for (i = 0; i < M.NumRows(); i++) {
+      is.read((char *)M.RowData(i), sizeof(float) * M.NumCols());
+      if (is.fail()) {
+        KALDIIO_WARN << "Could not read data from HTK feature file ";
+        return false;
+      }
+      if (MachineIsLittleEndian()) {
+        MatrixIndexT C = M.NumCols();
+        for (j = 0; j < C; j++) {
+          KALDIIO_SWAP4((M(i, j)));  // The HTK standard is big-endian!
+        }
+      }
+    }
+  } else {
+    float *pmem = new float[M.NumCols()];
+    for (i = 0; i < M.NumRows(); i++) {
+      is.read((char *)pmem, sizeof(float) * M.NumCols());
+      if (is.fail()) {
+        KALDIIO_WARN << "Could not read data from HTK feature file ";
+        delete[] pmem;
+        return false;
+      }
+      MatrixIndexT C = M.NumCols();
+      for (j = 0; j < C; j++) {
+        if (MachineIsLittleEndian())  // HTK standard is big-endian!
+          KALDIIO_SWAP4(pmem[j]);
+        M(i, j) = static_cast<Real>(pmem[j]);
+      }
+    }
+    delete[] pmem;
+  }
+  if (header_ptr) *header_ptr = htk_hdr;
+  if (has_checksum) {
+    int16_t checksum;
+    is.read((char *)&checksum, sizeof(checksum));
+    if (is.fail())
+      KALDIIO_WARN << "Could not read checksum from HTK feature file ";
+    // We ignore the checksum.
+  }
+  return true;
+}
+
+template bool ReadHtk(std::istream &is, Matrix<float> *M,
+                      HtkHeader *header_ptr);
+
+template bool ReadHtk(std::istream &is, Matrix<double> *M,
+                      HtkHeader *header_ptr);
+
+template <typename Real>
+bool WriteHtk(std::ostream &os, const MatrixBase<Real> &M,
+              HtkHeader htk_hdr)  // header may be derived from a previous call
+                                  // to ReadHtk.  Must be in binary mode.
+{
+  KALDIIO_ASSERT(M.NumRows() == static_cast<MatrixIndexT>(htk_hdr.mNSamples));
+  KALDIIO_ASSERT(M.NumCols() == static_cast<MatrixIndexT>(htk_hdr.mSampleSize) /
+                                    static_cast<MatrixIndexT>(sizeof(float)));
+
+  KALDIIO_SWAP4(htk_hdr.mNSamples);
+  KALDIIO_SWAP4(htk_hdr.mSamplePeriod);
+  KALDIIO_SWAP2(htk_hdr.mSampleSize);
+  KALDIIO_SWAP2(htk_hdr.mSampleKind);
+
+  os.write((char *)&htk_hdr, sizeof(htk_hdr));
+  if (os.fail()) goto bad;
+
+  MatrixIndexT i;
+  MatrixIndexT j;
+  if (sizeof(Real) == sizeof(float) && !MachineIsLittleEndian()) {
+    for (i = 0; i < M.NumRows(); i++) {  // Unlikely to reach here ever!
+      os.write((char *)M.RowData(i), sizeof(float) * M.NumCols());
+      if (os.fail()) goto bad;
+    }
+  } else {
+    float *pmem = new float[M.NumCols()];
+
+    for (i = 0; i < M.NumRows(); i++) {
+      const Real *rowData = M.RowData(i);
+      for (j = 0; j < M.NumCols(); j++)
+        pmem[j] = static_cast<float>(rowData[j]);
+      if (MachineIsLittleEndian())
+        for (j = 0; j < M.NumCols(); j++) KALDIIO_SWAP4(pmem[j]);
+      os.write((char *)pmem, sizeof(float) * M.NumCols());
+      if (os.fail()) {
+        delete[] pmem;
+        goto bad;
+      }
+    }
+    delete[] pmem;
+  }
+  return true;
+bad:
+  KALDIIO_WARN << "Could not write to HTK feature file ";
+  return false;
+}
+
+template bool WriteHtk(std::ostream &os, const MatrixBase<float> &M,
+                       HtkHeader htk_hdr);
+
+template bool WriteHtk(std::ostream &os, const MatrixBase<double> &M,
+                       HtkHeader htk_hdr);
 
 template class Matrix<float>;
 template class Matrix<double>;

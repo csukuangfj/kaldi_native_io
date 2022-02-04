@@ -146,6 +146,13 @@ void PybindKaldiTable(py::module &m) {
     PybindRandomAccessTableReader<PyClass>(m,
                                            "_RandomAccessDoubleMatrixReader");
   }
+
+  {
+    using PyClass = HtkMatrixHolder;
+    PybindTableWriter<PyClass>(m, "_HtkMatrixWriter");
+    PybindSequentialTableReader<PyClass>(m, "_SequentialHtkMatrixReader");
+    PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessHtkMatrixReader");
+  }
 }
 
 }  // namespace kaldiio
