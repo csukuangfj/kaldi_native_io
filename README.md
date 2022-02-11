@@ -12,8 +12,8 @@ is provided to read ark/scp files from Kaldi in Python.
 
 # Features
 
-- Native support for **ALL** types of `rxfilename`, `wxfilename`, `rspecifier`,
-and `wspecifier` since the C++ code is borrowed from Kaldi.
+- Native support for **ALL** types of `rspecifier` and `wspecifier`
+  since the C++ code is borrowed from Kaldi.
 
 - Support the following data types (More will be added later on request.)
 
@@ -48,6 +48,7 @@ pip install --verbose kaldi_native_io
 # Usage
 
 ## Write
+
 Create a `writer` instance with a `wspecifier` and use `writer[key] = value`.
 
 For instance, the following code uses `kaldi_native_io.FloatMatrixWriter` to
@@ -100,6 +101,7 @@ def test_sequential_float_matrix_reader():
 
 
 ### Random Access Read
+
 Create a random access reader class with an `rspecifier` and use `reader[key]`
 to read the file.
 
