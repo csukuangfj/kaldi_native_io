@@ -22,7 +22,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          python3 -m pip install wheel
+          python3 -m pip -U install pip wheel numpy
           python3 setup.py bdist_wheel
           ls -lh dist
           python3 -m pip install ./dist/kaldi*.whl

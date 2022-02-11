@@ -110,6 +110,7 @@ setuptools.setup(
         package_name: "kaldi_native_io/python/kaldi_native_io",
     },
     packages=[package_name],
+    install_requires=["numpy"],
     url="https://github.com/csukuangfj/kaldi_native_io",
     long_description=read_long_description(),
     long_description_content_type="text/markdown",
