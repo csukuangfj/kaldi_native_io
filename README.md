@@ -17,7 +17,7 @@ is provided to read ark/scp files from Kaldi in Python.
 
 - Support the following data types (More will be added later on request.)
 
-| type | Writer | Sequential Reader | Random Access Reader |
+| C++ Data Type | Writer | Sequential Reader | Random Access Reader |
 |------|--------|-------------------|----------------------|
 |`int32`  | `Int32Writer` | `SequentialInt32Reader`  | `RandomAccessInt32Reader` |
 |`std::vector<int32>` | `Int32VectorWriter`| `SequentialInt32VectorReader`| `RandomAccessInt32VectorReader`|
