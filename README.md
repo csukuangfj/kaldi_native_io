@@ -27,7 +27,6 @@ is provided to read ark/scp files from Kaldi in Python.
 |`std::vector<std::pair<float, float>>`|`FloatPairVectorWriter`|`SequentialFloatPairVectorReader`|`RandomAccessFloatPairVectorReader`|
 |`double`|`DoubleWriter`|`SequentialDoubleReader`|`RandomAccessDoubleReader`|
 |`bool`|`BoolWriter`|`SequentialBoolReader`|`RandomAccessBoolReader`|
-|`bool`|`BoolWriter`|`SequentialBoolReader`|`RandomAccessBoolReader`|
 |`std::string`|`TokenWriter`|`SequentialTokenReader`|`RandomAccessTokenReader`|
 |`std::vector<std::string>`|`TokenVectorWriter`|`SequentialTokenVectorReader`|`RandomAccessTokenVectorReader`|
 |`kaldi::Vector<float>`| `FloatVectorWriter`| `SequentialFloatVectorReader`| `RandomAccessFloatVectorReader`|
@@ -70,7 +69,8 @@ def test_float_matrix_writer():
 ## Read
 
 ### Sequential Read
-Create a sequential reader class with an `rspecifier` and use `for key, value in reader`
+
+Create a sequential reader instance with an `rspecifier` and use `for key, value in reader`
 to read the file.
 
 For instance, the following code uses `kaldi_native_io.SequentialFloatMatrixReader` to
@@ -102,7 +102,7 @@ def test_sequential_float_matrix_reader():
 
 ### Random Access Read
 
-Create a random access reader class with an `rspecifier` and use `reader[key]`
+Create a random access reader instance with an `rspecifier` and use `reader[key]`
 to read the file.
 
 For instance, the following code uses `kaldi_native_io.RandomAccessFloatMatrixReader` to
