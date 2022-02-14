@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 project(kaldi_native_io CXX)
 
-set(KALDI_NATIVE_IO_VERSION "1.0")
+set(KALDI_NATIVE_IO_VERSION "1.1")
 
 set(ALLOWABLE_BUILD_TYPES Debug Release RelWithDebInfo MinSizeRel)
 set(DEFAULT_BUILD_TYPE "Release")
