@@ -1,4 +1,4 @@
-from _kaldi_native_io import CompressionMethod, HtkHeader
+from _kaldi_native_io import CompressionMethod, HtkHeader, WaveInfo
 
 from .table_types import (
     BoolWriter,
@@ -34,6 +34,7 @@ from .table_types import (
     RandomAccessPosteriorReader,
     RandomAccessTokenReader,
     RandomAccessTokenVectorReader,
+    RandomAccessWaveInfoReader,
     SequentialBoolReader,
     SequentialDoubleMatrixReader,
     SequentialDoubleReader,
@@ -51,6 +52,7 @@ from .table_types import (
     SequentialPosteriorReader,
     SequentialTokenReader,
     SequentialTokenVectorReader,
+    SequentialWaveInfoReader,
     TokenVectorWriter,
     TokenWriter,
 )

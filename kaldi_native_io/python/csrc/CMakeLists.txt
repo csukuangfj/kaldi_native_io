@@ -6,6 +6,7 @@ pybind11_add_module(_kaldi_native_io
   kaldi-table.cc
   kaldi-vector.cc
   kaldiio.cc
+  wave-reader.cc
 )
 
 target_link_libraries(_kaldi_native_io PRIVATE kaldi_native_io_core)

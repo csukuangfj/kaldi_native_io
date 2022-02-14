@@ -21,12 +21,20 @@ namespace kaldiio {
 template <typename Real>
 class SubMatrix;
 
+template <typename Real>
+class MatrixBase;
+
+template <typename Real>
+class Matrix;
+
 /// Base class which provides matrix operations not involving resizing
 /// or allocation.   Classes Matrix and SubMatrix inherit from it and take care
 /// of allocation and resizing.
 template <typename Real>
 class MatrixBase {
  public:
+  // so this child can access protected members of other instances.
+  friend class Matrix<Real>;
   friend class SubMatrix<Real>;
   /// Sets matrix to zero.
   void SetZero();
@@ -168,6 +176,11 @@ class Matrix : public MatrixBase<Real> {
       : MatrixBase<Real>() {
     Resize(r, c, resize_type, stride_type);
   }
+
+  /// Constructor from any MatrixBase. Can also copy with transpose.
+  /// Allocates new memory.
+  explicit Matrix(const MatrixBase<Real> &M,
+                  MatrixTransposeType trans = kNoTrans);
 
   /// Swaps the contents of *this and *other.  Shallow swap.
   void Swap(Matrix<Real> *other);

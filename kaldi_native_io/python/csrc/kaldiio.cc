@@ -8,6 +8,7 @@
 #include "kaldi_native_io/python/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/python/csrc/kaldi-table.h"
 #include "kaldi_native_io/python/csrc/kaldi-vector.h"
+#include "kaldi_native_io/python/csrc/wave-reader.h"
 
 namespace kaldiio {
 
@@ -17,6 +18,7 @@ PYBIND11_MODULE(_kaldi_native_io, m) {
   PybindKaldiVector(m);
   PybindKaldiMatrix(m);
   PybindCompressedMatrix(m);
+  PybindWaveReader(m);
 }
 
 }  // namespace kaldiio

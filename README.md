@@ -37,6 +37,7 @@ is provided to read ark/scp files from Kaldi in Python.
 |`kaldi::CompressedMatrix`| `CompressedMatrixWriter`| `SequentialCompressedMatrixReader`| `RandomAccessCompressedMatrixReader`|
 |`kaldi::Posterior`|`PosteriorWriter`|`SequentialPosteriorReader`|`RandomAccessPosteriorReader`|
 |`kaldi::GausPost`|`GaussPostWriter`|`SequentialGaussPostReader`|`RandomAccessGaussPostReader`|
+|`kaldi::WaveInfo`|-|`SequentialWaveInfoReader`|`RandomAccessWaveInfoReader`|
 
 # Installation
 

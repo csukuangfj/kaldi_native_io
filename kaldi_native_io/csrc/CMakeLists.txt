@@ -13,6 +13,7 @@ set(srcs
   parse-options.cc
   posterior.cc
   text-utils.cc
+  wave-reader.cc
 )
 
 add_library(kaldi_native_io_core SHARED ${srcs})

@@ -46,6 +46,7 @@ from _kaldi_native_io import (
     _RandomAccessPosteriorReader,
     _RandomAccessTokenReader,
     _RandomAccessTokenVectorReader,
+    _RandomAccessWaveInfoReader,
     _SequentialBoolReader,
     _SequentialDoubleMatrixReader,
     _SequentialDoubleReader,
@@ -63,6 +64,7 @@ from _kaldi_native_io import (
     _SequentialPosteriorReader,
     _SequentialTokenReader,
     _SequentialTokenVectorReader,
+    _SequentialWaveInfoReader,
     _TokenVectorWriter,
     _TokenWriter,
 )
@@ -714,3 +716,13 @@ class RandomAccessGaussPostReader(_RandomAccessTableReader):
                 v[i] = (k[0], k[1].numpy())
 
         return value
+
+
+class SequentialWaveInfoReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialWaveInfoReader(rspecifier)
+
+
+class RandomAccessWaveInfoReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessWaveInfoReader(rspecifier)
