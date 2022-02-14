@@ -35,6 +35,7 @@ set(py_test_files
   test_posterior_writer_reader.py
   test_token_vector_writer_reader.py
   test_token_writer_reader.py
+  test_wave_info_reader.py
 )
 
 foreach(source IN LISTS py_test_files)

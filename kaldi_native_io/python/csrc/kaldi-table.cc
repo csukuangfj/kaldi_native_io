@@ -9,6 +9,7 @@
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
 #include "kaldi_native_io/csrc/posterior.h"
+#include "kaldi_native_io/csrc/wave-reader.h"
 #include "kaldi_native_io/python/csrc/kaldi-table.h"
 
 namespace kaldiio {
@@ -171,6 +172,19 @@ void PybindKaldiTable(py::module &m) {
     PybindTableWriter<PyClass>(m, "_GaussPostWriter");
     PybindSequentialTableReader<PyClass>(m, "_SequentialGaussPostReader");
     PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessGaussPostReader");
+  }
+
+  {
+    using PyClass = WaveHolder;
+    PybindTableWriter<PyClass>(m, "_WaveWriter");
+    PybindSequentialTableReader<PyClass>(m, "_SequentialWaveReader");
+    PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessWaveReader");
+  }
+
+  {
+    using PyClass = WaveInfoHolder;
+    PybindSequentialTableReader<PyClass>(m, "_SequentialWaveInfoReader");
+    PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessWaveInfoReader");
   }
 }
 

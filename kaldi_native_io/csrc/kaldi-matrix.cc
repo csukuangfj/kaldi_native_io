@@ -24,6 +24,20 @@ namespace kaldiio {
 
 // Copy constructor.  Copies data to newly allocated memory.
 template <typename Real>
+Matrix<Real>::Matrix(const MatrixBase<Real> &M,
+                     MatrixTransposeType trans /*=kNoTrans*/)
+    : MatrixBase<Real>() {
+  if (trans == kNoTrans) {
+    Resize(M.num_rows_, M.num_cols_);
+    this->CopyFromMat(M);
+  } else {
+    Resize(M.num_cols_, M.num_rows_);
+    this->CopyFromMat(M, kTrans);
+  }
+}
+
+// Copy constructor.  Copies data to newly allocated memory.
+template <typename Real>
 Matrix<Real>::Matrix(const Matrix<Real> &M) : MatrixBase<Real>() {
   Resize(M.num_rows_, M.num_cols_);
   this->CopyFromMat(M);
