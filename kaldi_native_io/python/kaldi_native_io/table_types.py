@@ -109,17 +109,20 @@ class _TableWriter(object):
         self._impl.flush()
 
     def close(self) -> None:
-        self._impl.close()
+        if self.is_open:
+            self._impl.close()
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback) -> None:
-        if self.is_open:
-            self.close()
+        self.close()
 
     def __setitem__(self, key: str, value: Any) -> None:
         self.write(key, value)
+
+    def __del__(self) -> None:
+        self.close()
 
 
 class _SequentialTableReader(object):
@@ -167,7 +170,8 @@ class _SequentialTableReader(object):
         self._impl.next()
 
     def close(self) -> None:
-        self._impl.close()
+        if self.is_open:
+            self._impl.close()
 
     def __enter__(self):
         return self
@@ -182,6 +186,9 @@ class _SequentialTableReader(object):
             value = self.value
             yield key, value
             self.next()
+
+    def __del__(self) -> None:
+        self.close()
 
 
 class _RandomAccessTableReader(object):
@@ -211,7 +218,8 @@ class _RandomAccessTableReader(object):
         return self._impl.is_open
 
     def close(self) -> None:
-        self._impl.close()
+        if self.is_open:
+            self._impl.close()
 
     def __contains__(self, key: str) -> bool:
         return key in self._impl
@@ -226,6 +234,9 @@ class _RandomAccessTableReader(object):
     def __exit__(self, type, value, traceback) -> None:
         if self.is_open:
             self.close()
+
+    def __del__(self) -> None:
+        self.close()
 
 
 class Int32Writer(_TableWriter):
