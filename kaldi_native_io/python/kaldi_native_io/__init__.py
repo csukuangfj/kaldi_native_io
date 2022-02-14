@@ -1,4 +1,9 @@
-from _kaldi_native_io import CompressionMethod, HtkHeader, WaveInfo
+from _kaldi_native_io import (
+    CompressionMethod,
+    HtkHeader,
+    WaveInfo,
+    read_wave_info,
+)
 
 from .table_types import (
     BoolWriter,

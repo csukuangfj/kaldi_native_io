@@ -4,6 +4,7 @@
 
 #include "kaldi_native_io/python/csrc/wave-reader.h"
 
+#include "kaldi_native_io/csrc/kaldi-io.h"
 #include "kaldi_native_io/csrc/wave-reader.h"
 
 namespace kaldiio {
@@ -41,6 +42,20 @@ void PybindWaveReader(py::module &m) {
           return os.str();
         });
   }
+
+  m.def(
+      "read_wave_info",
+      [](const std::string &rxfilename) -> WaveInfo {
+        Input ki(rxfilename);
+        if (!ki.IsOpen()) {
+          KALDIIO_ERR << "Failed to open " << rxfilename;
+        }
+
+        WaveInfo info;
+        info.Read(ki.Stream());  // Throws exception on failure.
+        return info;
+      },
+      py::arg("rxfilename"));
 }
 
 }  // namespace kaldiio
