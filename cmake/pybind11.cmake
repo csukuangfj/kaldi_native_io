@@ -30,6 +30,8 @@ function(download_pybind11)
     FetchContent_Declare(pybind11
       URL               ${pybind11_URL}
       URL_HASH          ${pybind11_HASH}
+      PATCH_COMMAND
+        sed -i.bak "s/VERSION 3.4/VERSION 3.3/g" CMakeLists.txt
     )
   else()
     FetchContent_Declare(pybind11

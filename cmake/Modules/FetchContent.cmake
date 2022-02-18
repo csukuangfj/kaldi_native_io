@@ -583,6 +583,8 @@ endfunction()
 # The setter also records the source and binary dirs used.
 #=======================================================================
 
+include(CMakeParseArguments)
+
 # Internal use, projects must not call this directly. It is
 # intended for use by the FetchContent_Populate() function to
 # record when FetchContent_Populate() is called for a particular
