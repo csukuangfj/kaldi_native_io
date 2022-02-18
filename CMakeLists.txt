@@ -9,7 +9,11 @@ to build this project"
   )
 endif()
 
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+if(POLICY CMP0057)
+  cmake_policy(SET CMP0057 NEW)
+endif()
+
+cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 
 
 project(kaldi_native_io CXX)
