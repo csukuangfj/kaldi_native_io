@@ -28,7 +28,7 @@
 #if !defined(_LIBCPP_VERSION)  // libc++
 #include <fstream>
 #else
-#include "kaldi_native_io/csrc/util/basic-filebuf.h"
+#include "kaldi_native_io/csrc/basic-filebuf.h"
 #endif
 
 #include "kaldi_native_io/csrc/log.h"

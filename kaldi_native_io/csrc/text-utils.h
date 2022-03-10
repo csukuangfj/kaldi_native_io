@@ -5,13 +5,15 @@
 
 // Copyright 2009-2011  Saarland University;  Microsoft Corporation
 
+#ifndef KALDI_NATIVE_IO_CSRC_TEXT_UTILS_H_
+#define KALDI_NATIVE_IO_CSRC_TEXT_UTILS_H_
+
+#include <errno.h>
+#include <stdlib.h>
 #include <limits>
 #include <string>
 #include <type_traits>
 #include <vector>
-
-#ifndef KALDI_NATIVE_IO_CSRC_TEXT_UTILS_H_
-#define KALDI_NATIVE_IO_CSRC_TEXT_UTILS_H_
 
 #ifdef _MSC_VER
 #define KALDIIO_STRTOLL(cur_cstr, end_cstr) _strtoi64(cur_cstr, end_cstr, 10);
