@@ -47,6 +47,7 @@ from _kaldi_native_io import (
     _RandomAccessTokenReader,
     _RandomAccessTokenVectorReader,
     _RandomAccessWaveInfoReader,
+    _RandomAccessWaveReader,
     _SequentialBoolReader,
     _SequentialDoubleMatrixReader,
     _SequentialDoubleReader,
@@ -65,6 +66,7 @@ from _kaldi_native_io import (
     _SequentialTokenReader,
     _SequentialTokenVectorReader,
     _SequentialWaveInfoReader,
+    _SequentialWaveReader,
     _TokenVectorWriter,
     _TokenWriter,
 )
@@ -719,10 +721,30 @@ class RandomAccessGaussPostReader(_RandomAccessTableReader):
 
 
 class SequentialWaveInfoReader(_SequentialTableReader):
+    """Caution: It does not support pipe input yet since it
+    closes the pipe as soon as it reads the header, which
+    causes pipe write error as the producer is still generating data.
+    """
+
     def open(self, rspecifier: str) -> None:
         self._impl = _SequentialWaveInfoReader(rspecifier)
 
 
 class RandomAccessWaveInfoReader(_RandomAccessTableReader):
+    """Caution: It does not support pipe input yet since it
+    closes the pipe as soon as it reads the header, which
+    causes pipe write error as the producer is still generating data.
+    """
+
     def open(self, rspecifier: str) -> None:
         self._impl = _RandomAccessWaveInfoReader(rspecifier)
+
+
+class SequentialWaveReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialWaveReader(rspecifier)
+
+
+class RandomAccessWaveReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessWaveReader(rspecifier)

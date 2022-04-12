@@ -15,7 +15,7 @@ void PybindWaveReader(py::module &m) {
     py::class_<PyClass>(m, "WaveData")
         .def(py::init<float, Matrix<float>>())
         .def_property_readonly("sample_freq", &PyClass::SampFreq)
-        .def_property_readonly("duration", &PyClass::Duration)
+        .def_property_readonly("duration", &PyClass::Duration)  // seconds
         .def_property_readonly("data", &PyClass::Data);
   }
 
@@ -46,6 +46,12 @@ void PybindWaveReader(py::module &m) {
   m.def(
       "read_wave_info",
       [](const std::string &rxfilename) -> WaveInfo {
+        InputType t = ClassifyRxfilename(rxfilename);
+        if (t != kFileInput) {
+          KALDIIO_ERR << "Expect an rxfilename of type kFileInput. \n"
+                      << "Given: " << PrintableRxfilename(rxfilename)
+                      << " (of type " << InputTypeToString(t) << ")";
+        }
         Input ki(rxfilename);
         if (!ki.IsOpen()) {
           KALDIIO_ERR << "Failed to open " << rxfilename;
@@ -54,6 +60,20 @@ void PybindWaveReader(py::module &m) {
         WaveInfo info;
         info.Read(ki.Stream());  // Throws exception on failure.
         return info;
+      },
+      py::arg("rxfilename"));
+
+  m.def(
+      "read_wave",
+      [](const std::string &rxfilename) -> WaveData {
+        Input ki(rxfilename);
+        if (!ki.IsOpen()) {
+          KALDIIO_ERR << "Failed to open " << rxfilename;
+        }
+
+        WaveData data;
+        data.Read(ki.Stream());  // Throws exception on failure.
+        return data;
       },
       py::arg("rxfilename"));
 }

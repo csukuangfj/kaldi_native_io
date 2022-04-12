@@ -63,6 +63,8 @@ class InputImplBase;   // Forward decl; defined in a .cc file
 // }
 enum OutputType { kNoOutput, kFileOutput, kStandardOutput, kPipeOutput };
 
+std::string OutputTypeToString(OutputType t);
+
 /// ClassifyWxfilename interprets filenames as follows:
 ///  - kNoOutput: invalid filenames (leading or trailing space, things that look
 ///     like wspecifiers and rspecifiers or like pipes to read from with leading
@@ -89,6 +91,8 @@ enum InputType {
 ///  - kPipeInput: e.g. "gunzip -c /tmp/abc.gz |"
 ///  - kOffsetFileInput: offsets into files, e.g.  /some/filename:12970
 InputType ClassifyRxfilename(const std::string &rxfilename);
+
+std::string InputTypeToString(InputType t);
 
 class Output {
  public:
