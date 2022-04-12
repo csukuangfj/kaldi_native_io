@@ -20,6 +20,40 @@
 
 namespace kaldiio {
 
+std::string InputTypeToString(InputType t) {
+  switch (t) {
+    case kNoInput:
+      return "kNoInput";
+    case kFileInput:
+      return "kFileInput";
+    case kStandardInput:
+      return "kStandardInput";
+    case kOffsetFileInput:
+      return "kOffsetFileInput";
+    case kPipeInput:
+      return "kPipeInput";
+    default:
+      KALDIIO_ERR << "Unknown type";
+      return "Unknown";
+  }
+}
+
+std::string OutputTypeToString(OutputType t) {
+  switch (t) {
+    case kNoOutput:
+      return "kNoOutput";
+    case kFileOutput:
+      return "kFileOutput";
+    case kStandardOutput:
+      return "kStandardOutput";
+    case kPipeOutput:
+      return "kPipeOutput";
+    default:
+      KALDIIO_ERR << "Unknown type";
+      return "Unknown";
+  }
+}
+
 std::string PrintableRxfilename(const std::string &rxfilename) {
   if (rxfilename == "" || rxfilename == "-") {
     return "standard input";
