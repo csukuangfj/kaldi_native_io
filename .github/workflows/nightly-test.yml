@@ -1,0 +1,52 @@
+name: build-pip
+
+on:
+  push:
+    branches:
+      - nightly-test
+  schedule:
+    # minute (0-59)
+    # hour (0-23)
+    # day of the month (1-31)
+    # month (1-12)
+    # day of the week (0-6)
+    # nightly build at 23:50 UTC time every day
+    - cron: "50 23 * * *"
+
+jobs:
+  pypi:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip pytest
+          python3 -m pip install wheel twine setuptools
+
+
+      - name: Install kaldi_native_io
+        shell: bash
+        run: |
+          python3 -m pip install kaldi_native_io
+
+      - name: Run tests
+        shell: bash
+        run: |
+          export KALDI_NATIVE_IO_MAKE_ARGS="-j VERBOSE=1"
+          python3 -m pip install kaldi_native_io
+          pytest ./kaldi_native_io/python/tests
+
