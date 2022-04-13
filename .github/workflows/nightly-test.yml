@@ -1,4 +1,4 @@
-name: build-pip
+name: nightly-test
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
       - name: Install kaldi_native_io
         shell: bash
         run: |
-          python3 -m pip install kaldi_native_io
+          python3 -m pip install -U kaldi_native_io
 
       - name: Run tests
         shell: bash
