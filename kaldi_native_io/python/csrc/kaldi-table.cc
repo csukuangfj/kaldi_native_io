@@ -8,6 +8,7 @@
 #include "kaldi_native_io/csrc/kaldi-holder.h"
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
+#include "kaldi_native_io/csrc/matrix-shape.h"
 #include "kaldi_native_io/csrc/posterior.h"
 #include "kaldi_native_io/csrc/wave-reader.h"
 #include "kaldi_native_io/python/csrc/kaldi-table.h"
@@ -165,6 +166,12 @@ void PybindKaldiTable(py::module &m) {
     PybindTableWriter<PyClass>(m, "_PosteriorWriter");
     PybindSequentialTableReader<PyClass>(m, "_SequentialPosteriorReader");
     PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessPosteriorReader");
+  }
+
+  {
+    using PyClass = KaldiObjectHolder<MatrixShape>;
+    PybindSequentialTableReader<PyClass>(m, "_SequentialMatrixShapeReader");
+    PybindRandomAccessTableReader<PyClass>(m, "_RandomAccessMatrixShapeReader");
   }
 
   {

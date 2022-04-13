@@ -6,6 +6,7 @@ pybind11_add_module(_kaldi_native_io
   kaldi-table.cc
   kaldi-vector.cc
   kaldiio.cc
+  matrix-shape.cc
   wave-reader.cc
 )
 

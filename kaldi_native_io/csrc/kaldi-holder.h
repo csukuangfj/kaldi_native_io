@@ -12,6 +12,8 @@
 
 #include <string>
 
+#include "kaldi_native_io/csrc/compressed-matrix.h"
+#include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
 
 namespace kaldiio {
@@ -99,6 +101,21 @@ bool ExtractObjectRange(const T &input, const std::string &range, T *output) {
 template <class Real>
 bool ExtractObjectRange(const Vector<Real> &input, const std::string &range,
                         Vector<Real> *output);
+
+/// The template is specialized with a version that actually does something,
+/// for types Matrix<float> and Matrix<double>.  We can later add versions of
+/// this template for other types, such as Vector, which can meaningfully
+/// have ranges extracted.
+template <class Real>
+bool ExtractObjectRange(const Matrix<Real> &input, const std::string &range,
+                        Matrix<Real> *output);
+
+/// CompressedMatrix is always of the type BaseFloat but it is more
+/// efficient to provide template as it uses CompressedMatrix's own
+/// conversion to Matrix<Real>
+template <class Real>
+bool ExtractObjectRange(const CompressedMatrix &input, const std::string &range,
+                        Matrix<Real> *output);
 
 }  // namespace kaldiio
 

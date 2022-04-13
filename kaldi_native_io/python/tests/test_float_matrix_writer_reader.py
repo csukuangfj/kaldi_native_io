@@ -47,10 +47,46 @@ def test_random_access_float_matrix_reader():
         )
 
 
+def test_read_write_single_mat():
+    arr = np.array(
+        [
+            [0, 1, 2, 22, 33],
+            [3, 4, 5, -1, -3],
+            [6, 7, 8, -9, 0],
+            [9, 10, 11, 5, 100],
+        ],
+        dtype=np.float32,
+    )
+    mat = kaldi_native_io.FloatMatrix(arr)
+    mat.write(wxfilename="binary.ark", binary=True)
+    mat.write(wxfilename="matrix.txt", binary=False)
+
+    m1 = kaldi_native_io.FloatMatrix.read("binary.ark")
+    m2 = kaldi_native_io.FloatMatrix.read("matrix.txt")
+
+    assert np.array_equal(mat, m1)
+    assert np.array_equal(mat, m2)
+
+    # read range
+    # Note: the upper bound is inclusive!
+    m3 = kaldi_native_io.FloatMatrix.read("binary.ark[0:1]")  # row 0 and row 1
+    assert np.array_equal(mat.numpy()[0:2], m3.numpy())
+
+    m4 = kaldi_native_io.FloatMatrix.read(
+        "matrix.txt[:,3:4]"
+    )  # column 3 and column 4
+    assert np.array_equal(mat.numpy()[:, 3:5], m4.numpy())
+
+    os.remove("binary.ark")
+    os.remove("matrix.txt")
+
+
 def main():
     test_float_matrix_writer()
     test_sequential_float_matrix_reader()
     test_random_access_float_matrix_reader()
+
+    test_read_write_single_mat()
 
     os.remove(f"{base}.scp")
     os.remove(f"{base}.ark")

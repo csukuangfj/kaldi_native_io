@@ -43,6 +43,7 @@ from _kaldi_native_io import (
     _RandomAccessInt32Reader,
     _RandomAccessInt32VectorReader,
     _RandomAccessInt32VectorVectorReader,
+    _RandomAccessMatrixShapeReader,
     _RandomAccessPosteriorReader,
     _RandomAccessTokenReader,
     _RandomAccessTokenVectorReader,
@@ -62,6 +63,7 @@ from _kaldi_native_io import (
     _SequentialInt32Reader,
     _SequentialInt32VectorReader,
     _SequentialInt32VectorVectorReader,
+    _SequentialMatrixShapeReader,
     _SequentialPosteriorReader,
     _SequentialTokenReader,
     _SequentialTokenVectorReader,
@@ -748,3 +750,13 @@ class SequentialWaveReader(_SequentialTableReader):
 class RandomAccessWaveReader(_RandomAccessTableReader):
     def open(self, rspecifier: str) -> None:
         self._impl = _RandomAccessWaveReader(rspecifier)
+
+
+class SequentialMatrixShapeReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialMatrixShapeReader(rspecifier)
+
+
+class RandomAccessMatrixShapeReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessMatrixShapeReader(rspecifier)

@@ -10,6 +10,7 @@ set(srcs
   kaldi-table.cc
   kaldi-utils.cc
   kaldi-vector.cc
+  matrix-shape.cc
   parse-options.cc
   posterior.cc
   text-utils.cc

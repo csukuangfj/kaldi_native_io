@@ -214,6 +214,23 @@ void ReadKaldiObject(const std::string &filename, C *c) {
   c->Read(ki.Stream(), binary_in);
 }
 
+template <typename T>
+class Matrix;
+// Specialize the template for reading matrices, because we want to be able to
+// support reading 'ranges' (row and column ranges), like foo.mat[10:20].
+template <>
+void ReadKaldiObject(const std::string &filename, Matrix<float> *m);
+
+template <>
+void ReadKaldiObject(const std::string &filename, Matrix<double> *m);
+
+template <class C>
+inline void WriteKaldiObject(const C &c, const std::string &filename,
+                             bool binary) {
+  Output ko(filename, binary);
+  c.Write(ko.Stream(), binary);
+}
+
 /// PrintableRxfilename turns the rxfilename into a more human-readable
 /// form for error reporting, i.e. it does quoting and escaping and
 /// replaces "" or "-" with "standard input".
