@@ -4,6 +4,7 @@
 
 import glob
 import os
+import platform
 import re
 import shutil
 import sys
@@ -12,6 +13,10 @@ import setuptools
 from setuptools.command.build_ext import build_ext
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+def is_windows():
+    return platform.system() == "Windows"
 
 
 def cmake_extension(name, *args, **kwargs) -> setuptools.Extension:
@@ -48,31 +53,55 @@ class BuildExtension(build_ext):
             print(f"Setting PYTHON_EXECUTABLE to {sys.executable}")
             cmake_args += f" -DPYTHON_EXECUTABLE={sys.executable}"
 
-        build_cmd = f"""
-            cd {self.build_temp}
-
-            cmake {cmake_args} {kaldi_native_io_dir}
-
-            make {make_args} _kaldi_native_io
-        """
-        print(f"build command is:\n{build_cmd}")
-
-        ret = os.system(build_cmd)
-        if ret != 0:
-            raise Exception(
-                "\nBuild kaldi_native_io failed. Please check the error "
-                "message.\n"
-                "You can ask for help by creating an issue on GitHub.\n"
-                "\nClick:\n"
-                "   https://github.com/csukuangfj/kaldi_native_io/issues/new\n"
+        if is_windows():
+            build_cmd = f"""
+                cmake {cmake_args} -B {build_dir} -S {kaldi_native_io_dir}
+                cmake --build {build_dir} --target _kaldi_native_io --config Release -- -m
+            """
+            print(f"build command is:\n{build_cmd}")
+            ret = os.system(
+                f"cmake {cmake_args} -B {build_dir} -S {kaldi_native_io_dir}"
             )
-        lib_so = glob.glob(f"{build_dir}/lib/*.so*")
-        for so in lib_so:
-            print(f"Copying {so} to {self.build_lib}/")
-            shutil.copy(f"{so}", f"{self.build_lib}/")
+            if ret != 0:
+                raise Exception("Failed to configure kaldi_native_io")
 
-        # macos
-        lib_so = glob.glob(f"{build_dir}/lib/*.dylib*")
+            ret = os.system(
+                f"cmake --build {build_dir} --target _kaldi_native_io --config Release -- -m"
+            )
+            if ret != 0:
+                raise Exception("Failed to build kaldi_native_io")
+        else:
+            build_cmd = f"""
+                cd {self.build_temp}
+
+                cmake {cmake_args} {kaldi_native_io_dir}
+
+                make {make_args} _kaldi_native_io
+            """
+            print(f"build command is:\n{build_cmd}")
+
+            ret = os.system(build_cmd)
+            if ret != 0:
+                raise Exception(
+                    "\nBuild kaldi_native_io failed. Please check the error "
+                    "message.\n"
+                    "You can ask for help by creating an issue on GitHub.\n"
+                    "\nClick:\n"
+                    "   https://github.com/csukuangfj/kaldi_native_io/issues/new\n"
+                )
+        lib_so = glob.glob(f"{build_dir}/lib/*.so*")
+        lib_so += glob.glob(f"{build_dir}/lib/*.dylib*")  # macos
+
+        # bin/Release/_kaldifeat.cp38-win_amd64.pyd
+        lib_so += glob.glob(
+            f"{build_dir}/**/*kaldi_native_io*.pyd", recursive=True
+        )  # windows
+
+        # lib/Release/*.lib
+        lib_so += glob.glob(
+            f"{build_dir}/**/*kaldi_native_io*.lib", recursive=True
+        )  # windows
+
         for so in lib_so:
             print(f"Copying {so} to {self.build_lib}/")
             shutil.copy(f"{so}", f"{self.build_lib}/")
