@@ -1,0 +1,78 @@
+name: build-pip-windows
+
+on:
+  push:
+    branches:
+      - master
+      - support-windows
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-pip-windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2019]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # see https://github.com/microsoft/setup-msbuild
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Display CMake version
+        run: |
+          cmake --version
+          cmake --help
+
+      - name: Configure CMake
+        shell: bash
+        run: |
+          mkdir build_release
+          cd build_release
+          cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+          ls -lh
+
+      - name: Build kaldi_native_io
+        run: |
+          cd build_release
+          cmake --build . --target _kaldi_native_io --config Release
+
+      - name: Display generated files
+        shell: bash
+        run: |
+          cd build_release
+          ls -lh lib/*/*
+
+      - name: Build wheel
+        shell: bash
+        run: |
+          python3 setup.py bdist_wheel
+          ls -lh dist/
+          pip install ./dist/*.whl
+          python3 -c "import kaldi_native_io; print(kaldi_native_io.__version__)"
+
+      - name: Upload Wheel
+        uses: actions/upload-artifact@v2
+        with:
+          name: python-${{ matrix.python-version }}-${{ matrix.os }}-cpu
+          path: dist/*.whl
+
+      - name: Run tests
+        shell: bash
+        run: |
+          pytest ./kaldi_native_io/python/tests
