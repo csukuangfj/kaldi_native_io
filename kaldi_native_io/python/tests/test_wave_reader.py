@@ -26,6 +26,7 @@ def test_sequential_wave_reader():
                 f"sample_freq: {value.sample_freq}, "
                 f"duration: {value.duration} (seconds)",
                 f"data shape: {value.data.numpy().shape}",
+                f"data shape: {value.data.shape}",  # same as the above one
             )
 
 
@@ -53,6 +54,7 @@ def test_read_wave_1():
     print("sample_freq", wave.sample_freq)  # e.g., 1600
     print("duration in seconds", wave.duration)
     print("data shape", wave.data.numpy().shape)  # (num_channels, num_samples)
+    print("data shape", wave.data.shape)  # same as the above one
     print(f"data min", wave.data.numpy().min())
     print(f"data max", wave.data.numpy().max())
 
@@ -66,6 +68,7 @@ def test_read_wave_2():
     print("sample_freq", wave.sample_freq)
     print("duration in seconds", wave.duration)
     print("data shape", wave.data.numpy().shape)
+    print("data shape", wave.data.shape)  # same as the above one
     print(f"data min", wave.data.numpy().min())
     print(f"data max", wave.data.numpy().max())
 

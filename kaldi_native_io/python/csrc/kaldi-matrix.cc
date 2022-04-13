@@ -30,6 +30,11 @@ void PybindKaldiMatrixTpl(py::module &m, const std::string &class_name,
             }
             return std::move(ans);
           }))
+      .def_property_readonly("shape",
+                             [](const PyClass &self) -> py::tuple {
+                               return py::make_tuple(self.NumRows(),
+                                                     self.NumCols());
+                             })
       .def("numpy",
            [](py::object obj) {
              auto *m = obj.cast<Matrix<Real> *>();
