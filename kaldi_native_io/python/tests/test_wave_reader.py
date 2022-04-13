@@ -17,6 +17,8 @@ b /path/to/bar.wav
 
 
 def test_sequential_wave_reader():
+    if not Path(base).exists():
+        return
     with kaldi_native_io.SequentialWaveReader(rspecifier) as ki:
         for key, value in ki:
             print(
@@ -28,6 +30,8 @@ def test_sequential_wave_reader():
 
 
 def test_random_access_wave_reader():
+    if not Path(base).exists():
+        return
     with kaldi_native_io.RandomAccessWaveReader(rspecifier) as ki:
         assert "a" in ki
         assert "b" in ki
@@ -42,6 +46,8 @@ def test_random_access_wave_reader():
 
 
 def test_read_wave_1():
+    if not Path(base).exists():
+        return
     file = "/ceph-fj/fangjun/open-source-2/kaldi_native_io/build/BAC009S0002W0123.wav"
     wave = kaldi_native_io.read_wave(file)
     print("sample_freq", wave.sample_freq)  # e.g., 1600
@@ -52,6 +58,8 @@ def test_read_wave_1():
 
 
 def test_read_wave_2():
+    if not Path(base).exists():
+        return
     # from a pipe
     file = "cat /ceph-fj/fangjun/open-source-2/kaldi_native_io/build/BAC009S0002W0123.wav |"
     wave = kaldi_native_io.read_wave(file)

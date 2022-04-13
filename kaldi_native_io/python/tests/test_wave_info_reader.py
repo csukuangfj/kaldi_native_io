@@ -16,12 +16,16 @@ b /path/to/bar.wav
 
 
 def test_sequential_wave_info_reader():
+    if not Path(base).exists():
+        return
     with kaldi_native_io.SequentialWaveInfoReader(rspecifier) as ki:
         for key, value in ki:
             print(key, value)
 
 
 def test_random_access_wave_info_reader():
+    if not Path(base).exists():
+        return
     with kaldi_native_io.RandomAccessWaveInfoReader(rspecifier) as ki:
         assert "a" in ki
         assert "b" in ki
