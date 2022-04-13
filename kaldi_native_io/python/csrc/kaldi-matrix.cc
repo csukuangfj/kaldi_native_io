@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "kaldi_native_io/csrc/kaldi-io.h"
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 
 namespace kaldiio {
@@ -17,6 +18,27 @@ void PybindKaldiMatrixTpl(py::module &m, const std::string &class_name,
   py::class_<PyClass>(m, class_name.c_str(), class_help_doc.c_str(),
                       pybind11::buffer_protocol())
       .def(py::init<>())
+      .def("__str__",
+           [](const PyClass &self) -> std::string {
+             std::ostringstream os;
+             bool binary = false;
+             self.Write(os, false);
+             return os.str();
+           })
+      .def_static(
+          "read",
+          [](const std::string &rxfilename) -> PyClass {
+            PyClass ans;
+            ReadKaldiObject(rxfilename, &ans);
+            return ans;
+          },
+          py::arg("rxfilename"))
+      .def(
+          "write",
+          [](const PyClass &self, const std::string &wxfilename, bool binary) {
+            WriteKaldiObject(self, wxfilename, binary);
+          },
+          py::arg("wxfilename"), py::arg("binary"))
       .def(py::init(
           [](py::array_t<Real> array) -> std::unique_ptr<Matrix<Real>> {
             // TODO(fangjun): Avoid extra copy here!

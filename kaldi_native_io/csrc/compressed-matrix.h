@@ -162,6 +162,7 @@ class CompressedMatrix {
 
   friend class Matrix<float>;
   friend class Matrix<double>;
+  friend class MatrixShape;
 
  private:
   // This enum describes the different compressed-data formats: these are

@@ -834,4 +834,56 @@ std::istream &Input::Stream() {
   return impl_->Stream();
 }
 
+template <>
+void ReadKaldiObject(const std::string &filename, Matrix<float> *m) {
+  if (!filename.empty() && filename[filename.size() - 1] == ']') {
+    // This filename seems to have a 'range'... like foo.ark:4312423[20:30].
+    // (the bit in square brackets is the range).
+    std::string rxfilename, range;
+    if (!ExtractRangeSpecifier(filename, &rxfilename, &range)) {
+      KALDIIO_ERR
+          << "Could not make sense of possible range specifier in filename "
+          << "while reading matrix: " << filename;
+    }
+    Matrix<float> temp;
+    bool binary_in;
+    Input ki(rxfilename, &binary_in);
+    temp.Read(ki.Stream(), binary_in);
+    if (!ExtractObjectRange(temp, range, m)) {
+      KALDIIO_ERR << "Error extracting range of object: " << filename;
+    }
+  } else {
+    // The normal case, there is no range.
+    bool binary_in;
+    Input ki(filename, &binary_in);
+    m->Read(ki.Stream(), binary_in);
+  }
+}
+
+template <>
+void ReadKaldiObject(const std::string &filename, Matrix<double> *m) {
+  if (!filename.empty() && filename[filename.size() - 1] == ']') {
+    // This filename seems to have a 'range'... like foo.ark:4312423[20:30].
+    // (the bit in square brackets is the range).
+    std::string rxfilename, range;
+    if (!ExtractRangeSpecifier(filename, &rxfilename, &range)) {
+      KALDIIO_ERR
+          << "Could not make sense of possible range specifier in filename "
+          << "while reading matrix: " << filename;
+    }
+    Matrix<double> temp;
+    bool binary_in;
+    Input ki(rxfilename, &binary_in);
+    temp.Read(ki.Stream(), binary_in);
+    if (!ExtractObjectRange(temp, range, m)) {
+      KALDIIO_ERR << "Error extracting range of object: " << filename;
+    }
+  } else {
+    // The normal case, there is no range.
+    bool binary_in;
+    Input ki(filename, &binary_in);
+    m->Read(ki.Stream(), binary_in);
+  }
+}
+
 }  // namespace kaldiio

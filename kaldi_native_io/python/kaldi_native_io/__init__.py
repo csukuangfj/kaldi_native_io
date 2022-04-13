@@ -1,10 +1,13 @@
 from _kaldi_native_io import (
     CompressionMethod,
     HtkHeader,
+    MatrixShape,
     WaveData,
     WaveInfo,
-    read_wave_info,
+    _DoubleMatrix as DoubleMatrix,
+    _FloatMatrix as FloatMatrix,
     read_wave,
+    read_wave_info,
 )
 
 from .table_types import (
@@ -38,6 +41,7 @@ from .table_types import (
     RandomAccessInt32Reader,
     RandomAccessInt32VectorReader,
     RandomAccessInt32VectorVectorReader,
+    RandomAccessMatrixShapeReader,
     RandomAccessPosteriorReader,
     RandomAccessTokenReader,
     RandomAccessTokenVectorReader,
@@ -57,6 +61,7 @@ from .table_types import (
     SequentialInt32Reader,
     SequentialInt32VectorReader,
     SequentialInt32VectorVectorReader,
+    SequentialMatrixShapeReader,
     SequentialPosteriorReader,
     SequentialTokenReader,
     SequentialTokenVectorReader,
