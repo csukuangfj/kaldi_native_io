@@ -16,4 +16,10 @@ set(srcs
   wave-reader.cc
 )
 
-add_library(kaldi_native_io_core SHARED ${srcs})
+add_library(kaldi_native_io_core ${srcs})
+if(APPLE)
+  set_target_properties(kaldi_native_io_core
+    PROPERTIES
+      LINK_FLAGS "-undefined dynamic_lookup"
+  )
+endif()

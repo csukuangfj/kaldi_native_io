@@ -46,6 +46,12 @@ set(CMAKE_BUILD_RPATH "$ORIGIN")
 
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
 
+set(BUILD_SHARED_LIBS ON)
+if(WIN32)
+  message(STATUS "Set BUILD_SHARED_LIBS to OFF for Windows")
+  set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(pybind11)
