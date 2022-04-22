@@ -31,12 +31,13 @@ jobs:
         shell: bash
         run: |
           pip list
-          python3 setup.py install
+          sudo python3 setup.py install
           pip list
           python3 -c "import kaldi_native_io; print(kaldi_native_io.__version__)"
           python3 -c "import kaldi_native_io; print(kaldi_native_io.__file__)"
-          python3 -m pip uninstall kaldi_native_io
+          sudo python3 -m pip uninstall -y kaldi-native-io
           pip list
+          sudo rm -rf build
 
       - name: Install from wheel
         shell: bash
