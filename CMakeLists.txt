@@ -32,6 +32,8 @@ elseif(NOT CMAKE_BUILD_TYPE IN_LIST ALLOWABLE_BUILD_TYPES)
     choose one from ${ALLOWABLE_BUILD_TYPES}")
 endif()
 
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
 option(KALDI_NATIVE_IO_BUILD_TESTS "Whether to build tests or not" OFF)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -41,13 +43,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(BUILD_RPATH_USE_ORIGIN TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 if(NOT APPLE)
-  set(CMAKE_INSTALL_RPATH "$ORIGIN")
-  set(CMAKE_BUILD_RPATH "$ORIGIN")
+  set(kaldi_native_io_rpath_origin "$ORIGIN")
 else()
-  set(CMAKE_INSTALL_RPATH "@loader_path")
-  set(CMAKE_BUILD_RPATH "@loader_path")
+  set(kaldi_native_io_rpath_origin "@loader_path")
 endif()
+
+set(CMAKE_INSTALL_RPATH ${kaldi_native_io_rpath_origin})
+set(CMAKE_BUILD_RPATH ${kaldi_native_io_rpath_origin})
 
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
 
@@ -65,4 +69,28 @@ if(KALDI_NATIVE_IO_BUILD_TESTS)
   include(googletest)
 endif()
 
+message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+
+include(GNUInstallDirs)
+
+message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+
 add_subdirectory(kaldi_native_io)
+
+configure_file(
+  ${PROJECT_SOURCE_DIR}/cmake/kaldi_native_ioConfigVersion.cmake.in
+  ${PROJECT_BINARY_DIR}/kaldi_native_ioConfigVersion.cmake
+  @ONLY
+)
+
+configure_file(
+  ${PROJECT_SOURCE_DIR}/cmake/kaldi_native_ioConfig.cmake.in
+  ${PROJECT_BINARY_DIR}/kaldi_native_ioConfig.cmake
+  @ONLY
+)
+
+install(FILES
+  ${PROJECT_BINARY_DIR}/kaldi_native_ioConfigVersion.cmake
+  ${PROJECT_BINARY_DIR}/kaldi_native_ioConfig.cmake
+  DESTINATION share/cmake/kaldi_native_io
+)

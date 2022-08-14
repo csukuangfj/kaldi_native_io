@@ -24,3 +24,26 @@ if(APPLE)
       LINK_FLAGS "-undefined dynamic_lookup"
   )
 endif()
+
+file(MAKE_DIRECTORY
+  DESTINATION
+    ${PROJECT_BINARY_DIR}/include/kaldi_native_io/csrc
+)
+
+file(GLOB_RECURSE all_headers *.h)
+
+message(STATUS "All headers: ${all_headers}")
+
+file(COPY
+  ${all_headers}
+  DESTINATION
+    ${PROJECT_BINARY_DIR}/include/kaldi_native_io/csrc
+)
+
+install(TARGETS kaldi_native_io_core
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(FILES ${all_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kaldi_native_io/csrc
+)
