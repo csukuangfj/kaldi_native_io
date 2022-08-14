@@ -70,3 +70,8 @@ from .table_types import (
     TokenVectorWriter,
     TokenWriter,
 )
+
+from pathlib import Path as _Path
+
+cmake_prefix_path = _Path(__file__).parent / "share" / "cmake"
+del _Path
