@@ -16,7 +16,7 @@
 
 # refer to https://github.com/actions/starter-workflows/pull/47/files
 
-name: build_conda_ubuntu
+name: build_conda_macos
 
 on:
   push:
@@ -27,7 +27,7 @@ on:
 
 jobs:
   build_conda_ubuntu:
-    runs-on: ubuntu-18.04
+    runs-on: macos-10.15
     strategy:
       fail-fast: false
       matrix:
@@ -63,7 +63,6 @@ jobs:
           which conda
           conda env list
           conda info
-          nproc
 
       - name: Build kaldi_native_io
         shell: bash -l {0}
@@ -74,10 +73,10 @@ jobs:
 
       - name: Display generated files
         run: |
-          ls -lh /usr/share/miniconda/envs/kaldi_native_io/conda-bld/linux-64
+          ls -lh /usr/local/miniconda/envs/kaldi_native_io/conda-bld/osx-64
 
       - name: Upload generated files
         uses: actions/upload-artifact@v2
         with:
           name: cpu-python-${{ matrix.python-version }}-${{ matrix.os }}
-          path: /usr/share/miniconda/envs/kaldi_native_io/conda-bld/linux-64/*.tar.bz2
+          path: /usr/local/miniconda/envs/kaldi_native_io/conda-bld/osx-64/*.tar.bz2
