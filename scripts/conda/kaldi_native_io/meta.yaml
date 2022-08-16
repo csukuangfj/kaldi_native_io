@@ -10,6 +10,10 @@ build:
   string: py{{ environ.get('KALDI_NATIVE_IO_PYTHON_VERSION') }}
 
 requirements:
+  build:
+    - {{ compiler('c') }} # [win]
+    - {{ compiler('cxx') }} # [win]
+
   host:
     - cmake=3.18
     - python
