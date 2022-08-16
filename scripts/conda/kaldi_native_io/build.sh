@@ -22,7 +22,6 @@ python3 --version
 
 echo "CC is: $CC"
 echo "GCC is: $GCC"
-echo "gcc version: $($CC --version)"
 
 export KALDI_NATIVE_IO_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release"
 export KALDI_NATIVE_IO_MAKE_ARGS="-j"
