@@ -64,8 +64,8 @@ jobs:
 
       - name: Build kaldi_native_io
         shell: bash -l {0}
-        env:
-          KALDI_NATIVE_IO_CONDA_TOKEN: ${{ secrets.KALDI_NATIVE_IO_CONDA_TOKEN }}
+        # env:
+        #   KALDI_NATIVE_IO_CONDA_TOKEN: ${{ secrets.KALDI_NATIVE_IO_CONDA_TOKEN }}
         run: |
           ./scripts/build_conda.sh
 
