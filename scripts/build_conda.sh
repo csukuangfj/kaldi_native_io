@@ -33,7 +33,7 @@ cd $kaldi_native_io_dir
 export KALDI_NATIVE_IO_ROOT_DIR=$kaldi_native_io_dir
 echo "KALDI_NATIVE_IO_ROOT_DIR: $KALDI_NATIVE_IO_ROOT_DIR"
 
-KALDI_NATIVE_IO_PYTHON_VERSION=$(python3 -c "import sys; print(sys.version[:3])")
+KALDI_NATIVE_IO_PYTHON_VERSION=$(python3 -c "import sys; print('.'.join(sys.version.split('.')[:2]))")
 
 # Example value: 3.8
 export KALDI_NATIVE_IO_PYTHON_VERSION
