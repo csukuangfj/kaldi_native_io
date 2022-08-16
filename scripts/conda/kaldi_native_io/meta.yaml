@@ -8,6 +8,7 @@ source:
 build:
   number: 0
   string: py{{ environ.get('KALDI_NATIVE_IO_PYTHON_VERSION') }}
+  script: python setup.py install --single-version-externally-managed --record=record.txt
 
 requirements:
   build:
@@ -15,7 +16,7 @@ requirements:
     - {{ compiler('cxx') }} # [win]
 
   host:
-    - cmake=3.18
+    - cmake
     - python
 
   run:
