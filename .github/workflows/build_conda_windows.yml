@@ -20,8 +20,6 @@ name: build_conda_windows
 
 on:
   push:
-    branches:
-      - windows
     tags:
       - '*'
 
@@ -31,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
 
     steps:
       # refer to https://github.com/actions/checkout
@@ -82,5 +80,5 @@ jobs:
       - name: Upload generated files
         uses: actions/upload-artifact@v2
         with:
-          name: python-${{ matrix.python-version }}-${{ matrix.os }}
+          name: python-${{ matrix.python-version }}-windows-2019
           path: c:/Miniconda/envs/kaldi_native_io/conda-bld/win-64/*.tar.bz2
