@@ -54,6 +54,7 @@ jobs:
           cmake --build . --target ALL_BUILD --config Release
 
       - name: Test
+        if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')
         shell: bash
         run: |
           cd build
