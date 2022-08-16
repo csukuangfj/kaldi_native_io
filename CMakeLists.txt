@@ -75,6 +75,7 @@ if(WIN32)
     /wd4018
     /wd4244
     /wd4267
+    /wd4996
   )
 
   message(STATUS "Disabled warnings: ${disabled_warnings}")

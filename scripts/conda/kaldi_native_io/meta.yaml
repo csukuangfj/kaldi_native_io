@@ -17,8 +17,11 @@ requirements:
   host:
     - cmake=3.18
     - python
+    - numpy
+
   run:
     - python
+    - numpy
 
 about:
   home: https://github.com/csukuangfj/kaldi_native_io
