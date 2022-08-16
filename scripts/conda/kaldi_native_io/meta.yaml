@@ -8,7 +8,7 @@ source:
 build:
   number: 0
   string: py{{ environ.get('KALDI_NATIVE_IO_PYTHON_VERSION') }}
-  script: python setup.py install --single-version-externally-managed --record=record.txt
+  script: {{ PYTHON }} setup.py install --single-version-externally-managed --record=record.txt
 
 requirements:
   build:
@@ -16,6 +16,8 @@ requirements:
     - {{ compiler('cxx') }} # [win]
 
   host:
+    - anaconda-client
+    - conda-build
     - cmake
     - python
 
