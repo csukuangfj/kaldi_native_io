@@ -594,11 +594,13 @@ class TokenVectorHolder {
   TokenVectorHolder() {}
 
   static bool Write(std::ostream &os, bool, const T &t) {  // ignore binary-mode
+    std::string sep = "";
     for (std::vector<std::string>::const_iterator iter = t.begin();
          iter != t.end(); ++iter) {
       KALDIIO_ASSERT(IsToken(*iter));  // make sure it's whitespace-free,
       // printable and nonempty.
-      os << *iter << ' ';
+      os << sep <<  *iter;
+      sep = " ";
     }
     os << '\n';
     return os.good();
