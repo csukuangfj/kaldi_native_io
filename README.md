@@ -52,6 +52,12 @@ is provided to read ark/scp files from Kaldi in Python.
 pip install --verbose kaldi_native_io
 ```
 
+or
+
+```bash
+conda install -c kaldi_native_io kaldi_native_io
+```
+
 # Usage
 
 ## Table readers and writers
