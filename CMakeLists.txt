@@ -18,7 +18,8 @@ cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 
 project(kaldi_native_io CXX)
 
-set(KALDI_NATIVE_IO_VERSION "1.11")
+# Remember to change scripts/conda/kaldi_native_io/meta.yaml
+set(KALDI_NATIVE_IO_VERSION "1.12")
 
 if(UNIX AND NOT APPLE)
   if(NOT DEFINED _GLIBCXX_USE_CXX11_ABI)
