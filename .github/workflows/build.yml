@@ -57,5 +57,9 @@ jobs:
       - name: Test
         shell: bash
         run: |
+          export PYTHONPATH=$PWD/kaldi_native_io/python:$PYTHONPATH
+          export PYTHONPATH=$PWD/build/lib:$PYTHONPATH
+          export PYTHONPATH=$PWD/build/lib/Release:$PYTHONPATH
+
           cd build
           ctest -C Release --output-on-failure
