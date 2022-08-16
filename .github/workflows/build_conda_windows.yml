@@ -20,8 +20,6 @@ name: build_conda_windows
 
 on:
   push:
-    branches:
-      - fix-conda
     tags:
       - '*'
 
