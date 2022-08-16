@@ -16,7 +16,7 @@
 
 # refer to https://github.com/actions/starter-workflows/pull/47/files
 
-name: build_conda_ubuntu
+name: build_conda_windows
 
 on:
   push:
@@ -24,8 +24,8 @@ on:
       - '*'
 
 jobs:
-  build_conda_ubuntu:
-    runs-on: ubuntu-18.04
+  build_conda_windows:
+    runs-on: windows-2019
     strategy:
       fail-fast: false
       matrix:
@@ -61,7 +61,7 @@ jobs:
           which conda
           conda env list
           conda info
-          nproc
+          which python
 
       - name: Build kaldi_native_io
         shell: bash -l {0}
@@ -71,11 +71,14 @@ jobs:
           ./scripts/build_conda.sh
 
       - name: Display generated files
+        shell: bash -l {0}
         run: |
-          ls -lh /usr/share/miniconda/envs/kaldi_native_io/conda-bld/linux-64
+          ls -lh /c/Miniconda/envs/kaldi_native_io/conda-bld
+          ls -lh /c/Miniconda/envs/kaldi_native_io/conda-bld/*/*
+          ls -lh /c/Miniconda/envs/kaldi_native_io/conda-bld/win-64/*
 
       - name: Upload generated files
         uses: actions/upload-artifact@v2
         with:
-          name: cpu-python-${{ matrix.python-version }}-ubuntu-18.04
-          path: /usr/share/miniconda/envs/kaldi_native_io/conda-bld/linux-64/*.tar.bz2
+          name: python-${{ matrix.python-version }}-windows-2019
+          path: c:/Miniconda/envs/kaldi_native_io/conda-bld/win-64/*.tar.bz2

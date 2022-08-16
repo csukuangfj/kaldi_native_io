@@ -9,6 +9,12 @@
 
 #include <string.h>
 
+#ifdef _MSC_VER
+#include <fcntl.h>
+#include <io.h>
+#include <stdio.h>
+#endif
+
 #include "kaldi_native_io/csrc/io-funcs.h"
 #include "kaldi_native_io/csrc/kaldi-pipebuf.h"
 #include "kaldi_native_io/csrc/kaldi-table.h"
@@ -17,6 +23,12 @@
 #include "kaldi_native_io/csrc/text-utils.h"
 
 #define MapOsPath(x) x
+
+#if defined(_MSC_VER)
+static FILE *popen(const char *command, const char *mode) {
+  return _popen(command, mode);
+}
+#endif  // _MSC_VER
 
 namespace kaldiio {
 
