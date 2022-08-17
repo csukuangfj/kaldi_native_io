@@ -40,6 +40,7 @@ jobs:
         run: |
           python3 -c "import sys; print(sys.version)"
           which python3
+          ls -lh /Users/runner/hostedtoolcache/Python/*/*
 
       - name: Install kaldi_native_io
         shell: bash -l {0}
