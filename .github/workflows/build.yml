@@ -32,7 +32,7 @@ jobs:
       - name: Install Python dependencies
         shell: bash
         run: |
-          python3 -m pip install --upgrade numpy
+          python -m pip install --upgrade numpy
 
       - name: Configure Cmake
         shell: bash
