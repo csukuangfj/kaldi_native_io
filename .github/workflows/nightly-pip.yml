@@ -25,10 +25,6 @@ jobs:
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
 
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
       # see https://github.com/microsoft/setup-msbuild
       - name: Add msbuild to PATH
         if: startsWith(matrix.os, 'windows')
