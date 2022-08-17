@@ -46,6 +46,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda install -y -c kaldi_native_io kaldi_native_io
+          conda info
 
       - name: Display kaldi_native_io version
         shell: bash
