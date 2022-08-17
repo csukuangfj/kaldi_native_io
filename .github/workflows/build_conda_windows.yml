@@ -20,6 +20,8 @@ name: build_conda_windows
 
 on:
   push:
+    branch:
+      - nightly
     tags:
       - '*'
 
@@ -67,6 +69,7 @@ jobs:
         shell: bash -l {0}
         env:
           KALDI_NATIVE_IO_CONDA_TOKEN: ${{ secrets.KALDI_NATIVE_IO_CONDA_TOKEN }}
+          KALDI_NATIVE_IO_PYTHON_VERSION: ${{ matrix.python-version }}
         run: |
           ./scripts/build_conda.sh
 
