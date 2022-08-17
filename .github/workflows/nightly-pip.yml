@@ -52,5 +52,6 @@ jobs:
       - name: Display kaldi_native_io version
         shell: bash
         run: |
+          cd /tmp
           python -c "import kaldi_native_io; print(kaldi_native_io.__version__)"
           python -c "import kaldi_native_io; print(kaldi_native_io.__file__)"
