@@ -48,10 +48,13 @@ jobs:
         run: |
           conda install -y -c kaldi_native_io kaldi_native_io
           conda info
+          conda list
 
       - name: Display kaldi_native_io version
         shell: bash
         run: |
+          python --version
+          which python
           cd /tmp
           python -c "import kaldi_native_io; print(kaldi_native_io.__file__)"
           python -c "import kaldi_native_io; print(dir(kaldi_native_io)); print(kaldi_native_io.__version__)"
