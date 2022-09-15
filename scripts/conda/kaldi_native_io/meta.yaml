@@ -1,6 +1,6 @@
 package:
   name: kaldi_native_io
-  version: "1.13.1"
+  version: "1.14"
 
 source:
   path: "{{ environ.get('KALDI_NATIVE_IO_ROOT_DIR') }}"
