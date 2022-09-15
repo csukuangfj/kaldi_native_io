@@ -15,11 +15,18 @@ endif()
 
 cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 
-
 project(kaldi_native_io CXX)
 
 # Remember to change scripts/conda/kaldi_native_io/meta.yaml
-set(KALDI_NATIVE_IO_VERSION "1.12")
+set(KALDI_NATIVE_IO_VERSION "1.13")
+
+if(CMAKE_TOOLCHAIN_FILE)
+  set(_BUILD_PYTHON OFF)
+  set(_BUILD_TESTS OFF)
+else()
+  set(_BUILD_PYTHON ON)
+  set(_BUILD_TESTS ON)
+endif()
 
 if(UNIX AND NOT APPLE)
   if(NOT DEFINED _GLIBCXX_USE_CXX11_ABI)
@@ -43,7 +50,8 @@ endif()
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
-option(KALDI_NATIVE_IO_BUILD_TESTS "Whether to build tests or not" OFF)
+option(KALDI_NATIVE_IO_BUILD_TESTS "Whether to build tests or not" ${_BUILD_TESTS})
+option(KALDI_NATIVE_IO_BUILD_PYTHON "Whether to build Python extension" ${_BUILD_PYTHON})
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -86,7 +94,10 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
-include(pybind11)
+if(KALDI_NATIVE_IO_BUILD_PYTHON)
+  include(pybind11)
+endif()
+
 if(KALDI_NATIVE_IO_BUILD_TESTS)
   enable_testing()
   include(googletest)
