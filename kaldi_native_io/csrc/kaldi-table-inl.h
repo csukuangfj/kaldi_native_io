@@ -84,7 +84,7 @@ class SequentialTableReaderImplBase {
   SequentialTableReaderImplBase() {}
   virtual ~SequentialTableReaderImplBase() {}  // throws.
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(SequentialTableReaderImplBase);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(SequentialTableReaderImplBase)
 };
 
 // This is the implementation for SequentialTableReader
@@ -1013,7 +1013,7 @@ class TableWriterImplBase {
   TableWriterImplBase() {}
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(TableWriterImplBase);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(TableWriterImplBase)
 };
 
 // The implementation of TableWriter we use when writing directly

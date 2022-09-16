@@ -43,7 +43,7 @@ class Semaphore {
 
   std::mutex mutex_;
   std::condition_variable condition_variable_;
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(Semaphore);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(Semaphore)
 };
 
 }  // namespace kaldiio

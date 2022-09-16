@@ -113,7 +113,7 @@ class BasicHolder {
   ~BasicHolder() {}
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicHolder)
 
   T t_;
 };
@@ -235,7 +235,7 @@ class BasicVectorHolder {
   ~BasicVectorHolder() {}
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicVectorHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicVectorHolder)
   T t_;
 };
 
@@ -385,7 +385,7 @@ class BasicVectorVectorHolder {
   ~BasicVectorVectorHolder() {}
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicVectorVectorHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicVectorVectorHolder)
   T t_;
 };
 
@@ -529,7 +529,7 @@ class BasicPairVectorHolder {
   ~BasicPairVectorHolder() {}
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicPairVectorHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicPairVectorHolder)
   T t_;
 };
 
@@ -583,7 +583,7 @@ class TokenHolder {
   }
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(TokenHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(TokenHolder)
   T t_;
 };
 
@@ -644,7 +644,7 @@ class TokenVectorHolder {
   }
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(TokenVectorHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(TokenVectorHolder)
   T t_;
 };
 
@@ -727,7 +727,7 @@ class KaldiObjectHolder {
   ~KaldiObjectHolder() { delete t_; }
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(KaldiObjectHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(KaldiObjectHolder)
   T *t_;
 };
 
@@ -773,7 +773,7 @@ class HtkMatrixHolder {
   }
   // Default destructor.
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(HtkMatrixHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(HtkMatrixHolder)
   T t_;
 };
 

@@ -103,7 +103,7 @@ class VectorBase {
   Real *data_;
   /// dimension of vector
   MatrixIndexT dim_;
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(VectorBase);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(VectorBase)
 };
 
 /** @brief A class representing a vector.

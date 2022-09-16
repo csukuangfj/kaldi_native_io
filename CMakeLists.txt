@@ -34,7 +34,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall ")
 if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Werror -Wextra -g ")
+  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Werror -Wextra -Wpedantic -pedantic-errors -g ")
 endif()
 
 set(ALLOWABLE_BUILD_TYPES Debug Release RelWithDebInfo MinSizeRel)

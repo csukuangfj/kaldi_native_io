@@ -132,7 +132,7 @@ class Output {
  private:
   OutputImplBase *impl_;  // non-NULL if open.
   std::string filename_;
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(Output);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(Output)
 };
 
 // bool binary_in;
@@ -204,7 +204,7 @@ class Input {
   bool OpenInternal(const std::string &rxfilename, bool file_binary,
                     bool *contents_binary);
   InputImplBase *impl_;
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(Input);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(Input)
 };
 
 template <class C>

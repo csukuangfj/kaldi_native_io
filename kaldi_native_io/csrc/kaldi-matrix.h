@@ -158,7 +158,7 @@ class MatrixBase {
   MatrixIndexT stride_;
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(MatrixBase);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(MatrixBase)
 };
 
 /// A class for storing matrices.

@@ -68,7 +68,7 @@ class PosteriorHolder {
   }
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(PosteriorHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(PosteriorHolder)
   T t_;
 };
 
@@ -108,7 +108,7 @@ class GaussPostHolder {
   }
 
  private:
-  KALDIIO_DISALLOW_COPY_AND_ASSIGN(GaussPostHolder);
+  KALDIIO_DISALLOW_COPY_AND_ASSIGN(GaussPostHolder)
   T t_;
 };
 
