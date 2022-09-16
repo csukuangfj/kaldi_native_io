@@ -25,7 +25,7 @@ void PybindKaldiVectorTpl(py::module &m, const std::string &class_name,
             for (int32_t i = 0; i != ans->Dim(); ++i) {
               ans->Data()[i] = array.at(i);
             }
-            return std::move(ans);
+            return ans;
           }))
       .def("numpy",
            [](py::object obj) {

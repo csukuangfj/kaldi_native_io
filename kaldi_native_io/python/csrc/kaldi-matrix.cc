@@ -50,7 +50,7 @@ void PybindKaldiMatrixTpl(py::module &m, const std::string &class_name,
                 ans->operator()(r, c) = array.at(r, c);
               }
             }
-            return std::move(ans);
+            return ans;
           }))
       .def_property_readonly("shape",
                              [](const PyClass &self) -> py::tuple {
