@@ -32,6 +32,11 @@ if(DEFINED _GLIBCXX_USE_CXX11_ABI)
   set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=${_GLIBCXX_USE_CXX11_ABI}")
 endif()
 
+set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall ")
+if(CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Werror -Wextra -Wpedantic -pedantic-errors -g ")
+endif()
+
 set(ALLOWABLE_BUILD_TYPES Debug Release RelWithDebInfo MinSizeRel)
 set(DEFAULT_BUILD_TYPE "Release")
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "${ALLOWABLE_BUILD_TYPES}")
@@ -77,9 +82,33 @@ endif()
 if(WIN32)
   set(disabled_warnings
     /wd4018
+    /wd4061
+    /wd4127
+    /wd4191
+    /wd4242
     /wd4244
     /wd4267
+    /wd4355
+    /wd4365
+    /wd4371
+    /wd4456
+    /wd4458
+    /wd4464
+    /wd4514
+    /wd4623
+    /wd4625
+    /wd4626
+    /wd4668
+    /wd4686
+    /wd4710
+    /wd4711
+    /wd4820
+    /wd4868
     /wd4996
+    /wd5027
+    /wd5039
+    /wd5045
+    /wd5219
   )
 
   message(STATUS "Disabled warnings: ${disabled_warnings}")

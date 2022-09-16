@@ -19,10 +19,7 @@ class Logger {
  public:
   Logger(const char *filename, const char *func_name, uint32_t line_num,
          LogLevel level)
-      : filename_(filename),
-        func_name_(func_name),
-        line_num_(line_num),
-        level_(level) {
+      : level_(level) {
     os_ << filename << ":" << func_name << ":" << line_num << "\n";
     switch (level_) {
       case LogLevel::kInfo:
@@ -51,15 +48,12 @@ class Logger {
 
  private:
   std::ostringstream os_;
-  const char *filename_;
-  const char *func_name_;
-  uint32_t line_num_;
   LogLevel level_;
 };
 
 class Voidifier {
  public:
-  void operator&(const Logger &)const {}
+  void operator&(const Logger &) const {}
 };
 
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__) || \

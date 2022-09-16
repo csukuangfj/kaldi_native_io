@@ -287,8 +287,8 @@ void WaveData::Read(std::istream &is) {
 
   // The matrix is arranged row per channel, column per sample.
   data_.Resize(header.NumChannels(), buffer.size() / header.BlockAlign());
-  for (uint32 i = 0; i < data_.NumCols(); ++i) {
-    for (uint32 j = 0; j < data_.NumRows(); ++j) {
+  for (int32 i = 0; i < data_.NumCols(); ++i) {
+    for (int32 j = 0; j < data_.NumRows(); ++j) {
       int16 k = *data_ptr++;
       if (header.ReverseBytes()) KALDIIO_SWAP2(k);
       data_(j, i) = k;

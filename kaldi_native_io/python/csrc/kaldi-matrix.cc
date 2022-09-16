@@ -22,7 +22,7 @@ void PybindKaldiMatrixTpl(py::module &m, const std::string &class_name,
            [](const PyClass &self) -> std::string {
              std::ostringstream os;
              bool binary = false;
-             self.Write(os, false);
+             self.Write(os, binary);
              return os.str();
            })
       .def_static(
@@ -50,7 +50,7 @@ void PybindKaldiMatrixTpl(py::module &m, const std::string &class_name,
                 ans->operator()(r, c) = array.at(r, c);
               }
             }
-            return std::move(ans);
+            return ans;
           }))
       .def_property_readonly("shape",
                              [](const PyClass &self) -> py::tuple {
