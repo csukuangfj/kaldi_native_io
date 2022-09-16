@@ -35,6 +35,7 @@ class BuildExtension(build_ext):
         os.makedirs(self.build_lib, exist_ok=True)
 
         kaldi_native_io_dir = os.path.dirname(os.path.abspath(__file__))
+        install_dir = Path(self.build_lib).resolve() / "kaldi_native_io"
 
         cmake_args = os.environ.get("KALDI_NATIVE_IO_CMAKE_ARGS", "")
         make_args = os.environ.get("KALDI_NATIVE_IO_MAKE_ARGS", "")
@@ -44,7 +45,7 @@ class BuildExtension(build_ext):
             cmake_args = "-DCMAKE_BUILD_TYPE=Release"
 
         extra_cmake_args = " -DKALDI_NATIVE_IO_BUILD_TESTS=OFF "
-        extra_cmake_args += f" -DCMAKE_INSTALL_PREFIX={Path(self.build_lib).resolve()}/kaldi_native_io "  # noqa
+        extra_cmake_args += f" -DCMAKE_INSTALL_PREFIX={install_dir} "
 
         if make_args == "" and system_make_args == "":
             print("For fast compilation, run:")
@@ -62,7 +63,6 @@ class BuildExtension(build_ext):
         if is_windows():
             build_cmd = f"""
                 cmake {cmake_args} -B {self.build_temp} -S {kaldi_native_io_dir}
-                cmake --build {self.build_temp} --target _kaldi_native_io --config Release -- -m
                 cmake --build {self.build_temp} --target install --config Release -- -m
             """
             print(f"build command is:\n{build_cmd}")
@@ -74,16 +74,10 @@ class BuildExtension(build_ext):
                 raise Exception("Failed to configure kaldi_native_io")
 
             ret = os.system(
-                f"cmake --build {self.build_temp} --target _kaldi_native_io --config Release -- -m"
-            )
-            if ret != 0:
-                raise Exception("Failed to build kaldi_native_io")
-
-            ret = os.system(
                 f"cmake --build {self.build_temp} --target install --config Release -- -m"
             )
             if ret != 0:
-                raise Exception("Failed to install kaldi_native_io")
+                raise Exception("Failed to build and install kaldi_native_io")
         else:
             build_cmd = f"""
                 cd {self.build_temp}
