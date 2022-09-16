@@ -92,7 +92,8 @@ bool ExtractRangeSpecifier(const std::string &rxfilename_with_range,
 /// The generic version of this function just fails; we overload the template
 /// whenever we need it for a specific class.
 template <class T>
-bool ExtractObjectRange(const T &input, const std::string &range, T *output) {
+bool ExtractObjectRange(const T & /*input*/, const std::string & /*range*/,
+                        T * /*output*/) {
   KALDIIO_ERR << "Ranges not supported for objects of this type.";
   return false;
 }

@@ -251,13 +251,14 @@ class StandardOutputImpl : public OutputImplBase {
  public:
   StandardOutputImpl() : is_open_(false) {}
 
-  virtual bool Open(const std::string &filename, bool binary) {
+  virtual bool Open(const std::string & /*filename*/, bool binary) {
     if (is_open_)
       KALDIIO_ERR << "StandardOutputImpl::Open(), "
                      "open called on already open file.";
 #ifdef _MSC_VER
     _setmode(_fileno(stdout), binary ? _O_BINARY : _O_TEXT);
 #endif
+    (void)binary;
     is_open_ = std::cout.good();
     return is_open_;
   }
@@ -525,7 +526,7 @@ class StandardInputImpl : public InputImplBase {
  public:
   StandardInputImpl() : is_open_(false) {}
 
-  virtual bool Open(const std::string &filename, bool binary) {
+  virtual bool Open(const std::string & /*filename*/, bool binary) {
     if (is_open_)
       KALDIIO_ERR << "StandardInputImpl::Open(), "
                      "open called on already open file.";
@@ -533,6 +534,7 @@ class StandardInputImpl : public InputImplBase {
 #ifdef _MSC_VER
     _setmode(_fileno(stdin), binary ? _O_BINARY : _O_TEXT);
 #endif
+    (void)binary;
     return true;  // Don't check good() because would be false if
     // eof, which may be valid input.
   }

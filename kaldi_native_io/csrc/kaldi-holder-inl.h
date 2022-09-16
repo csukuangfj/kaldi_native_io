@@ -104,7 +104,8 @@ class BasicHolder {
 
   void Swap(BasicHolder<T> *other) { std::swap(t_, other->t_); }
 
-  bool ExtractRange(const BasicHolder<T> &other, const std::string &range) {
+  bool ExtractRange(const BasicHolder<T> & /*other*/,
+                    const std::string & /*range*/) {
     KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
     return false;
   }
@@ -225,8 +226,8 @@ class BasicVectorHolder {
 
   void Swap(BasicVectorHolder<BasicType> *other) { t_.swap(other->t_); }
 
-  bool ExtractRange(const BasicVectorHolder<BasicType> &other,
-                    const std::string &range) {
+  bool ExtractRange(const BasicVectorHolder<BasicType> & /*other*/,
+                    const std::string & /*range*/) {
     KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
     return false;
   }
@@ -375,8 +376,8 @@ class BasicVectorVectorHolder {
 
   void Swap(BasicVectorVectorHolder<BasicType> *other) { t_.swap(other->t_); }
 
-  bool ExtractRange(BasicVectorVectorHolder<BasicType> &other,
-                    const std::string &range) {
+  bool ExtractRange(BasicVectorVectorHolder<BasicType> & /*other*/,
+                    const std::string & /*range*/) {
     KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
     return false;
   }
@@ -519,8 +520,8 @@ class BasicPairVectorHolder {
 
   void Swap(BasicPairVectorHolder<BasicType> *other) { t_.swap(other->t_); }
 
-  bool ExtractRange(const BasicPairVectorHolder<BasicType> &other,
-                    const std::string &range) {
+  bool ExtractRange(const BasicPairVectorHolder<BasicType> & /*other*/,
+                    const std::string & /*range*/) {
     KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
     return false;
   }
@@ -575,7 +576,8 @@ class TokenHolder {
 
   void Swap(TokenHolder *other) { t_.swap(other->t_); }
 
-  bool ExtractRange(const TokenHolder &other, const std::string &range) {
+  bool ExtractRange(const TokenHolder & /*other*/,
+                    const std::string & /*range*/) {
     KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
     return false;
   }
@@ -599,7 +601,7 @@ class TokenVectorHolder {
          iter != t.end(); ++iter) {
       KALDIIO_ASSERT(IsToken(*iter));  // make sure it's whitespace-free,
       // printable and nonempty.
-      os << sep <<  *iter;
+      os << sep << *iter;
       sep = " ";
     }
     os << '\n';
@@ -635,7 +637,8 @@ class TokenVectorHolder {
 
   void Swap(TokenVectorHolder *other) { t_.swap(other->t_); }
 
-  bool ExtractRange(const TokenVectorHolder &other, const std::string &range) {
+  bool ExtractRange(const TokenVectorHolder & /*other*/,
+                    const std::string & /*range*/) {
     KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
     return false;
   }
@@ -763,7 +766,8 @@ class HtkMatrixHolder {
     std::swap(t_.second, other->t_.second);
   }
 
-  bool ExtractRange(const HtkMatrixHolder &other, const std::string &range) {
+  bool ExtractRange(const HtkMatrixHolder & /*other*/,
+                    const std::string & /*range*/) {
     KALDIIO_ERR << "ExtractRange is not defined for this type of holder.";
     return false;
   }

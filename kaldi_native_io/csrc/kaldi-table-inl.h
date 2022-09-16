@@ -480,8 +480,8 @@ class SequentialTableReaderScriptImpl
                      // object.
     kFileStart,      // no  no  yes no            We just opened the .scp file
                      // (we'll never be in this
-                 //                           state when a user-visible function
-                 //                           is called.)
+    //                           state when a user-visible function
+    //                           is called.)
     kEof,    // no  no  no  no            We did Next() and found eof in script
              // file.
     kError,  // no  no  no  no            Error reading or parsing script file.
@@ -748,7 +748,7 @@ class SequentialTableReaderBackgroundImpl
   // This function ignores the rxfilename argument.
   // We use the same function signature as the regular Open(),
   // for convenience.
-  virtual bool Open(const std::string &rxfilename) {
+  virtual bool Open(const std::string & /*rxfilename*/) {
     KALDIIO_ASSERT(base_reader_ != NULL &&
                    base_reader_->IsOpen());  // or code error.
     {
@@ -813,7 +813,7 @@ class SequentialTableReaderBackgroundImpl
     if (key_.empty()) KALDIIO_ERR << "Calling Value() at the wrong time.";
     return holder_.Value();
   }
-  void SwapHolder(Holder *other_holder) {
+  void SwapHolder(Holder * /*other_holder*/) {
     KALDIIO_ERR << "SwapHolder() should not be called on this class.";
   }
   virtual void FreeCurrent() {
@@ -1029,6 +1029,7 @@ class TableWriterArchiveImpl : public TableWriterImplBase<Holder> {
         break;
       case kWriteError:
         KALDIIO_ERR << "Opening stream, already open with write error.";
+        break;
       case kOpen:
       default:
         if (!Close())  // throw because this error may not have been previously
@@ -1323,6 +1324,7 @@ class TableWriterBothImpl : public TableWriterImplBase<Holder> {
         break;
       case kWriteError:
         KALDIIO_ERR << "Opening stream, already open with write error.";
+        break;
       case kOpen:
       default:
         if (!Close())  // throw because this error may not have been previously
@@ -1742,6 +1744,7 @@ class RandomAccessTableReaderScriptImpl
       case kNotReadScript:
         KALDIIO_ERR << "HasKey called on RandomAccessTableReader object that is"
                        " not open.";
+        break;
       case kHaveObject:
         if (key == key_ && range_.empty()) return true;
         break;

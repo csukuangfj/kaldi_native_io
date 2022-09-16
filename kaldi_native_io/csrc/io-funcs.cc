@@ -121,7 +121,7 @@ void CheckToken(const char *token) {
   }
 }
 
-void WriteToken(std::ostream &os, bool binary, const char *token) {
+void WriteToken(std::ostream &os, bool /*binary*/, const char *token) {
   // binary mode is ignored;
   // we use space as termination character in either case.
   KALDIIO_ASSERT(token != NULL);
