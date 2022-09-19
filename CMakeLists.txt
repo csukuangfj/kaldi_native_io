@@ -18,7 +18,7 @@ cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 project(kaldi_native_io CXX)
 
 # Remember to change scripts/conda/kaldi_native_io/meta.yaml
-set(KALDI_NATIVE_IO_VERSION "1.15")
+set(KALDI_NATIVE_IO_VERSION "1.15.1")
 
 if(CMAKE_TOOLCHAIN_FILE)
   set(_BUILD_PYTHON OFF)
@@ -32,9 +32,9 @@ if(DEFINED _GLIBCXX_USE_CXX11_ABI)
   set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=${_GLIBCXX_USE_CXX11_ABI}")
 endif()
 
-set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall ")
+# set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall ")
 if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Werror -Wextra -Wpedantic -pedantic-errors -g ")
+  # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Werror -Wextra -Wpedantic -pedantic-errors -g ")
 endif()
 
 set(ALLOWABLE_BUILD_TYPES Debug Release RelWithDebInfo MinSizeRel)
