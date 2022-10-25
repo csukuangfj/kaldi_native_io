@@ -48,6 +48,26 @@ def test_read_write_single_vector():
 
     os.remove("binary.ark")
 
+    a = np.array([1, 2], dtype=np.float64)
+    b = np.array([10.5], dtype=np.float64)
+    with kaldi_native_io.DoubleVectorWriter("ark,scp:v.ark,v.scp") as ko:
+        ko.write("a", a)
+        ko["b"] = b
+
+    """
+    v.scp contains:
+      a v.ark:2
+      b v.ark:30
+    """
+    va = kaldi_native_io.DoubleVector.read("v.ark:2")
+    assert np.array_equal(va.numpy(), a)
+
+    vb = kaldi_native_io.DoubleVector.read("v.ark:30")
+    assert np.array_equal(vb.numpy(), b)
+
+    os.remove("v.scp")
+    os.remove("v.ark")
+
 
 def main():
     test_double_vector_writer()

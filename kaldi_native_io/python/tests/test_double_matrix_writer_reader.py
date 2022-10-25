@@ -80,6 +80,27 @@ def test_read_write_single_mat():
     os.remove("binary.ark")
     os.remove("matrix.txt")
 
+    a = np.array([[1, 2], [3, 4]], dtype=np.float64)
+    b = np.array([[10, 20, 30], [40, 50, 60]], dtype=np.float64)
+    with kaldi_native_io.DoubleMatrixWriter("ark,scp:m.ark,m.scp") as ko:
+        ko.write("a", a)
+        ko["b"] = b
+
+    """
+    m.scp contains:
+      a m.ark:2
+      b m.ark:51
+    """
+
+    m5 = kaldi_native_io.FloatMatrix.read("m.ark:2")
+    assert np.array_equal(m5.numpy(), a)
+
+    m6 = kaldi_native_io.FloatMatrix.read("m.ark:51")
+    assert np.array_equal(m6.numpy(), b)
+
+    os.remove("m.scp")
+    os.remove("m.ark")
+
 
 def main():
     test_double_matrix_writer()
