@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "kaldi_native_io/csrc/kaldi-io.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
 
 namespace kaldiio {
@@ -42,7 +43,21 @@ void PybindKaldiVectorTpl(py::module &m, const std::string &class_name,
                                1,  // num-axes
                                {v.Dim()},
                                {sizeof(Real)});  // strides (in chars)
-      });
+      })
+      .def_static(
+          "read",
+          [](const std::string &rxfilename) -> PyClass {
+            PyClass ans;
+            ReadKaldiObject(rxfilename, &ans);
+            return ans;
+          },
+          py::arg("rxfilename"))
+      .def(
+          "write",
+          [](const PyClass &self, const std::string &wxfilename, bool binary) {
+            WriteKaldiObject(self, wxfilename, binary);
+          },
+          py::arg("wxfilename"), py::arg("binary"));
 }
 
 void PybindKaldiVector(py::module &m) {

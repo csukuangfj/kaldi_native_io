@@ -38,10 +38,22 @@ def test_random_access_double_vector_reader():
         assert np.array_equal(ki["b"], np.array([10.5], dtype=np.float64))
 
 
+def test_read_write_single_vector():
+    a = np.array([1, 2], dtype=np.float64)
+    v = kaldi_native_io.DoubleVector(a)
+    v.write(wxfilename="binary.ark", binary=True)
+
+    b = kaldi_native_io.DoubleVector.read("binary.ark")
+    assert np.array_equal(a, b.numpy())
+
+    os.remove("binary.ark")
+
+
 def main():
     test_double_vector_writer()
     test_sequential_double_vector_reader()
     test_random_access_double_vector_reader()
+    test_read_write_single_vector()
 
     os.remove(f"{base}.scp")
     os.remove(f"{base}.ark")
