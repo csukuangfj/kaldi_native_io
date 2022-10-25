@@ -5,7 +5,9 @@ from _kaldi_native_io import (
     WaveData,
     WaveInfo,
     _DoubleMatrix as DoubleMatrix,
+    _DoubleVector as DoubleVector,
     _FloatMatrix as FloatMatrix,
+    _FloatVector as FloatVector,
     read_wave,
     read_wave_info,
 )

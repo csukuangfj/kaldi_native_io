@@ -188,3 +188,32 @@ def test_read_write_single_mat():
     os.remove("binary.ark")
     os.remove("matrix.txt")
 ```
+
+## Read and write a single vector
+
+See
+
+- <https://github.com/csukuangfj/kaldi_native_io/blob/master/kaldi_native_io/python/tests/test_float_vector_writer_reader.py>
+- <https://github.com/csukuangfj/kaldi_native_io/blob/master/kaldi_native_io/python/tests/test_double_vector_writer_reader.py>
+
+```python3
+def test_read_write_single_vector():
+    a = np.array([1, 2], dtype=np.float32)
+    v = kaldi_native_io.FloatVector(a)
+    v.write(wxfilename="binary.ark", binary=True)
+
+    b = kaldi_native_io.FloatVector.read("binary.ark")
+    assert np.array_equal(a, b.numpy())
+```
+
+```python3
+def test_read_write_single_vector():
+    a = np.array([1, 2], dtype=np.float64)
+    v = kaldi_native_io.DoubleVector(a)
+    v.write(wxfilename="binary.ark", binary=True)
+
+    b = kaldi_native_io.DoubleVector.read("binary.ark")
+    assert np.array_equal(a, b.numpy())
+
+    os.remove("binary.ark")
+```
