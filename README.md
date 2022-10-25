@@ -187,6 +187,27 @@ def test_read_write_single_mat():
 
     os.remove("binary.ark")
     os.remove("matrix.txt")
+
+    a = np.array([[1, 2], [3, 4]], dtype=np.float32)
+    b = np.array([[10, 20, 30], [40, 50, 60]], dtype=np.float32)
+    with kaldi_native_io.FloatMatrixWriter("ark,scp:m.ark,m.scp") as ko:
+        ko.write("a", a)
+        ko["b"] = b
+
+    """
+    m.scp contains:
+      a m.ark:2
+      b m.ark:35
+    """
+
+    m5 = kaldi_native_io.FloatMatrix.read("m.ark:2")
+    assert np.array_equal(m5.numpy(), a)
+
+    m6 = kaldi_native_io.FloatMatrix.read("m.ark:35")
+    assert np.array_equal(m6.numpy(), b)
+
+    os.remove("m.scp")
+    os.remove("m.ark")
 ```
 
 ## Read and write a single vector
@@ -204,6 +225,26 @@ def test_read_write_single_vector():
 
     b = kaldi_native_io.FloatVector.read("binary.ark")
     assert np.array_equal(a, b.numpy())
+
+    a = np.array([1, 2], dtype=np.float32)
+    b = np.array([10.5], dtype=np.float32)
+    with kaldi_native_io.FloatVectorWriter("ark,scp:v.ark,v.scp") as ko:
+        ko.write("a", a)
+        ko["b"] = b
+
+    """
+    v.scp contains:
+      a v.ark:2
+      b v.ark:22
+    """
+    va = kaldi_native_io.FloatVector.read("v.ark:2")
+    assert np.array_equal(va.numpy(), a)
+
+    vb = kaldi_native_io.FloatVector.read("v.ark:22")
+    assert np.array_equal(vb.numpy(), b)
+
+    os.remove("v.scp")
+    os.remove("v.ark")
 ```
 
 ```python3
@@ -216,4 +257,24 @@ def test_read_write_single_vector():
     assert np.array_equal(a, b.numpy())
 
     os.remove("binary.ark")
+
+    a = np.array([1, 2], dtype=np.float64)
+    b = np.array([10.5], dtype=np.float64)
+    with kaldi_native_io.DoubleVectorWriter("ark,scp:v.ark,v.scp") as ko:
+        ko.write("a", a)
+        ko["b"] = b
+
+    """
+    v.scp contains:
+      a v.ark:2
+      b v.ark:30
+    """
+    va = kaldi_native_io.DoubleVector.read("v.ark:2")
+    assert np.array_equal(va.numpy(), a)
+
+    vb = kaldi_native_io.DoubleVector.read("v.ark:30")
+    assert np.array_equal(vb.numpy(), b)
+
+    os.remove("v.scp")
+    os.remove("v.ark")
 ```
