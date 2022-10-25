@@ -36,10 +36,33 @@ def test_random_access_int32_vector_reader():
         assert ki["b"] == [100, 200, 300]
 
 
+def test_read_single_item():
+    a = [10, 20]
+    b = [100, 200, 300]
+
+    # You can also generate a text format by adding ",t" if you like
+    #  with kaldi_native_io.Int32VectorWriter("ark,scp,t:v.ark,v.scp") as ko:
+    with kaldi_native_io.Int32VectorWriter("ark,scp:v.ark,v.scp") as ko:
+        ko.write("a", a)
+        ko["b"] = b
+    """
+    v.scp contains:
+      a v.ark:2
+      b v.ark:21
+    """
+
+    va = kaldi_native_io.read_int32_vector("v.ark:2")
+    assert va == a
+
+    vb = kaldi_native_io.read_int32_vector("v.ark:21")
+    assert vb == b
+
+
 def main():
     test_int32_vector_writer()
     test_sequential_int32_vector_reader()
     test_random_access_int32_vector_reader()
+    test_read_single_item()
 
     os.remove(f"{base}.scp")
     os.remove(f"{base}.ark")

@@ -278,3 +278,30 @@ def test_read_write_single_vector():
     os.remove("v.scp")
     os.remove("v.ark")
 ```
+
+## Read a single int32 vector
+
+See <https://github.com/csukuangfj/kaldi_native_io/blob/master/kaldi_native_io/python/tests/test_int32_vector_writer_reader.py>
+
+```python3
+def test_read_single_item():
+    a = [10, 20]
+    b = [100, 200, 300]
+
+    # You can also generate a text format by adding ",t" if you like
+    #  with kaldi_native_io.Int32VectorWriter("ark,scp,t:v.ark,v.scp") as ko:
+    with kaldi_native_io.Int32VectorWriter("ark,scp:v.ark,v.scp") as ko:
+        ko.write("a", a)
+        ko["b"] = b
+    """
+    v.scp contains:
+      a v.ark:2
+      b v.ark:21
+    """
+
+    va = kaldi_native_io.read_int32_vector("v.ark:2")
+    assert va == a
+
+    vb = kaldi_native_io.read_int32_vector("v.ark:21")
+    assert va == b
+```

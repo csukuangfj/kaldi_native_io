@@ -6,6 +6,7 @@
 
 #include "kaldi_native_io/csrc/compressed-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-holder.h"
+#include "kaldi_native_io/csrc/kaldi-io.h"
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
 #include "kaldi_native_io/csrc/matrix-shape.h"
@@ -62,6 +63,20 @@ void PybindRandomAccessTableReader(py::module &m, const std::string &class_name,
            py::return_value_policy::reference);
 }
 
+template <typename Holder>
+void PybindReadSingleItem(py::module &m, const std::string &name,
+                          const std::string &help_doc = "") {
+  m.def(
+      name.c_str(),
+      [](const std::string &rxfilename) {
+        Input ki(rxfilename);
+        Holder holder;
+        holder.Read(ki.Stream());
+        return holder.Value();  // Return a copy
+      },
+      py::arg("rxfilename"), help_doc.c_str());
+}
+
 void PybindKaldiTable(py::module &m) {
   PybindTableWriter<BasicHolder<int32_t>>(m, "_Int32Writer");
   PybindSequentialTableReader<BasicHolder<int32_t>>(m,
@@ -74,6 +89,8 @@ void PybindKaldiTable(py::module &m) {
       m, "_SequentialInt32VectorReader");
   PybindRandomAccessTableReader<BasicVectorHolder<int32_t>>(
       m, "_RandomAccessInt32VectorReader");
+  PybindReadSingleItem<BasicVectorHolder<int32_t>>(
+      m, "read_int32_vector", "Read std::vector<int32_t> for an rxfilename");
 
   PybindTableWriter<BasicVectorVectorHolder<int32_t>>(
       m, "_Int32VectorVectorWriter");

@@ -1,3 +1,5 @@
+from typing import List
+import _kaldi_native_io
 from _kaldi_native_io import (
     CompressionMethod,
     HtkHeader,
@@ -77,3 +79,8 @@ from pathlib import Path as _Path
 
 cmake_prefix_path = _Path(__file__).parent / "share" / "cmake"
 del _Path
+
+
+def read_int32_vector(rxfilename: str) -> List[int]:
+    """Read a vector of int32 from an rxfilename"""
+    return _kaldi_native_io.read_int32_vector(rxfilename)
