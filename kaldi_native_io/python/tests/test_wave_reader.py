@@ -4,9 +4,10 @@
 from pathlib import Path
 
 import kaldi_native_io
+import numpy as np
 
 
-base = "/ceph-fj/fangjun/open-source-2/kaldi_native_io/build/a.scp"
+base = "/ceph-fj/fangjun/open-source/kaldi_native_io/build/wave.scp"
 rspecifier = f"scp:{base}"
 
 # a.scp contains something like the following:
@@ -16,9 +17,45 @@ b /path/to/bar.wav
 """
 
 
+def test_wave_writer():
+    file1 = "/ceph-fj/fangjun/open-source-2/kaldi_native_io/build/BAC009S0002W0123.wav"
+    if not Path(file1).is_file():
+        return
+
+    file2 = "/ceph-fj/fangjun/open-source-2/kaldi_native_io/build/BAC009S0002W0124.wav"
+    if not Path(file2).is_file():
+        return
+
+    print("-----test_wave_writer------")
+
+    file2 = f"cat {file2} |"
+
+    wave1 = kaldi_native_io.read_wave(file1)
+    wave2 = kaldi_native_io.read_wave(file2)
+
+    wspecifier = "ark,scp:wave.ark,wave.scp"
+    with kaldi_native_io.WaveWriter(wspecifier) as ko:
+        ko.write("a", wave1)
+        ko["b"] = wave2
+    """
+    wave.scp has the following content:
+      a wave.ark:2
+      b wave.ark:123728
+    """
+    wave3 = kaldi_native_io.read_wave("wave.ark:2")
+    wave4 = kaldi_native_io.read_wave("wave.ark:123728")
+
+    assert wave1.sample_freq == wave3.sample_freq
+    assert wave2.sample_freq == wave4.sample_freq
+
+    assert np.array_equal(wave1.data.numpy(), wave3.data.numpy())
+    assert np.array_equal(wave2.data.numpy(), wave4.data.numpy())
+
+
 def test_sequential_wave_reader():
     if not Path(base).exists():
         return
+    print("-----test_sequential_wave_reader------")
     with kaldi_native_io.SequentialWaveReader(rspecifier) as ki:
         for key, value in ki:
             print(
@@ -33,6 +70,7 @@ def test_sequential_wave_reader():
 def test_random_access_wave_reader():
     if not Path(base).exists():
         return
+    print("-----test_random_access_wave_reader------")
     with kaldi_native_io.RandomAccessWaveReader(rspecifier) as ki:
         assert "a" in ki
         assert "b" in ki
@@ -47,9 +85,10 @@ def test_random_access_wave_reader():
 
 
 def test_read_wave_1():
-    if not Path(base).exists():
-        return
     file = "/ceph-fj/fangjun/open-source-2/kaldi_native_io/build/BAC009S0002W0123.wav"
+    if not Path(file).is_file():
+        return
+    print("-----test_read_wave_1------")
     wave = kaldi_native_io.read_wave(file)
     print("sample_freq", wave.sample_freq)  # e.g., 1600
     print("duration in seconds", wave.duration)
@@ -60,10 +99,12 @@ def test_read_wave_1():
 
 
 def test_read_wave_2():
-    if not Path(base).exists():
+    file = "/ceph-fj/fangjun/open-source-2/kaldi_native_io/build/BAC009S0002W0123.wav"
+    if not Path(file).is_file():
         return
+    print("-----test_read_wave_2------")
     # from a pipe
-    file = "cat /ceph-fj/fangjun/open-source-2/kaldi_native_io/build/BAC009S0002W0123.wav |"
+    file = f"cat {file} |"
     wave = kaldi_native_io.read_wave(file)
     print("sample_freq", wave.sample_freq)
     print("duration in seconds", wave.duration)
@@ -74,11 +115,11 @@ def test_read_wave_2():
 
 
 def main():
-    if Path(base).exists():
-        test_sequential_wave_reader()
-        test_random_access_wave_reader()
-        test_read_wave_1()
-        test_read_wave_2()
+    test_wave_writer()
+    test_sequential_wave_reader()
+    test_random_access_wave_reader()
+    test_read_wave_1()
+    test_read_wave_2()
 
 
 if __name__ == "__main__":
