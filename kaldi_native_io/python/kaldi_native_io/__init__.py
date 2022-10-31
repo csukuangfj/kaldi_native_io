@@ -1,4 +1,6 @@
+from pathlib import Path as _Path
 from typing import List
+
 import _kaldi_native_io
 from _kaldi_native_io import (
     CompressionMethod,
@@ -6,13 +8,12 @@ from _kaldi_native_io import (
     MatrixShape,
     WaveData,
     WaveInfo,
-    _DoubleMatrix as DoubleMatrix,
-    _DoubleVector as DoubleVector,
-    _FloatMatrix as FloatMatrix,
-    _FloatVector as FloatVector,
-    read_wave,
-    read_wave_info,
 )
+from _kaldi_native_io import _DoubleMatrix as DoubleMatrix
+from _kaldi_native_io import _DoubleVector as DoubleVector
+from _kaldi_native_io import _FloatMatrix as FloatMatrix
+from _kaldi_native_io import _FloatVector as FloatVector
+from _kaldi_native_io import read_wave, read_wave_info
 
 from .table_types import (
     BoolWriter,
@@ -73,9 +74,8 @@ from .table_types import (
     SequentialWaveReader,
     TokenVectorWriter,
     TokenWriter,
+    WaveWriter,
 )
-
-from pathlib import Path as _Path
 
 cmake_prefix_path = _Path(__file__).parent / "share" / "cmake"
 del _Path

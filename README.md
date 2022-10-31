@@ -305,3 +305,46 @@ def test_read_single_item():
     vb = kaldi_native_io.read_int32_vector("v.ark:21")
     assert va == b
 ```
+
+## Read/Write Waves
+
+
+See
+- <https://github.com/csukuangfj/kaldi_native_io/blob/master/kaldi_native_io/python/tests/test_wave_reader.py>
+- <https://github.com/csukuangfj/kaldi_native_io/blob/master/kaldi_native_io/python/tests/test_wave_data.py>
+
+```python3
+def test_wave_writer():
+    file1 = "/ceph-fj/fangjun/open-source-2/kaldi_native_io/build/BAC009S0002W0123.wav"
+    if not Path(file1).is_file():
+        return
+
+    file2 = "/ceph-fj/fangjun/open-source-2/kaldi_native_io/build/BAC009S0002W0124.wav"
+    if not Path(file2).is_file():
+        return
+
+    print("-----test_wave_writer------")
+
+    file2 = f"cat {file2} |"
+
+    wave1 = kaldi_native_io.read_wave(file1)
+    wave2 = kaldi_native_io.read_wave(file2)
+
+    wspecifier = "ark,scp:wave.ark,wave.scp"
+    with kaldi_native_io.WaveWriter(wspecifier) as ko:
+        ko.write("a", wave1)
+        ko["b"] = wave2
+    """
+    wave.scp has the following content:
+      a wave.ark:2
+      b wave.ark:123728
+    """
+    wave3 = kaldi_native_io.read_wave("wave.ark:2")
+    wave4 = kaldi_native_io.read_wave("wave.ark:123728")
+
+    assert wave1.sample_freq == wave3.sample_freq
+    assert wave2.sample_freq == wave4.sample_freq
+
+    assert np.array_equal(wave1.data.numpy(), wave3.data.numpy())
+    assert np.array_equal(wave2.data.numpy(), wave4.data.numpy())
+```

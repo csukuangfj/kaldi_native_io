@@ -36,6 +36,7 @@ set(py_test_files
   test_posterior_writer_reader.py
   test_token_vector_writer_reader.py
   test_token_writer_reader.py
+  test_wave_data.py
   test_wave_info_reader.py
   test_wave_reader.py
 )

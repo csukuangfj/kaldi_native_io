@@ -71,6 +71,7 @@ from _kaldi_native_io import (
     _SequentialWaveReader,
     _TokenVectorWriter,
     _TokenWriter,
+    _WaveWriter,
 )
 
 
@@ -740,6 +741,11 @@ class RandomAccessWaveInfoReader(_RandomAccessTableReader):
 
     def open(self, rspecifier: str) -> None:
         self._impl = _RandomAccessWaveInfoReader(rspecifier)
+
+
+class WaveWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _WaveWriter(wspecifier)
 
 
 class SequentialWaveReader(_SequentialTableReader):

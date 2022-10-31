@@ -13,10 +13,49 @@ void PybindWaveReader(py::module &m) {
   {
     using PyClass = WaveData;
     py::class_<PyClass>(m, "WaveData")
-        .def(py::init<float, Matrix<float>>())
+        .def(py::init<float, Matrix<float>>(), py::arg("sample_freq"),
+             py::arg("data"))
+        .def(
+            py::init([](float samp_freq,
+                        py::array_t<float> array) -> std::unique_ptr<WaveData> {
+              KALDIIO_ASSERT(array.ndim() == 1 || array.ndim() == 2);
+              int32_t num_channels;
+              int32_t num_cols;
+              if (array.ndim() == 1) {
+                num_channels = 1;
+                num_cols = array.size();
+              } else {
+                num_channels = array.shape(0);
+                num_cols = array.shape(1);
+              }
+
+              Matrix<float> data(num_channels, num_cols);
+
+              if (array.ndim() == 1) {
+                float *p = data.Data();
+                for (int32_t i = 0; i != num_cols; ++i) {
+                  p[i] = array.at(i);
+                }
+              } else {
+                for (int32_t r = 0; r != data.NumRows(); ++r) {
+                  for (int32_t c = 0; c != data.NumCols(); ++c) {
+                    data(r, c) = array.at(r, c);
+                  }
+                }
+              }
+              return std::make_unique<WaveData>(samp_freq, data);
+            }),
+            py::arg("sample_freq"), py::arg("data"))
         .def_property_readonly("sample_freq", &PyClass::SampFreq)
         .def_property_readonly("duration", &PyClass::Duration)  // seconds
-        .def_property_readonly("data", &PyClass::Data);
+        .def_property_readonly("data", &PyClass::Data)
+        .def("__str__", [](const PyClass &self) -> std::string {
+          std::ostringstream os;
+          os << "sample_freq: " << self.SampFreq() << " Hz\n";
+          os << "num_channels: " << self.Data().NumRows() << "\n";
+          os << "duration: " << self.Duration() << " s\n";
+          return os.str();
+        });
   }
 
   {
