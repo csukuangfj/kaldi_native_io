@@ -9,6 +9,26 @@ is provided to read ark/scp files from Kaldi in Python.
 
 **Note**: This project is self-contained and does not depend on `Kaldi`.
 
+# Installation
+
+```bash
+pip install --verbose kaldi_native_io
+```
+
+or
+
+```bash
+git clone https://github.com/csukuangfj/kaldi_native_io
+cd kaldi_native_io
+python3 setup.py install
+```
+
+or
+
+```bash
+conda install -c kaldi_native_io kaldi_native_io
+```
+
 
 # Features
 
@@ -47,17 +67,6 @@ is provided to read ark/scp files from Kaldi in Python.
 - `MatrixShape` does not exist in Kaldi. Its purpose is to get the shape information
   of a matrix without reading all the data.
 
-# Installation
-
-```
-pip install --verbose kaldi_native_io
-```
-
-or
-
-```bash
-conda install -c kaldi_native_io kaldi_native_io
-```
 
 # Usage
 
