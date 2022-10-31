@@ -27,7 +27,7 @@ from _kaldi_native_io import (
     _Int32PairVectorWriter,
     _Int32VectorVectorWriter,
     _Int32VectorWriter,
-    _Int32Writer,
+    _Int8VectorWriter,
     _PosteriorWriter,
     _RandomAccessBoolReader,
     _RandomAccessDoubleMatrixReader,
@@ -42,6 +42,7 @@ from _kaldi_native_io import (
     _RandomAccessInt32PairVectorReader,
     _RandomAccessInt32Reader,
     _RandomAccessInt32VectorReader,
+    _RandomAccessInt8VectorReader,
     _RandomAccessInt32VectorVectorReader,
     _RandomAccessMatrixShapeReader,
     _RandomAccessPosteriorReader,
@@ -62,6 +63,7 @@ from _kaldi_native_io import (
     _SequentialInt32PairVectorReader,
     _SequentialInt32Reader,
     _SequentialInt32VectorReader,
+    _SequentialInt8VectorReader,
     _SequentialInt32VectorVectorReader,
     _SequentialMatrixShapeReader,
     _SequentialPosteriorReader,
@@ -274,6 +276,21 @@ class SequentialInt32VectorReader(_SequentialTableReader):
 class RandomAccessInt32VectorReader(_RandomAccessTableReader):
     def open(self, rspecifier: str) -> None:
         self._impl = _RandomAccessInt32VectorReader(rspecifier)
+
+
+class Int8VectorWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _Int8VectorWriter(wspecifier)
+
+
+class SequentialInt8VectorReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialInt8VectorReader(rspecifier)
+
+
+class RandomAccessInt8VectorReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessInt8VectorReader(rspecifier)
 
 
 class Int32VectorVectorWriter(_TableWriter):

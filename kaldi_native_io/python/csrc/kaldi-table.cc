@@ -106,6 +106,14 @@ void PybindKaldiTable(py::module &m) {
   PybindRandomAccessTableReader<BasicPairVectorHolder<int32_t>>(
       m, "_RandomAccessInt32PairVectorReader");
 
+  PybindTableWriter<BasicVectorHolder<int8_t>>(m, "_Int8VectorWriter");
+  PybindSequentialTableReader<BasicVectorHolder<int8_t>>(
+      m, "_SequentialInt8VectorReader");
+  PybindRandomAccessTableReader<BasicVectorHolder<int8_t>>(
+      m, "_RandomAccessInt8VectorReader");
+  PybindReadSingleItem<BasicVectorHolder<int8_t>>(
+      m, "read_int8_vector", "Read std::vector<int8_t> for an rxfilename");
+
   PybindTableWriter<BasicHolder<float>>(m, "_FloatWriter");
   PybindSequentialTableReader<BasicHolder<float>>(m, "_SequentialFloatReader");
   PybindRandomAccessTableReader<BasicHolder<float>>(m,

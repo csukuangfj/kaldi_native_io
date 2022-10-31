@@ -21,6 +21,7 @@ is provided to read ark/scp files from Kaldi in Python.
 |------|--------|-------------------|----------------------|
 |`int32`  | `Int32Writer` | `SequentialInt32Reader`  | `RandomAccessInt32Reader` |
 |`std::vector<int32>` | `Int32VectorWriter`| `SequentialInt32VectorReader`| `RandomAccessInt32VectorReader`|
+|`std::vector<int8>` | `Int8VectorWriter`| `SequentialInt8VectorReader`| `RandomAccessInt8VectorReader`|
 |`std::vector<std::vector<int32>>`|`Int32VectorVectorWriter`|`SequentialInt32VectorVectorReader`|`RandomAccessInt32VectorVectorReader`|
 | `std::vector<std::pair<int32, int32>>` | `Int32PairVectorWriter`   | `SequentialInt32PairVectorReader`   | `RandomAccessInt32PairVectorReader`   |
 |`float`| `FloatWriter`| `SequentialFloatReader`| `RandomAccessFloatReader`|
@@ -347,4 +348,33 @@ def test_wave_writer():
 
     assert np.array_equal(wave1.data.numpy(), wave3.data.numpy())
     assert np.array_equal(wave2.data.numpy(), wave4.data.numpy())
+```
+
+## Read/Write int8 vector
+
+
+See
+- <https://github.com/csukuangfj/kaldi_native_io/blob/master/kaldi_native_io/python/tests/test_int8_vector_writer_reader.py>
+
+```python3
+def test_read_single_item():
+    a = [10, 20]
+    b = [100, 120, -2]
+
+    # You can also generate a text format by adding ",t" if you like
+    #  with kaldi_native_io.Int8VectorWriter("ark,scp,t:v.ark,v.scp") as ko:
+    with kaldi_native_io.Int8VectorWriter("ark,scp:v.ark,v.scp") as ko:
+        ko.write("a", a)
+        ko["b"] = b
+    """
+    v.scp contains:
+      a v.ark:2
+      b v.ark:15
+    """
+
+    va = kaldi_native_io.read_int8_vector("v.ark:2")
+    assert va == a
+
+    vb = kaldi_native_io.read_int8_vector("v.ark:15")
+    assert vb == b
 ```
