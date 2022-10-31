@@ -32,6 +32,7 @@ set(py_test_files
   test_int32_vector_vector_writer_reader.py
   test_int32_vector_writer_reader.py
   test_int32_writer_reader.py
+  test_int8_vector_writer_reader.py
   test_matrix_shape_reader.py
   test_posterior_writer_reader.py
   test_token_vector_writer_reader.py

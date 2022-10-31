@@ -27,6 +27,7 @@ from .table_types import (
     FloatWriter,
     GaussPostWriter,
     HtkMatrixWriter,
+    Int8VectorWriter,
     Int32PairVectorWriter,
     Int32VectorVectorWriter,
     Int32VectorWriter,
@@ -42,6 +43,7 @@ from .table_types import (
     RandomAccessFloatVectorReader,
     RandomAccessGaussPostReader,
     RandomAccessHtkMatrixReader,
+    RandomAccessInt8VectorReader,
     RandomAccessInt32PairVectorReader,
     RandomAccessInt32Reader,
     RandomAccessInt32VectorReader,
@@ -62,6 +64,7 @@ from .table_types import (
     SequentialFloatVectorReader,
     SequentialGaussPostReader,
     SequentialHtkMatrixReader,
+    SequentialInt8VectorReader,
     SequentialInt32PairVectorReader,
     SequentialInt32Reader,
     SequentialInt32VectorReader,
@@ -84,3 +87,8 @@ del _Path
 def read_int32_vector(rxfilename: str) -> List[int]:
     """Read a vector of int32 from an rxfilename"""
     return _kaldi_native_io.read_int32_vector(rxfilename)
+
+
+def read_int8_vector(rxfilename: str) -> List[int]:
+    """Read a vector of int8 from an rxfilename"""
+    return _kaldi_native_io.read_int8_vector(rxfilename)
