@@ -95,7 +95,7 @@ class VectorBase {
   ~VectorBase() {}
 
   /// Empty initializer, corresponds to vector of zero size.
-  explicit VectorBase() : data_(NULL), dim_(0) {
+  VectorBase() : data_(NULL), dim_(0) {
     static_assert(std::is_floating_point<Real>::value, "");
   }
 

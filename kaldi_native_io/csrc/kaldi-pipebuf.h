@@ -21,8 +21,8 @@
  *  This is an Kaldi C++ Library header.
  */
 
-#ifndef KALDI_NATIVE_IO_CSRC_UTIL_KALDI_PIPEBUF_H_
-#define KALDI_NATIVE_IO_CSRC_UTIL_KALDI_PIPEBUF_H_
+#ifndef KALDI_NATIVE_IO_CSRC_KALDI_PIPEBUF_H_
+#define KALDI_NATIVE_IO_CSRC_KALDI_PIPEBUF_H_
 
 #include <string>
 #if !defined(_LIBCPP_VERSION)  // libc++
@@ -85,4 +85,4 @@ class basic_pipebuf : public std::basic_filebuf<CharType, Traits> {
 
 }  // namespace kaldiio
 
-#endif  // KALDI_NATIVE_IO_CSRC_UTIL_KALDI_PIPEBUF_H_
+#endif  // KALDI_NATIVE_IO_CSRC_KALDI_PIPEBUF_H_

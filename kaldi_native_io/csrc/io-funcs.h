@@ -9,6 +9,8 @@
 #ifndef KALDI_NATIVE_IO_CSRC_IO_FUNCS_H_
 #define KALDI_NATIVE_IO_CSRC_IO_FUNCS_H_
 
+#include <string>
+
 #include "kaldi_native_io/csrc/io-funcs-inl.h"
 
 namespace kaldiio {

@@ -21,8 +21,8 @@
 #ifndef KALDI_NATIVE_IO_CSRC_KALDI_SEMAPHORE_H_
 #define KALDI_NATIVE_IO_CSRC_KALDI_SEMAPHORE_H_
 
-#include <condition_variable>
-#include <mutex>
+#include <condition_variable>  // NOLINT
+#include <mutex>               // NOLINT
 
 #include "kaldi_native_io/csrc/log.h"
 
@@ -30,7 +30,7 @@ namespace kaldiio {
 
 class Semaphore {
  public:
-  Semaphore(int32_t count = 0);
+  explicit Semaphore(int32_t count = 0);
 
   ~Semaphore();
 

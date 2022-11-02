@@ -15,6 +15,9 @@
 #include <string.h>
 
 #include <cstring>
+#include <limits>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "kaldi_native_io/csrc/kaldi-utils.h"
@@ -85,9 +88,9 @@ void Vector<Real>::Resize(const MatrixIndexT dim,
     if (this->data_ == NULL || dim == 0)
       resize_type = kSetZero;  // nothing to copy.
     else if (this->dim_ == dim) {
+      // nothing to do.
       return;
-    }  // nothing to do.
-    else {
+    } else {
       // set tmp to a vector of the desired size.
       Vector<Real> tmp(dim, kUndefined);
       if (dim > this->dim_) {

@@ -9,6 +9,8 @@
 #ifndef KALDI_NATIVE_IO_CSRC_KALDI_TABLE_H_
 #define KALDI_NATIVE_IO_CSRC_KALDI_TABLE_H_
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "kaldi_native_io/csrc/kaldi-holder.h"
 

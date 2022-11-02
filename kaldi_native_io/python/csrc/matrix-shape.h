@@ -8,7 +8,7 @@
 
 namespace kaldiio {
 
-void PybindMatrixShape(py::module &m);
+void PybindMatrixShape(py::module &m);  // NOLINT
 
 }  // namespace kaldiio
 

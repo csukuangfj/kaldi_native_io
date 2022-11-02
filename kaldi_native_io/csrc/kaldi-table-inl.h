@@ -27,7 +27,7 @@
 
 #include <algorithm>
 #include <string>
-#include <thread>
+#include <thread>  // NOLINT
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -83,6 +83,7 @@ class SequentialTableReaderImplBase {
   virtual void SwapHolder(Holder *other_holder) = 0;
   SequentialTableReaderImplBase() {}
   virtual ~SequentialTableReaderImplBase() {}  // throws.
+
  private:
   KALDIIO_DISALLOW_COPY_AND_ASSIGN(SequentialTableReaderImplBase)
 };

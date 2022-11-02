@@ -5,6 +5,7 @@
 #include "kaldi_native_io/python/csrc/kaldi-matrix.h"
 
 #include <memory>
+#include <string>
 
 #include "kaldi_native_io/csrc/kaldi-io.h"
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
@@ -12,7 +13,8 @@
 namespace kaldiio {
 
 template <typename Real>
-void PybindKaldiMatrixTpl(py::module &m, const std::string &class_name,
+void PybindKaldiMatrixTpl(py::module &m,  // NOLINT
+                          const std::string &class_name,
                           const std::string &class_help_doc = "") {
   using PyClass = Matrix<Real>;
   py::class_<PyClass>(m, class_name.c_str(), class_help_doc.c_str(),
@@ -67,10 +69,10 @@ void PybindKaldiMatrixTpl(py::module &m, const std::string &class_name,
                  obj);  // it will increase the reference
                         // count of **this** matrix
            })
-      .def_buffer([](const PyClass &m) -> py::buffer_info {
+      .def_buffer([](PyClass &m) -> py::buffer_info {
         return pybind11::buffer_info(
-            (void *)m.Data(),  // pointer to buffer
-            sizeof(Real),      // size of one scalar
+            reinterpret_cast<void *>(m.Data()),  // pointer to buffer
+            sizeof(Real),                        // size of one scalar
             pybind11::format_descriptor<Real>::format(),
             2,                           // num-axes
             {m.NumRows(), m.NumCols()},  // buffer dimensions
@@ -79,7 +81,7 @@ void PybindKaldiMatrixTpl(py::module &m, const std::string &class_name,
       });
 }
 
-static void PybindHtkHeader(py::module &m) {
+static void PybindHtkHeader(py::module &m) {  // NOLINT
   using PyClass = HtkHeader;
   py::class_<PyClass>(
       m, "HtkHeader",
@@ -118,7 +120,7 @@ static void PybindHtkHeader(py::module &m) {
       });
 }
 
-void PybindKaldiMatrix(py::module &m) {
+void PybindKaldiMatrix(py::module &m) {  // NOLINT
   PybindKaldiMatrixTpl<float>(m, "_FloatMatrix");
   PybindKaldiMatrixTpl<double>(m, "_DoubleMatrix");
   PybindHtkHeader(m);

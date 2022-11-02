@@ -9,7 +9,7 @@
 
 namespace kaldiio {
 
-void PybindKaldiVector(py::module &m);
+void PybindKaldiVector(py::module &m);  // NOLINT
 
 }  // namespace kaldiio
 

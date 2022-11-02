@@ -10,8 +10,10 @@
 
 #include "kaldi_native_io/csrc/wave-reader.h"
 
+#include <algorithm>
 #include <cmath>  // for trunc()
 #include <cstring>
+#include <limits>
 #include <vector>
 
 #include "kaldi_native_io/csrc/kaldi-utils.h"
@@ -24,7 +26,7 @@ struct WaveHeaderReadGofer {
   bool swap;
   char tag[5];
 
-  WaveHeaderReadGofer(std::istream &is) : is(is), swap(false) {
+  explicit WaveHeaderReadGofer(std::istream &is) : is(is), swap(false) {
     memset(tag, '\0', sizeof tag);
   }
 

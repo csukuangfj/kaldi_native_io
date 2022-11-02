@@ -9,6 +9,8 @@
 
 #include <string.h>
 
+#include <string>
+
 #include "kaldi_native_io/csrc/kaldi-utils.h"
 #include "kaldi_native_io/csrc/log.h"
 

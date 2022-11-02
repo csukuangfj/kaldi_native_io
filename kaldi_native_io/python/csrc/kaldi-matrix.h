@@ -9,7 +9,7 @@
 
 namespace kaldiio {
 
-void PybindKaldiMatrix(py::module &m);
+void PybindKaldiMatrix(py::module &m);  // NOLINT
 
 }  // namespace kaldiio
 

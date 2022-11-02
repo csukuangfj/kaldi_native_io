@@ -4,12 +4,14 @@
 
 #include "kaldi_native_io/python/csrc/matrix-shape.h"
 
+#include <string>
+
 #include "kaldi_native_io/csrc/kaldi-io.h"
 #include "kaldi_native_io/csrc/matrix-shape.h"
 
 namespace kaldiio {
 
-void PybindMatrixShape(py::module &m) {
+void PybindMatrixShape(py::module &m) {  // NOLINT
   using PyClass = MatrixShape;
   py::class_<PyClass>(m, "MatrixShape")
       .def(py::init<int32_t, int32_t>(), py::arg("num_rows") = 0,

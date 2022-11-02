@@ -12,6 +12,7 @@
 
 #include <istream>
 #include <string>
+#include <utility>
 
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/log.h"

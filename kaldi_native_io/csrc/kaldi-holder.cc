@@ -8,6 +8,9 @@
 
 #include "kaldi_native_io/csrc/kaldi-holder.h"
 
+#include <algorithm>
+#include <vector>
+
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
 #include "kaldi_native_io/csrc/log.h"

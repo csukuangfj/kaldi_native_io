@@ -10,6 +10,7 @@
 
 #include "kaldi_native_io/csrc/posterior.h"
 
+#include <string>
 #include <vector>
 
 #include "kaldi_native_io/csrc/io-funcs.h"

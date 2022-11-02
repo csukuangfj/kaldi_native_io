@@ -9,7 +9,7 @@
 
 namespace kaldiio {
 
-void PybindWaveReader(py::module &m);
+void PybindWaveReader(py::module &m);  // NOLINT
 
 }  // namespace kaldiio
 

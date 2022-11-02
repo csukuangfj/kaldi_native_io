@@ -16,8 +16,8 @@
 // MERCHANTABLITY OR NON-INFRINGEMENT.
 // See the Apache 2 License for the specific language governing permissions and
 // limitations under the License.
-#ifndef KALDI_NATIVE_IO_CSRC_UTIL_KALDI_IO_INL_H_
-#define KALDI_NATIVE_IO_CSRC_UTIL_KALDI_IO_INL_H_
+#ifndef KALDI_NATIVE_IO_CSRC_KALDI_IO_INL_H_
+#define KALDI_NATIVE_IO_CSRC_KALDI_IO_INL_H_
 
 #include <string>
 
@@ -37,4 +37,4 @@ bool Output::IsOpen() { return impl_ != NULL; }
 
 }  // namespace kaldiio
 
-#endif  // KALDI_NATIVE_IO_CSRC_UTIL_KALDI_IO_INL_H_
+#endif  // KALDI_NATIVE_IO_CSRC_KALDI_IO_INL_H_

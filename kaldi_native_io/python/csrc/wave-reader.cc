@@ -4,12 +4,15 @@
 
 #include "kaldi_native_io/python/csrc/wave-reader.h"
 
+#include <memory>
+#include <string>
+
 #include "kaldi_native_io/csrc/kaldi-io.h"
 #include "kaldi_native_io/csrc/wave-reader.h"
 
 namespace kaldiio {
 
-void PybindWaveReader(py::module &m) {
+void PybindWaveReader(py::module &m) {  // NOLINT
   {
     using PyClass = WaveData;
     py::class_<PyClass>(m, "WaveData")

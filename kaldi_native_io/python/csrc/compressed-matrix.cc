@@ -4,11 +4,12 @@
 
 #include "kaldi_native_io/csrc/compressed-matrix.h"
 
+#include "kaldi_native_io/python/csrc/compressed-matrix.h"
 #include "kaldi_native_io/python/csrc/kaldi-matrix.h"
 
 namespace kaldiio {
 
-static void PybindCompressionMethod(py::module &m) {
+static void PybindCompressionMethod(py::module &m) {  // NOLINT
   py::enum_<CompressionMethod>(
       m, "CompressionMethod", py::arithmetic(),
       "The enum CompressionMethod is used when creating a CompressedMatrix (a "
@@ -52,7 +53,7 @@ static void PybindCompressionMethod(py::module &m) {
       .export_values();
 }
 
-void PybindCompressedMatrix(py::module &m) {
+void PybindCompressedMatrix(py::module &m) {  // NOLINT
   PybindCompressionMethod(m);
   {
     using PyClass = CompressedMatrix;

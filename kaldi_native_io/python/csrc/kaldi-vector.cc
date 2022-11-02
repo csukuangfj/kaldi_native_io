@@ -5,6 +5,7 @@
 #include "kaldi_native_io/python/csrc/kaldi-vector.h"
 
 #include <memory>
+#include <string>
 
 #include "kaldi_native_io/csrc/kaldi-io.h"
 #include "kaldi_native_io/csrc/kaldi-vector.h"
@@ -12,7 +13,8 @@
 namespace kaldiio {
 
 template <typename Real>
-void PybindKaldiVectorTpl(py::module &m, const std::string &class_name,
+void PybindKaldiVectorTpl(py::module &m,  // NOLINT
+                          const std::string &class_name,
                           const std::string &class_help_doc = "") {
   using PyClass = Vector<Real>;
   py::class_<PyClass>(m, class_name.c_str(), class_help_doc.c_str(),
@@ -37,8 +39,8 @@ void PybindKaldiVectorTpl(py::module &m, const std::string &class_name,
                                       obj);  // it will increase the reference
                                              // count of **this** vector
            })
-      .def_buffer([](const PyClass &v) -> py::buffer_info {
-        return py::buffer_info((void *)v.Data(), sizeof(Real),
+      .def_buffer([](PyClass &v) -> py::buffer_info {
+        return py::buffer_info(reinterpret_cast<void *>(v.Data()), sizeof(Real),
                                py::format_descriptor<Real>::format(),
                                1,  // num-axes
                                {v.Dim()},
@@ -60,7 +62,7 @@ void PybindKaldiVectorTpl(py::module &m, const std::string &class_name,
           py::arg("wxfilename"), py::arg("binary"));
 }
 
-void PybindKaldiVector(py::module &m) {
+void PybindKaldiVector(py::module &m) {  // NOLINT
   PybindKaldiVectorTpl<float>(m, "_FloatVector");
   PybindKaldiVectorTpl<double>(m, "_DoubleVector");
 }

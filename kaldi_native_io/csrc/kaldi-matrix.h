@@ -132,7 +132,7 @@ class MatrixBase {
   }
   ///  Initializer, callable only from child.
   /// Empty initializer, for un-initialized matrix.
-  explicit MatrixBase() : data_(NULL) {
+  MatrixBase() : data_(NULL) {
     static_assert(std::is_floating_point<Real>::value, "");
   }
 

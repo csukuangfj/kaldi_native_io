@@ -14,6 +14,10 @@
 
 #include <string.h>
 
+#include <algorithm>
+#include <limits>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "kaldi_native_io/csrc/compressed-matrix.h"
@@ -209,9 +213,9 @@ void Matrix<Real>::Resize(const MatrixIndexT rows, const MatrixIndexT cols,
     else if (rows == this->num_rows_ && cols == this->num_cols_ &&
              (stride_type == kDefaultStride ||
               this->stride_ == this->num_cols_)) {
+      // nothing to do.
       return;
-    }  // nothing to do.
-    else {
+    } else {
       // set tmp to a matrix of the desired size; if new matrix
       // is bigger in some dimension, zero it.
       MatrixResizeType new_resize_type =
@@ -329,7 +333,6 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
     char other_token_start = (sizeof(Real) == 4 ? 'D' : 'F');
     if (peekval ==
         other_token_start) {  // need to instantiate the other type to read it.
-
       // if Real == float, OtherType == double, and vice versa.
       using OtherType =
           typename std::conditional<std::is_same<Real, float>::value, double,
@@ -383,9 +386,9 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
     // }
     if (str == "[]") {
       Resize(0, 0);
+      // Be tolerant of variants.
       return;
-    }  // Be tolerant of variants.
-    else if (str != "[") {
+    } else if (str != "[") {
       if (str.length() > 20) str = str.substr(0, 17) + "...";
       specific_error << ": Expected \"[\", got \"" << str << '"';
       goto bad;
@@ -494,7 +497,8 @@ bool ReadHtk(std::istream &is, Matrix<Real> *M_ptr, HtkHeader *header_ptr) {
   HtkHeader htk_hdr;
 
   // TODO(arnab): this fails if the HTK file has CRC cheksum or is compressed.
-  is.read((char *)&htk_hdr, sizeof(htk_hdr));  // we're being really POSIX here!
+  is.read(reinterpret_cast<char *>(&htk_hdr),
+          sizeof(htk_hdr));  // we're being really POSIX here!
   if (is.fail()) {
     KALDIIO_WARN << "Could not read header from HTK feature file ";
     return false;
@@ -549,7 +553,8 @@ bool ReadHtk(std::istream &is, Matrix<Real> *M_ptr, HtkHeader *header_ptr) {
   MatrixIndexT j;
   if (sizeof(Real) == sizeof(float)) {
     for (i = 0; i < M.NumRows(); i++) {
-      is.read((char *)M.RowData(i), sizeof(float) * M.NumCols());
+      is.read(reinterpret_cast<char *>(M.RowData(i)),
+              sizeof(float) * M.NumCols());
       if (is.fail()) {
         KALDIIO_WARN << "Could not read data from HTK feature file ";
         return false;
@@ -564,7 +569,7 @@ bool ReadHtk(std::istream &is, Matrix<Real> *M_ptr, HtkHeader *header_ptr) {
   } else {
     float *pmem = new float[M.NumCols()];
     for (i = 0; i < M.NumRows(); i++) {
-      is.read((char *)pmem, sizeof(float) * M.NumCols());
+      is.read(reinterpret_cast<char *>(pmem), sizeof(float) * M.NumCols());
       if (is.fail()) {
         KALDIIO_WARN << "Could not read data from HTK feature file ";
         delete[] pmem;
@@ -582,7 +587,7 @@ bool ReadHtk(std::istream &is, Matrix<Real> *M_ptr, HtkHeader *header_ptr) {
   if (header_ptr) *header_ptr = htk_hdr;
   if (has_checksum) {
     int16_t checksum;
-    is.read((char *)&checksum, sizeof(checksum));
+    is.read(reinterpret_cast<char *>(&checksum), sizeof(checksum));
     if (is.fail())
       KALDIIO_WARN << "Could not read checksum from HTK feature file ";
     // We ignore the checksum.
@@ -596,11 +601,10 @@ template bool ReadHtk(std::istream &is, Matrix<float> *M,
 template bool ReadHtk(std::istream &is, Matrix<double> *M,
                       HtkHeader *header_ptr);
 
+// header may be derived from a previous call
+// to ReadHtk.  Must be in binary mode.
 template <typename Real>
-bool WriteHtk(std::ostream &os, const MatrixBase<Real> &M,
-              HtkHeader htk_hdr)  // header may be derived from a previous call
-                                  // to ReadHtk.  Must be in binary mode.
-{
+bool WriteHtk(std::ostream &os, const MatrixBase<Real> &M, HtkHeader htk_hdr) {
   KALDIIO_ASSERT(M.NumRows() == static_cast<MatrixIndexT>(htk_hdr.mNSamples));
   KALDIIO_ASSERT(M.NumCols() == static_cast<MatrixIndexT>(htk_hdr.mSampleSize) /
                                     static_cast<MatrixIndexT>(sizeof(float)));
@@ -610,14 +614,15 @@ bool WriteHtk(std::ostream &os, const MatrixBase<Real> &M,
   KALDIIO_SWAP2(htk_hdr.mSampleSize);
   KALDIIO_SWAP2(htk_hdr.mSampleKind);
 
-  os.write((char *)&htk_hdr, sizeof(htk_hdr));
+  os.write(reinterpret_cast<char *>(&htk_hdr), sizeof(htk_hdr));
   if (os.fail()) goto bad;
 
   MatrixIndexT i;
   MatrixIndexT j;
   if (sizeof(Real) == sizeof(float) && !MachineIsLittleEndian()) {
     for (i = 0; i < M.NumRows(); i++) {  // Unlikely to reach here ever!
-      os.write((char *)M.RowData(i), sizeof(float) * M.NumCols());
+      os.write(reinterpret_cast<char *>(const_cast<Real *>(M.RowData(i))),
+               sizeof(float) * M.NumCols());
       if (os.fail()) goto bad;
     }
   } else {
@@ -629,7 +634,7 @@ bool WriteHtk(std::ostream &os, const MatrixBase<Real> &M,
         pmem[j] = static_cast<float>(rowData[j]);
       if (MachineIsLittleEndian())
         for (j = 0; j < M.NumCols(); j++) KALDIIO_SWAP4(pmem[j]);
-      os.write((char *)pmem, sizeof(float) * M.NumCols());
+      os.write(reinterpret_cast<char *>(pmem), sizeof(float) * M.NumCols());
       if (os.fail()) {
         delete[] pmem;
         goto bad;

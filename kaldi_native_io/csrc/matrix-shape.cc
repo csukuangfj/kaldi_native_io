@@ -4,6 +4,8 @@
 
 #include "kaldi_native_io/csrc/matrix-shape.h"
 
+#include <string>
+
 #include "kaldi_native_io/csrc/compressed-matrix.h"
 #include "kaldi_native_io/csrc/io-funcs.h"
 
@@ -32,7 +34,7 @@ void MatrixShape::ReadCompressedBinary(std::istream &is) {
   int peekval = Peek(is, binary);
 
   if (peekval != 'C') {
-    KALDIIO_ERR << "Expect token 'C'. Given: " << (char)peekval;
+    KALDIIO_ERR << "Expect token 'C'. Given: " << static_cast<char>(peekval);
   }
 
   std::string tok;  // Should be CM (format 1) or CM2 (format 2)

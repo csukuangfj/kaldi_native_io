@@ -10,6 +10,7 @@
 #ifndef KALDI_NATIVE_IO_CSRC_POSTERIOR_H_
 #define KALDI_NATIVE_IO_CSRC_POSTERIOR_H_
 
+#include <string>
 #include <utility>
 #include <vector>
 

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <string>
 #include <vector>
 
 #include "kaldi_native_io/csrc/log.h"
@@ -551,15 +552,15 @@ void CompressedMatrix::Read(std::istream &is, bool binary) {
       ReadToken(is, binary, &tok);
       GlobalHeader h;
       if (tok == "CM") {
+        //  kOneByteWithColHeaders
         h.format = 1;
-      }  //  kOneByteWithColHeaders
-      else if (tok == "CM2") {
+      } else if (tok == "CM2") {
+        // kTwoByte
         h.format = 2;
-      }  // kTwoByte
-      else if (tok == "CM3") {
+      } else if (tok == "CM3") {
+        // kOneByte
         h.format = 3;
-      }  // kOneByte
-      else {
+      } else {
         KALDIIO_ERR << "Unexpected token " << tok
                     << ", expecting CM, CM2 or CM3";
       }

@@ -9,6 +9,8 @@
 #ifndef KALDI_NATIVE_IO_CSRC_COMPRESSED_MATRIX_H_
 #define KALDI_NATIVE_IO_CSRC_COMPRESSED_MATRIX_H_
 
+#include <utility>
+
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 
 namespace kaldiio {

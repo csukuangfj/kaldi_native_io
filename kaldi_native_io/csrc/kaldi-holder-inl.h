@@ -12,6 +12,8 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "kaldi_native_io/csrc/io-funcs.h"
 #include "kaldi_native_io/csrc/kaldi-matrix.h"

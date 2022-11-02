@@ -4,6 +4,8 @@
 
 #include "kaldi_native_io/csrc/kaldi-table.h"
 
+#include <string>
+
 #include "kaldi_native_io/csrc/compressed-matrix.h"
 #include "kaldi_native_io/csrc/kaldi-holder.h"
 #include "kaldi_native_io/csrc/kaldi-io.h"
@@ -17,7 +19,8 @@
 namespace kaldiio {
 
 template <class Holder>
-void PybindTableWriter(py::module &m, const std::string &class_name,
+void PybindTableWriter(py::module &m,  // NOLINT
+                       const std::string &class_name,
                        const std::string &class_help_doc = "") {
   using PyClass = TableWriter<Holder>;
 
@@ -32,7 +35,8 @@ void PybindTableWriter(py::module &m, const std::string &class_name,
 }
 
 template <class Holder>
-void PybindSequentialTableReader(py::module &m, const std::string &class_name,
+void PybindSequentialTableReader(py::module &m,  // NOLINT
+                                 const std::string &class_name,
                                  const std::string &class_help_doc = "") {
   using PyClass = SequentialTableReader<Holder>;
   py::class_<PyClass>(m, class_name.c_str(), class_help_doc.c_str())
@@ -49,7 +53,8 @@ void PybindSequentialTableReader(py::module &m, const std::string &class_name,
 }
 
 template <class Holder>
-void PybindRandomAccessTableReader(py::module &m, const std::string &class_name,
+void PybindRandomAccessTableReader(py::module &m,  // NOLINT
+                                   const std::string &class_name,
                                    const std::string &class_help_doc = "") {
   using PyClass = RandomAccessTableReader<Holder>;
   py::class_<PyClass>(m, class_name.c_str(), class_help_doc.c_str())
@@ -64,7 +69,8 @@ void PybindRandomAccessTableReader(py::module &m, const std::string &class_name,
 }
 
 template <typename Holder>
-void PybindReadSingleItem(py::module &m, const std::string &name,
+void PybindReadSingleItem(py::module &m,  // NOLINT
+                          const std::string &name,
                           const std::string &help_doc = "") {
   m.def(
       name.c_str(),
@@ -77,7 +83,7 @@ void PybindReadSingleItem(py::module &m, const std::string &name,
       py::arg("rxfilename"), help_doc.c_str());
 }
 
-void PybindKaldiTable(py::module &m) {
+void PybindKaldiTable(py::module &m) {  // NOLINT
   PybindTableWriter<BasicHolder<int32_t>>(m, "_Int32Writer");
   PybindSequentialTableReader<BasicHolder<int32_t>>(m,
                                                     "_SequentialInt32Reader");

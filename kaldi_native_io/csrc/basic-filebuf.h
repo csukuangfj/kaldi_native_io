@@ -9,15 +9,17 @@
 // Source License licenses. See LICENSE.TXT for details (included at the
 // bottom).
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef KALDI_NATIVE_IO_CSRC_UTIL_BASIC_FILEBUF_H_
-#define KALDI_NATIVE_IO_CSRC_UTIL_BASIC_FILEBUF_H_
+#ifndef KALDI_NATIVE_IO_CSRC_BASIC_FILEBUF_H_
+#define KALDI_NATIVE_IO_CSRC_BASIC_FILEBUF_H_
 
 ///////////////////////////////////////////////////////////////////////////////
-#include <fstream>
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
+#include <memory>
 #include <string>
-#include <algorithm>
+#include <utility>
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace kaldiio {
@@ -335,7 +337,7 @@ basic_filebuf<CharT, Traits>::
 open(const char* s, std::ios_base::openmode mode) {
     basic_filebuf<CharT, Traits>* rt = nullptr;
     if (_M_file == nullptr) {
-        const char* md= _M_get_mode(mode);
+        const char* md = _M_get_mode(mode);
         if (md) {
             _M_file = fopen(s, md);
             if (_M_file) {
@@ -367,9 +369,9 @@ basic_filebuf<CharT, Traits>::open(const std::string& s,
 template <class CharT, class Traits>
 basic_filebuf<CharT, Traits>*
 basic_filebuf<CharT, Traits>::open(int fd, std::ios_base::openmode mode) {
-    const char* md= this->_M_get_mode(mode);
+    const char* md = this->_M_get_mode(mode);
     if (md) {
-        this->_M_file= fdopen(fd, md);
+        this->_M_file = fdopen(fd, md);
         this->_M_om = mode;
         return this;
     } else {
@@ -785,7 +787,7 @@ basic_filebuf<CharT, Traits>::_M_write_mode() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-#endif  // KALDI_NATIVE_IO_CSRC_UTIL_BASIC_FILEBUF_H_
+#endif  // KALDI_NATIVE_IO_CSRC_BASIC_FILEBUF_H_
 
 ///////////////////////////////////////////////////////////////////////////////
 
