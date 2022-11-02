@@ -32,6 +32,10 @@ if(DEFINED _GLIBCXX_USE_CXX11_ABI)
   set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=${_GLIBCXX_USE_CXX11_ABI}")
 endif()
 
+if(WIN32)
+  add_definitions(-DNOMINMAX) # Otherwise, std::max() and std::min() won't work
+endif()
+
 # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall ")
 if(CMAKE_COMPILER_IS_GNUCXX)
   # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Werror -Wextra -Wpedantic -pedantic-errors -g ")
