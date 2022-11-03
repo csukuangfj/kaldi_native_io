@@ -14,6 +14,7 @@
 
 #include <string.h>
 
+#include <cctype>
 #include <cstring>
 #include <limits>
 #include <string>

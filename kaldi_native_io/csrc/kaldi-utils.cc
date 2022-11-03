@@ -7,6 +7,8 @@
 
 #include "kaldi_native_io/csrc/kaldi-utils.h"
 
+#include <cctype>
+
 namespace kaldiio {
 
 std::string CharToString(const char &c) {
