@@ -37,8 +37,11 @@ conda install -c kaldi_native_io kaldi_native_io
 
 - Support the following data types (More will be added later on request.)
 
+  * Note: We also support Python `bytes` class
+
 | C++ Data Type | Writer | Sequential Reader | Random Access Reader |
 |------|--------|-------------------|----------------------|
+| Python's `bytes`  | `BlobWriter` | `SequentialBlobReader`  | `RandomAccessBlobReader` |
 |`int32`  | `Int32Writer` | `SequentialInt32Reader`  | `RandomAccessInt32Reader` |
 |`std::vector<int32>` | `Int32VectorWriter`| `SequentialInt32VectorReader`| `RandomAccessInt32VectorReader`|
 |`std::vector<int8>` | `Int8VectorWriter`| `SequentialInt8VectorReader`| `RandomAccessInt8VectorReader`|
@@ -359,31 +362,53 @@ def test_wave_writer():
     assert np.array_equal(wave2.data.numpy(), wave4.data.numpy())
 ```
 
-## Read/Write int8 vector
+## Read/Write Python's bytes
 
 
 See
-- <https://github.com/csukuangfj/kaldi_native_io/blob/master/kaldi_native_io/python/tests/test_int8_vector_writer_reader.py>
+- <https://github.com/csukuangfj/kaldi_native_io/blob/master/kaldi_native_io/python/tests/test_blob_writer_reader.py>
 
 ```python3
-def test_read_single_item():
-    a = [10, 20]
-    b = [100, 120, -2]
+base = "blob"
+wspecifier = f"ark,scp:{base}.ark,{base}.scp"
+rspecifier = f"scp:{base}.scp"
 
-    # You can also generate a text format by adding ",t" if you like
-    #  with kaldi_native_io.Int8VectorWriter("ark,scp,t:v.ark,v.scp") as ko:
-    with kaldi_native_io.Int8VectorWriter("ark,scp:v.ark,v.scp") as ko:
+
+def test_blob_writer():
+    with kaldi_native_io.BlobWriter(wspecifier) as ko:
+        ko.write("a", bytes([0x30, 0x31]))
+        ko["b"] = b"1234"
+
+
+def test_sequential_blob_reader():
+    with kaldi_native_io.SequentialBlobReader(rspecifier) as ki:
+        for key, value in ki:
+            if key == "a":
+                assert value == bytes([0x30, 0x31])
+            elif key == "b":
+                assert value == b"1234"
+            else:
+                raise ValueError(f"Unknown key {key} with value {value}")
+
+def test_read_single_item():
+    a = bytes([10, 20])
+    b = b"1234"
+
+    with kaldi_native_io.BlobWriter("ark,scp:b.ark,b.scp") as ko:
         ko.write("a", a)
         ko["b"] = b
     """
-    v.scp contains:
-      a v.ark:2
-      b v.ark:15
+    b.scp contains:
+      a b.ark:2
+      b b.ark:20
     """
 
-    va = kaldi_native_io.read_int8_vector("v.ark:2")
-    assert va == a
+    va = kaldi_native_io.read_blob("b.ark:2")
+    assert va == a, (va, a)
 
-    vb = kaldi_native_io.read_int8_vector("v.ark:15")
-    assert vb == b
+    vb = kaldi_native_io.read_blob("b.ark:20")
+    assert vb == b, (vb, b)
+
+    os.remove("b.scp")
+    os.remove("b.ark")
 ```

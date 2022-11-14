@@ -8,6 +8,7 @@ import numpy as np
 from _kaldi_native_io import (
     CompressionMethod,
     HtkHeader,
+    _BlobWriter,
     _BoolWriter,
     _CompressedMatrix,
     _CompressedMatrixWriter,
@@ -30,6 +31,7 @@ from _kaldi_native_io import (
     _Int32VectorWriter,
     _Int32Writer,
     _PosteriorWriter,
+    _RandomAccessBlobReader,
     _RandomAccessBoolReader,
     _RandomAccessDoubleMatrixReader,
     _RandomAccessDoubleReader,
@@ -51,6 +53,7 @@ from _kaldi_native_io import (
     _RandomAccessTokenVectorReader,
     _RandomAccessWaveInfoReader,
     _RandomAccessWaveReader,
+    _SequentialBlobReader,
     _SequentialBoolReader,
     _SequentialDoubleMatrixReader,
     _SequentialDoubleReader,
@@ -75,6 +78,7 @@ from _kaldi_native_io import (
     _TokenVectorWriter,
     _TokenWriter,
     _WaveWriter,
+    read_blob,
 )
 
 
@@ -277,6 +281,21 @@ class SequentialInt32VectorReader(_SequentialTableReader):
 class RandomAccessInt32VectorReader(_RandomAccessTableReader):
     def open(self, rspecifier: str) -> None:
         self._impl = _RandomAccessInt32VectorReader(rspecifier)
+
+
+class BlobWriter(_TableWriter):
+    def open(self, wspecifier: str) -> None:
+        self._impl = _BlobWriter(wspecifier)
+
+
+class SequentialBlobReader(_SequentialTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _SequentialBlobReader(rspecifier)
+
+
+class RandomAccessBlobReader(_RandomAccessTableReader):
+    def open(self, rspecifier: str) -> None:
+        self._impl = _RandomAccessBlobReader(rspecifier)
 
 
 class Int8VectorWriter(_TableWriter):

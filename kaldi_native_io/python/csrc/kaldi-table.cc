@@ -14,9 +14,12 @@
 #include "kaldi_native_io/csrc/matrix-shape.h"
 #include "kaldi_native_io/csrc/posterior.h"
 #include "kaldi_native_io/csrc/wave-reader.h"
+#include "kaldi_native_io/python/csrc/blob.h"
 #include "kaldi_native_io/python/csrc/kaldi-table.h"
 
 namespace kaldiio {
+
+int32_t BlobHolder::kMagicHeader = 0x20221114;
 
 template <class Holder>
 void PybindTableWriter(py::module &m,  // NOLINT
@@ -97,6 +100,12 @@ void PybindKaldiTable(py::module &m) {  // NOLINT
       m, "_RandomAccessInt32VectorReader");
   PybindReadSingleItem<BasicVectorHolder<int32_t>>(
       m, "read_int32_vector", "Read std::vector<int32_t> for an rxfilename");
+
+  PybindTableWriter<BlobHolder>(m, "_BlobWriter");
+  PybindSequentialTableReader<BlobHolder>(m, "_SequentialBlobReader");
+  PybindRandomAccessTableReader<BlobHolder>(m, "_RandomAccessBlobReader");
+  PybindReadSingleItem<BlobHolder>(m, "read_blob",
+                                   "Read a bytes object from an rxfilename");
 
   PybindTableWriter<BasicVectorVectorHolder<int32_t>>(
       m, "_Int32VectorVectorWriter");

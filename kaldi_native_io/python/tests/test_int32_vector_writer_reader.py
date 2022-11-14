@@ -57,6 +57,9 @@ def test_read_single_item():
     vb = kaldi_native_io.read_int32_vector("v.ark:21")
     assert vb == b
 
+    os.remove("v.scp")
+    os.remove("v.ark")
+
 
 def main():
     test_int32_vector_writer()

@@ -17,6 +17,7 @@ endfunction()
 
 # please sort the files in alphabetic order
 set(py_test_files
+  test_blob_writer_reader.py
   test_bool_writer_reader.py
   test_compressed_matrix_writer_reader.py
   test_double_matrix_writer_reader.py

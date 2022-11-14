@@ -13,7 +13,7 @@ from _kaldi_native_io import _DoubleMatrix as DoubleMatrix
 from _kaldi_native_io import _DoubleVector as DoubleVector
 from _kaldi_native_io import _FloatMatrix as FloatMatrix
 from _kaldi_native_io import _FloatVector as FloatVector
-from _kaldi_native_io import read_wave, read_wave_info
+from _kaldi_native_io import read_blob, read_wave, read_wave_info
 
 from .table_types import (
     BoolWriter,
@@ -31,9 +31,11 @@ from .table_types import (
     Int32PairVectorWriter,
     Int32VectorVectorWriter,
     Int32VectorWriter,
+    BlobWriter,
     Int32Writer,
     PosteriorWriter,
     RandomAccessBoolReader,
+    RandomAccessBlobReader,
     RandomAccessDoubleMatrixReader,
     RandomAccessDoubleReader,
     RandomAccessDoubleVectorReader,
@@ -67,6 +69,7 @@ from .table_types import (
     SequentialInt8VectorReader,
     SequentialInt32PairVectorReader,
     SequentialInt32Reader,
+    SequentialBlobReader,
     SequentialInt32VectorReader,
     SequentialInt32VectorVectorReader,
     SequentialMatrixShapeReader,
