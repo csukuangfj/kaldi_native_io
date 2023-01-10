@@ -10,10 +10,6 @@ pybind11_add_module(_kaldi_native_io
   wave-reader.cc
 )
 
-if(UNIX AND NOT APPLE)
-  target_link_libraries(_kaldi_native_io PUBLIC ${PYTHON_LIBRARY})
-endif()
-
 if(APPLE)
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
@@ -29,11 +25,6 @@ if(NOT WIN32)
 endif()
 
 target_link_libraries(_kaldi_native_io PRIVATE kaldi_native_io_core)
-if(UNIX AND NOT APPLE)
-  target_link_libraries(_kaldi_native_io PUBLIC ${PYTHON_LIBRARY})
-elseif(WIN32)
-  target_link_libraries(_kaldi_native_io PUBLIC ${PYTHON_LIBRARIES})
-endif()
 
 install(TARGETS _kaldi_native_io
   DESTINATION ../

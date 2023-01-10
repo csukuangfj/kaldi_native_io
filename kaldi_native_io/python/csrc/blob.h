@@ -85,7 +85,7 @@ class BlobHolder {
 
     if (is.good()) {
       // s is copied to value_
-      value_ = py::bytes(s.data(), len);
+      value_ = py::bytes(s.data(), static_cast<int32_t>(len));
     }
 
     return is.good();
