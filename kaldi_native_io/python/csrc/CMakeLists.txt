@@ -29,11 +29,6 @@ if(NOT WIN32)
 endif()
 
 target_link_libraries(_kaldi_native_io PRIVATE kaldi_native_io_core)
-if(UNIX AND NOT APPLE)
-  target_link_libraries(_kaldi_native_io PUBLIC ${PYTHON_LIBRARY})
-elseif(WIN32)
-  target_link_libraries(_kaldi_native_io PUBLIC ${PYTHON_LIBRARIES})
-endif()
 
 install(TARGETS _kaldi_native_io
   DESTINATION ../
