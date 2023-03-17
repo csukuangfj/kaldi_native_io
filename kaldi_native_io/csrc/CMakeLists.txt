@@ -17,6 +17,8 @@ set(srcs
   wave-reader.cc
 )
 
+add_library(kaldi_native_io_core_static STATIC ${srcs})
+
 add_library(kaldi_native_io_core ${srcs})
 if(APPLE)
   set_target_properties(kaldi_native_io_core
