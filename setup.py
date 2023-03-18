@@ -31,6 +31,8 @@ class BuildExtension(build_ext):
         build_dir = self.build_temp
         os.makedirs(build_dir, exist_ok=True)
 
+        bin_dir = Path(build_dir).parent.resolve() / "bin"
+
         # build/lib.linux-x86_64-3.8
         os.makedirs(self.build_lib, exist_ok=True)
 
@@ -97,6 +99,7 @@ class BuildExtension(build_ext):
                     "\nClick:\n"
                     "   https://github.com/csukuangfj/kaldi_native_io/issues/new\n"
                 )
+        shutil.copy(install_dir / "bin" / "copy-blob", bin_dir)
 
 
 def read_long_description():
@@ -130,6 +133,7 @@ setuptools.setup(
     package_dir={
         package_name: "kaldi_native_io/python/kaldi_native_io",
     },
+    data_files=[("bin", ["build/bin/copy-blob"])],
     packages=[package_name],
     install_requires=["numpy"],
     url="https://github.com/csukuangfj/kaldi_native_io",

@@ -38,6 +38,6 @@ add_executable(copy-blob
 target_link_libraries(copy-blob kaldi_native_io_core_static)
 
 install(
-  TARGETS ${exe_list}
+  TARGETS copy-blob
   DESTINATION bin
 )
