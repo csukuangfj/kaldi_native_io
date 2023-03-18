@@ -36,6 +36,9 @@ add_executable(copy-blob
   parse-options.cc
 )
 target_link_libraries(copy-blob kaldi_native_io_core_static)
+if(NOT WIN32)
+  target_link_libraries(copy-blob -pthread)
+endif()
 
 install(
   TARGETS copy-blob
