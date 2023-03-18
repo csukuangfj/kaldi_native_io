@@ -100,7 +100,10 @@ class BuildExtension(build_ext):
                     "\nClick:\n"
                     "   https://github.com/csukuangfj/kaldi_native_io/issues/new\n"
                 )
-        shutil.copy(install_dir / "bin" / "copy-blob", bin_dir)
+        if is_windows():
+            shutil.copy(install_dir / "bin" / "copy-blob.exe", bin_dir)
+        else:
+            shutil.copy(install_dir / "bin" / "copy-blob", bin_dir)
 
 
 def read_long_description():
@@ -134,7 +137,16 @@ setuptools.setup(
     package_dir={
         package_name: "kaldi_native_io/python/kaldi_native_io",
     },
-    data_files=[("bin", ["build/bin/copy-blob"])],
+    data_files=[
+        (
+            "bin",
+            [
+                "build/bin/copy-blob.exe"
+                if is_windows()
+                else "build/bin/copy-blob"
+            ],
+        )
+    ],
     packages=[package_name],
     install_requires=["numpy"],
     url="https://github.com/csukuangfj/kaldi_native_io",
