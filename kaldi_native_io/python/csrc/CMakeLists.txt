@@ -1,6 +1,7 @@
 include_directories(${CMAKE_SOURCE_DIR})
 
 pybind11_add_module(_kaldi_native_io
+  blob.cc
   compressed-matrix.cc
   kaldi-matrix.cc
   kaldi-table.cc
@@ -28,4 +29,18 @@ target_link_libraries(_kaldi_native_io PRIVATE kaldi_native_io_core)
 
 install(TARGETS _kaldi_native_io
   DESTINATION ../
+)
+
+add_executable(copy-blob
+  copy-blob.cc
+  parse-options.cc
+)
+target_link_libraries(copy-blob kaldi_native_io_core_static)
+if(NOT WIN32)
+  target_link_libraries(copy-blob -pthread)
+endif()
+
+install(
+  TARGETS copy-blob
+  DESTINATION bin
 )

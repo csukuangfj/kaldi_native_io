@@ -43,6 +43,8 @@ class Logger {
   ~Logger() noexcept(false) {
     if (level_ == LogLevel::kError) {
       throw std::runtime_error(os_.str());
+    } else {
+      fprintf(stderr, "%s\n", os_.str().c_str());
     }
   }
 

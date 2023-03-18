@@ -19,8 +19,6 @@
 
 namespace kaldiio {
 
-int32_t BlobHolder::kMagicHeader = 0x20221114;
-
 template <class Holder>
 void PybindTableWriter(py::module &m,  // NOLINT
                        const std::string &class_name,

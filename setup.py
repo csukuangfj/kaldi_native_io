@@ -31,11 +31,18 @@ class BuildExtension(build_ext):
         build_dir = self.build_temp
         os.makedirs(build_dir, exist_ok=True)
 
+        bin_dir = Path(__file__).resolve().parent / "build" / "bin"
+        bin_dir.mkdir(parents=True, exist_ok=True)
+
         # build/lib.linux-x86_64-3.8
         os.makedirs(self.build_lib, exist_ok=True)
 
         kaldi_native_io_dir = os.path.dirname(os.path.abspath(__file__))
         install_dir = Path(self.build_lib).resolve() / "kaldi_native_io"
+
+        print(f"build_dir: {build_dir}")
+        print(f"bin_dir: {bin_dir}")
+        print(f"install_dir: {install_dir}")
 
         cmake_args = os.environ.get("KALDI_NATIVE_IO_CMAKE_ARGS", "")
         make_args = os.environ.get("KALDI_NATIVE_IO_MAKE_ARGS", "")
@@ -97,6 +104,12 @@ class BuildExtension(build_ext):
                     "\nClick:\n"
                     "   https://github.com/csukuangfj/kaldi_native_io/issues/new\n"
                 )
+        if is_windows():
+            print(f"Copying {install_dir}/bin/copy-blob.exe to {bin_dir}")
+            shutil.copy(install_dir / "bin" / "copy-blob.exe", bin_dir)
+        else:
+            print(f"Copying {install_dir}/bin/copy-blob to {bin_dir}")
+            shutil.copy(install_dir / "bin" / "copy-blob", bin_dir)
 
 
 def read_long_description():
@@ -130,6 +143,16 @@ setuptools.setup(
     package_dir={
         package_name: "kaldi_native_io/python/kaldi_native_io",
     },
+    data_files=[
+        (
+            "bin",
+            [
+                "build/bin/copy-blob.exe"
+                if is_windows()
+                else "build/bin/copy-blob"
+            ],
+        )
+    ],
     packages=[package_name],
     install_requires=["numpy"],
     url="https://github.com/csukuangfj/kaldi_native_io",
