@@ -32,6 +32,7 @@ class BuildExtension(build_ext):
         os.makedirs(build_dir, exist_ok=True)
 
         bin_dir = Path(build_dir).parent.resolve() / "bin"
+        bin_dir.mkdir(parents=True, exist_ok=True)
 
         # build/lib.linux-x86_64-3.8
         os.makedirs(self.build_lib, exist_ok=True)
