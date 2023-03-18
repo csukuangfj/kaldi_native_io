@@ -31,7 +31,7 @@ class BuildExtension(build_ext):
         build_dir = self.build_temp
         os.makedirs(build_dir, exist_ok=True)
 
-        bin_dir = Path(build_dir).parent.resolve() / "bin"
+        bin_dir = Path(__file__).resolve().parent / "build" / "bin"
         bin_dir.mkdir(parents=True, exist_ok=True)
 
         # build/lib.linux-x86_64-3.8
@@ -39,6 +39,10 @@ class BuildExtension(build_ext):
 
         kaldi_native_io_dir = os.path.dirname(os.path.abspath(__file__))
         install_dir = Path(self.build_lib).resolve() / "kaldi_native_io"
+
+        print(f"build_dir: {build_dir}")
+        print(f"bin_dir: {bin_dir}")
+        print(f"install_dir: {install_dir}")
 
         cmake_args = os.environ.get("KALDI_NATIVE_IO_CMAKE_ARGS", "")
         make_args = os.environ.get("KALDI_NATIVE_IO_MAKE_ARGS", "")
@@ -101,8 +105,10 @@ class BuildExtension(build_ext):
                     "   https://github.com/csukuangfj/kaldi_native_io/issues/new\n"
                 )
         if is_windows():
+            print(f"Copying {install_dir}/bin/copy-blob.exe to {bin_dir}")
             shutil.copy(install_dir / "bin" / "copy-blob.exe", bin_dir)
         else:
+            print(f"Copying {install_dir}/bin/copy-blob to {bin_dir}")
             shutil.copy(install_dir / "bin" / "copy-blob", bin_dir)
 
 
