@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - wheel
+      - copy-blob
     tags:
       - '*'
 
