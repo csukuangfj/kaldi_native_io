@@ -115,8 +115,8 @@ int main(int argc, char *argv[]) {
       "Usage: copy-blob [options] "
       "(<blob-in-rspecifier>|<blob-in-rxfilename>) "
       "(<blob-out-wspecifier>|<blob-out-wxfilename>)\n"
-      " e.g.: copy-blob --binary=false 1.ark -\n"
-      "   copy-blob ark:2.ark ark,t:-\n";
+      " e.g.: copy-blob 1.ark - | soxi -\n"
+      "   copy-blob ark:2.ark ark,scp:out.ark,out.scp\n";
   bool binary = true;  // must be true
                        //
   kaldiio::ParseOptions po(usage);
