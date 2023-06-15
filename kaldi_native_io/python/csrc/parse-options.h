@@ -7,6 +7,7 @@
 #ifndef KALDI_NATIVE_IO_PYTHON_CSRC_PARSE_OPTIONS_H_
 #define KALDI_NATIVE_IO_PYTHON_CSRC_PARSE_OPTIONS_H_
 
+#include <cstdint>
 #include <sstream>
 #include <string>
 #include <unordered_map>
