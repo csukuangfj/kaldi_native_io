@@ -4,6 +4,7 @@
 
 #ifndef KALDI_NATIVE_IO_CSRC_LOG_H_
 #define KALDI_NATIVE_IO_CSRC_LOG_H_
+#include <cstdint>
 #include <iostream>
 #include <sstream>
 
