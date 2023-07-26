@@ -18,7 +18,7 @@ cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 project(kaldi_native_io CXX)
 
 # Remember to change scripts/conda/kaldi_native_io/meta.yaml
-set(KALDI_NATIVE_IO_VERSION "1.20")
+set(KALDI_NATIVE_IO_VERSION "1.21")
 
 if(CMAKE_TOOLCHAIN_FILE)
   set(_BUILD_PYTHON OFF)

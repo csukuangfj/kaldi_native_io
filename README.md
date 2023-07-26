@@ -409,6 +409,31 @@ def test_read_single_item():
     vb = kaldi_native_io.read_blob("b.ark:20")
     assert vb == b, (vb, b)
 
+    # test range read
+    # [start:end], both ends are inclusive
+    # Must satisfy 0 <= start <= end < length of the data
+
+    # start 0, end 2
+    vc = kaldi_native_io.read_blob("b.ark:20[0:2]")
+    assert vc == b"123", (vc, b"123")
+
+    # start 1, end 2
+    vd = kaldi_native_io.read_blob("b.ark:20[1:2]")
+    assert vd == b"23", (vd, b"23")
+
+    # start 2, end 2
+    ve = kaldi_native_io.read_blob("b.ark:20[2:2]")
+    assert ve == b"3", (ve, b"3")
+
+    # start 2, end -1
+    # -1 means the end of the data
+    vf = kaldi_native_io.read_blob("b.ark:20[2:-1]")
+    assert vf == b"34", (vf, b"34")
+
+    # [:] means all the data
+    vg = kaldi_native_io.read_blob("b.ark:20[:]")
+    assert vg == b"1234", (vg, b"1234")
+
     os.remove("b.scp")
     os.remove("b.ark")
 ```

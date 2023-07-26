@@ -84,6 +84,16 @@ void PybindReadSingleItem(py::module &m,  // NOLINT
       py::arg("rxfilename"), help_doc.c_str());
 }
 
+template <>
+void PybindReadSingleItem<BlobHolder>(py::module &m,  // NOLINT
+                                      const std::string &name,
+                                      const std::string &help_doc /*= ""*/) {
+  m.def(
+      name.c_str(),
+      [](const std::string &rxfilename) { return ReadBlobObject(rxfilename); },
+      py::arg("rxfilename"), help_doc.c_str());
+}
+
 void PybindKaldiTable(py::module &m) {  // NOLINT
   PybindTableWriter<BasicHolder<int32_t>>(m, "_Int32Writer");
   PybindSequentialTableReader<BasicHolder<int32_t>>(m,
