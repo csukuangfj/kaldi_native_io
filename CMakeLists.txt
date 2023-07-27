@@ -18,7 +18,7 @@ cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 project(kaldi_native_io CXX)
 
 # Remember to change scripts/conda/kaldi_native_io/meta.yaml
-set(KALDI_NATIVE_IO_VERSION "1.21")
+set(KALDI_NATIVE_IO_VERSION "1.22")
 
 if(CMAKE_TOOLCHAIN_FILE)
   set(_BUILD_PYTHON OFF)
@@ -57,6 +57,7 @@ message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 option(KALDI_NATIVE_IO_BUILD_TESTS "Whether to build tests or not" ${_BUILD_TESTS})
 option(KALDI_NATIVE_IO_BUILD_PYTHON "Whether to build Python extension" ${_BUILD_PYTHON})
+option(BUILD_SHARED_LIBS "Whether to build shared libraries" ON)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -77,10 +78,8 @@ set(CMAKE_BUILD_RPATH ${kaldi_native_io_rpath_origin})
 
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
 
-set(BUILD_SHARED_LIBS ON)
-if(WIN32)
-  message(STATUS "Set BUILD_SHARED_LIBS to OFF for Windows")
-  set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+if(BUILD_SHARED_LIBS AND MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
 if(WIN32)
