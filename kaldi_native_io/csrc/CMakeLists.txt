@@ -48,6 +48,12 @@ install(TARGETS kaldi_native_io_core
   DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
+if(KALDI_NATIVE_IO_BUILD_PYTHON AND WIN32)
+  install(TARGETS kaldi_native_io_core
+    DESTINATION ../
+  )
+endif()
+
 install(FILES ${all_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kaldi_native_io/csrc
 )
