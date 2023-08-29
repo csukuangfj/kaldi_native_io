@@ -269,7 +269,6 @@ void WaveInfo::Read(std::istream &is) {
 }
 
 void WaveData::Read(std::istream &is) {
-  const uint32 kBlockSize = 1024 * 1024;
 
   WaveInfo header;
   header.Read(is);
@@ -310,6 +309,8 @@ std::vector<char> WaveData::ReadData(std::istream &is, const WaveInfo& header) {
   // loading large files. The output vector is assembled later.
   std::list<std::vector<char>> buffers;
 
+  int64_t block_size = static_cast<int64_t>(kBlockSize);
+
   // read wav data to buffers
   {
     int64_t bytes_to_go = header.IsStreamed() ? kBlockSize : header.DataBytes();
@@ -318,7 +319,7 @@ std::vector<char> WaveData::ReadData(std::istream &is, const WaveInfo& header) {
     // read the file to the end
     while (is && bytes_to_go > 0) {
       // not more than kBlockSize bytes per buffer
-      uint32 block_bytes = std::min(bytes_to_go, static_cast<int64_t>(kBlockSize));
+      uint32 block_bytes = std::min(bytes_to_go, block_size);
       buffers.emplace_back(block_bytes); // add vector to back()
       is.read(buffers.back().data(), block_bytes);
 
@@ -331,6 +332,8 @@ std::vector<char> WaveData::ReadData(std::istream &is, const WaveInfo& header) {
       if (is.fail()) {
         KALDIIO_ERR << "WaveData: file read error (stream read failed).";
       }
+
+      block_size *= 2;
     }
   }
 
@@ -355,11 +358,16 @@ std::vector<char> WaveData::ReadData(std::istream &is, const WaveInfo& header) {
       }
 
       // pre-allocate
-      buffer_out.reserve(total_size);
+      //buffer_out.reserve(total_size);
+      buffer_out.resize(total_size);
       // concatenate buffers
+      char* ptr_write = buffer_out.data();
       for (auto& b : buffers) {
-        buffer_out.insert(buffer_out.end(), b.begin(), b.end());
+        memcpy(ptr_write, b.data(), b.size());
+        ptr_write += b.size();
+        // buffer_out.insert(buffer_out.end(), b.begin(), b.end());
       }
+      KALDIIO_ASSERT(ptr_write - buffer_out.data() == total_size);
 
       return buffer_out;
     }

@@ -135,7 +135,9 @@ class WaveData {
   static std::vector<char> ReadData(std::istream &is, const WaveInfo& header);
 
  private:
-  static const uint32_t kBlockSize = 1024 * 1024;  // Use 1M bytes.
+  //static const uint32_t kBlockSize = 1024 * 1024;  // Use 1M bytes.
+  //static const uint32_t kBlockSize = 100 * 1024 * 1024;  // Use 100M bytes.
+  static const uint32_t kBlockSize = 10 * 1024 * 1024;  // Use 10M bytes.
   Matrix<float> data_;
   float samp_freq_;
 };
