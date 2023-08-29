@@ -68,7 +68,17 @@ struct WaveHeaderReadGofer {
       KALDIIO_ERR << "WaveData: unexpected end of file or read error";
     return u.ans;
   }
+
+  void SkipBytes(int32 num_bytes) {
+    KALDIIO_ASSERT(num_bytes >= 0);
+    for (uint32 i = 0; i < num_bytes; i++) {
+      is.get();
+    }
+  }
+
 };
+
+
 
 static void WriteUint32(std::ostream &os, int32_t i) {
   union {
@@ -98,6 +108,7 @@ static void WriteUint16(std::ostream &os, int16 i) {
 
 void WaveInfo::Read(std::istream &is) {
   WaveHeaderReadGofer reader(is);
+
   reader.Read4ByteTag();
   if (strcmp(reader.tag, "RIFF") == 0)
     reverse_bytes_ = false;
@@ -112,9 +123,9 @@ void WaveInfo::Read(std::istream &is) {
   reader.swap = reverse_bytes_;
 
   uint32 riff_chunk_size = reader.ReadUint32();
-  reader.Expect4ByteTag("WAVE");
-
   uint32 riff_chunk_read = 0;
+
+  reader.Expect4ByteTag("WAVE");
   riff_chunk_read += 4;  // WAVE included in riff_chunk_size.
 
   // Possibly skip any RIFF tags between 'WAVE' and 'fmt '.
@@ -124,40 +135,46 @@ void WaveInfo::Read(std::istream &is) {
   while (strcmp(reader.tag, "fmt ") != 0) {
     uint32 filler_size = reader.ReadUint32();
     riff_chunk_read += 4;
-    for (uint32 i = 0; i < filler_size; i++) {
-      is.get();  // read 1 byte,
-    }
+
+    reader.SkipBytes(filler_size);
     riff_chunk_read += filler_size;
+
     // get next RIFF tag,
     reader.Read4ByteTag();
     riff_chunk_read += 4;
   }
-
   KALDIIO_ASSERT(strcmp(reader.tag, "fmt ") == 0);
-  uint32 subchunk1_size = reader.ReadUint32();
+
+  uint32 fmt_chunk_size = reader.ReadUint32();
+  uint32 fmt_chunk_read = 0;
+  if (fmt_chunk_size < 16) {
+    KALDIIO_ERR << "WaveData: expect fmt chunk of at least size 16.";
+  }
+  riff_chunk_read += 4;
+
   uint16 audio_format = reader.ReadUint16();
   num_channels_ = reader.ReadUint16();
-  uint32 sample_rate = reader.ReadUint32(), byte_rate = reader.ReadUint32(),
+  uint32 sample_rate = reader.ReadUint32(),
+         byte_rate = reader.ReadUint32(),
          block_align = reader.ReadUint16(),
          bits_per_sample = reader.ReadUint16();
   samp_freq_ = static_cast<float>(sample_rate);
+  fmt_chunk_read += 16;
 
-  uint32 fmt_chunk_read = 16;
   if (audio_format == 1) {
-    if (subchunk1_size < 16) {
-      KALDIIO_ERR << "WaveData: expect PCM format data to have fmt chunk "
-                  << "of at least size 16.";
-    }
+    ;
   } else if (audio_format == 0xFFFE) {  // WAVE_FORMAT_EXTENSIBLE
     uint16 extra_size = reader.ReadUint16();
-    if (subchunk1_size < 40 || extra_size < 22) {
+    if (fmt_chunk_size < 40 || extra_size < 22) {
       KALDIIO_ERR << "WaveData: malformed WAVE_FORMAT_EXTENSIBLE format data.";
     }
     reader.ReadUint16();  // Unused for PCM.
     reader.ReadUint32();  // Channel map: we do not care.
-    uint32 guid1 = reader.ReadUint32(), guid2 = reader.ReadUint32(),
-           guid3 = reader.ReadUint32(), guid4 = reader.ReadUint32();
-    fmt_chunk_read = 40;
+    uint32 guid1 = reader.ReadUint32(),
+           guid2 = reader.ReadUint32(),
+           guid3 = reader.ReadUint32(),
+           guid4 = reader.ReadUint32();
+    fmt_chunk_read += 24;
 
     // Support only KSDATAFORMAT_SUBTYPE_PCM for now. Interesting formats:
     // ("00000001-0000-0010-8000-00aa00389b71", KSDATAFORMAT_SUBTYPE_PCM)
@@ -173,48 +190,45 @@ void WaveInfo::Read(std::istream &is) {
                 << audio_format;
   }
 
-  for (uint32 i = fmt_chunk_read; i < subchunk1_size; ++i)
-    is.get();  // use up extra data.
-
   if (num_channels_ == 0) KALDIIO_ERR << "WaveData: no channels present";
   if (bits_per_sample != 16)
     KALDIIO_ERR << "WaveData: unsupported bits_per_sample = "
                 << bits_per_sample;
-  if (byte_rate != sample_rate * bits_per_sample / 8 * num_channels_)
+  uint32 bytes_per_sample = bits_per_sample / 8;
+
+  if (byte_rate != sample_rate * bytes_per_sample * num_channels_)
     KALDIIO_ERR << "Unexpected byte rate " << byte_rate << " vs. "
-                << sample_rate << " * " << (bits_per_sample / 8) << " * "
+                << sample_rate << " * " << bytes_per_sample << " * "
                 << num_channels_;
-  if (block_align != num_channels_ * bits_per_sample / 8)
+  if (block_align != num_channels_ * bytes_per_sample)
     KALDIIO_ERR << "Unexpected block_align: " << block_align << " vs. "
-                << num_channels_ << " * " << (bits_per_sample / 8);
+                << num_channels_ << " * " << bytes_per_sample;
 
-  riff_chunk_read += 4 + subchunk1_size;
-  // size of what we just read, 4 for subchunk1_size + subchunk1_size itself.
-
-  // We support an optional "fact" chunk (which is useless but which
-  // we encountered), and then a single "data" chunk.
-
-  reader.Read4ByteTag();
-  riff_chunk_read += 4;
+  // consume any remaining extra data in the "fmt " subchunk
+  reader.SkipBytes(fmt_chunk_size - fmt_chunk_read);
+  riff_chunk_read += fmt_chunk_size;
 
   // Skip any subchunks between "fmt" and "data".  Usually there will
   // be a single "fact" subchunk, but on Windows there can also be a
   // "list" subchunk.
+  reader.Read4ByteTag();
+  riff_chunk_read += 4;
   while (strcmp(reader.tag, "data") != 0) {
     // We will just ignore the data in these chunks.
     uint32 chunk_sz = reader.ReadUint32();
+    riff_chunk_read += 4;
     if (chunk_sz != 4 && strcmp(reader.tag, "fact") == 0)
       KALDIIO_WARN << "Expected fact chunk to be 4 bytes long.";
-    for (uint32 i = 0; i < chunk_sz; i++) is.get();
-    riff_chunk_read +=
-        4 + chunk_sz;  // for chunk_sz (4) + chunk contents (chunk-sz)
+
+    reader.SkipBytes(chunk_sz);
+    riff_chunk_read += chunk_sz;
 
     // Now read the next chunk name.
     reader.Read4ByteTag();
     riff_chunk_read += 4;
   }
-
   KALDIIO_ASSERT(strcmp(reader.tag, "data") == 0);
+
   uint32 data_chunk_size = reader.ReadUint32();
   riff_chunk_read += 4;
 
@@ -223,7 +237,8 @@ void WaveInfo::Read(std::istream &is) {
   bool is_stream_mode =
       riff_chunk_size == 0 || riff_chunk_size == 0xFFFFFFFF ||
       data_chunk_size == 0 || data_chunk_size == 0xFFFFFFFF ||
-      data_chunk_size == 0x7FFFF000;  // This value is used by SoX.
+      data_chunk_size == 0x7FFFF000 || // This value is used by SoX
+      data_chunk_size == 0xFFFFFFFE; // This value was seen from ffmpeg -> SoX pipeline
 
 #if 0
   if (is_stream_mode)
@@ -285,7 +300,7 @@ void WaveData::Read(std::istream &is) {
                  << "Truncated file?";
   }
 
-  uint16 *data_ptr = reinterpret_cast<uint16 *>(&buffer[0]);
+  const int16 *data_ptr = reinterpret_cast<const int16 *>(&buffer[0]);
 
   // The matrix is arranged row per channel, column per sample.
   data_.Resize(header.NumChannels(), buffer.size() / header.BlockAlign());
@@ -297,6 +312,7 @@ void WaveData::Read(std::istream &is) {
     }
   }
 }
+
 
 // Write 16-bit PCM.
 
