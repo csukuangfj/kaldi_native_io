@@ -13,7 +13,6 @@
 #include <istream>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 #include "kaldi_native_io/csrc/log.h"
@@ -129,10 +128,6 @@ class WaveData {
     data_.Swap(&(other->data_));
     std::swap(samp_freq_, other->samp_freq_);
   }
-
- private:
-  /// Internal impl. of Read, reads data blockwise and merges blocks at the end.
-  static std::vector<char> ReadData(std::istream &is, const WaveInfo& header);
 
  private:
   static const uint32_t kBlockSize = 1024 * 1024;  // Use 1M bytes.

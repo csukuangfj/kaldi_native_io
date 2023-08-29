@@ -14,8 +14,6 @@
 #include <cmath>  // for trunc()
 #include <cstring>
 #include <limits>
-#include <list>
-#include <memory>
 #include <vector>
 
 #include "kaldi_native_io/csrc/kaldi-utils.h"
@@ -277,8 +275,20 @@ void WaveData::Read(std::istream &is) {
   data_.Resize(0, 0);  // clear the data.
   samp_freq_ = header.SampFreq();
 
-  const std::vector<char>& buffer = WaveData::ReadData(is, header);
-  // (the tmp object exists till end of the scope of the reference, optimization)
+  std::vector<char> buffer;
+  uint32 bytes_to_go = header.IsStreamed() ? kBlockSize : header.DataBytes();
+
+  // Once in a while header.DataBytes() will report an insane value;
+  // read the file to the end
+  while (is && bytes_to_go > 0) {
+    uint32 block_bytes = std::min(bytes_to_go, kBlockSize);
+    uint32 offset = buffer.size();
+    buffer.resize(offset + block_bytes);
+    is.read(&buffer[offset], block_bytes);
+    uint32 bytes_read = is.gcount();
+    buffer.resize(offset + bytes_read);
+    if (!header.IsStreamed()) bytes_to_go -= bytes_read;
+  }
 
   if (is.bad()) KALDIIO_ERR << "WaveData: file read error";
 
@@ -299,69 +309,6 @@ void WaveData::Read(std::istream &is) {
       int16 k = *data_ptr++;
       if (header.ReverseBytes()) KALDIIO_SWAP2(k);
       data_(j, i) = k;
-    }
-  }
-}
-
-
-std::vector<char> WaveData::ReadData(std::istream &is, const WaveInfo& header) {
-
-  // We use list of buffers, to avoid re-allocations and memory moves when
-  // loading large files. The output vector is assembled later.
-  std::list<std::vector<char>> buffers;
-
-  // read wav data to buffers
-  {
-    int64_t bytes_to_go = header.IsStreamed() ? kBlockSize : header.DataBytes();
-
-    // Once in a while header.DataBytes() will report an insane value;
-    // read the file to the end
-    while (is && bytes_to_go > 0) {
-      // not more than kBlockSize bytes per buffer
-      uint32 block_bytes = std::min(bytes_to_go, static_cast<int64_t>(kBlockSize));
-      buffers.emplace_back(block_bytes); // add vector to back()
-      is.read(buffers.back().data(), block_bytes);
-
-      std::streamsize bytes_last_read = is.gcount(); // signed type
-      buffers.back().resize(bytes_last_read);
-
-      if (! header.IsStreamed()) bytes_to_go -= bytes_last_read;
-
-      if (is.eof()) break;
-      if (is.fail()) {
-        KALDIIO_ERR << "WaveData: file read error (stream read failed).";
-      }
-    }
-  }
-
-  // prepare the output buffer
-  {
-    std::vector<char> buffer_out;
-
-    if (buffers.size() == 0) {
-      KALDIIO_ERR << "WaveData: file read error (no buffer)";
-    }
-
-    // shortcut for small files
-    if (buffers.size() == 1) {
-      buffer_out.swap(buffers.front());
-      return buffer_out;
-    }
-
-    { // assemble the vectors to single vector
-      int32 total_size = 0;
-      for (auto& b : buffers) {
-        total_size += b.size();
-      }
-
-      // pre-allocate
-      buffer_out.reserve(total_size);
-      // concatenate buffers
-      for (auto& b : buffers) {
-        buffer_out.insert(buffer_out.end(), b.begin(), b.end());
-      }
-
-      return buffer_out;
     }
   }
 }
