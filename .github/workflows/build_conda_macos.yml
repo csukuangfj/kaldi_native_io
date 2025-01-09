@@ -29,11 +29,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       # refer to https://github.com/actions/checkout
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -75,7 +75,7 @@ jobs:
           ls -lh /usr/local/miniconda/envs/kaldi_native_io/conda-bld/osx-64
 
       - name: Upload generated files
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: cpu-python-${{ matrix.python-version }}-macos-10.15
           path: /usr/local/miniconda/envs/kaldi_native_io/conda-bld/osx-64/*.tar.bz2
