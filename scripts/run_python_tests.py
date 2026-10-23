@@ -108,12 +108,15 @@ def main() -> int:
         )
         return 1
 
-    # Guard against the shadowing described above: if the resolved package
-    # lives inside this checkout, we are testing the source tree rather than
-    # the installed wheel.
+    # Guard against the shadowing described above: if the resolved package is
+    # the one sitting next to these tests, we are testing the source tree
+    # rather than the installed wheel. Compare against the tests dir rather
+    # than deriving a "repo root" from __file__ -- when this script is mounted
+    # at /scripts in a container, that derivation yields "/" and "/" is an
+    # ancestor of every absolute path, so the guard would fire on every run.
     pkg_dir = Path(kaldi_native_io.__file__).resolve().parent
-    repo_root = Path(__file__).resolve().parent.parent
-    if repo_root in pkg_dir.parents:
+    source_pkg_dir = (tests_dir.parent / "kaldi_native_io").resolve()
+    if pkg_dir == source_pkg_dir:
         print(
             "\nERROR: kaldi_native_io resolved to the source tree "
             f"({pkg_dir}), not to an installed package.\n"
