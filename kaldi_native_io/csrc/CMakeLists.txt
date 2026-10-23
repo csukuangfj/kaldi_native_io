@@ -17,43 +17,42 @@ set(srcs
   wave-reader.cc
 )
 
-add_library(kaldi_native_io_core_static STATIC ${srcs})
+# Explicitly static, like kaldifst_core: the _kaldi_native_io extension then
+# links the code in and becomes self-contained, so the wheel needs no extra
+# libraries and no RPATH fixups.
+add_library(kaldi_native_io_core STATIC ${srcs})
 
-add_library(kaldi_native_io_core ${srcs})
-if(APPLE)
+if(NOT WIN32)
   set_target_properties(kaldi_native_io_core
     PROPERTIES
-      LINK_FLAGS "-undefined dynamic_lookup"
+      POSITION_INDEPENDENT_CODE ON
+      C_VISIBILITY_PRESET hidden
+      CXX_VISIBILITY_PRESET hidden
   )
 endif()
 
-file(MAKE_DIRECTORY
-  DESTINATION
-    ${PROJECT_BINARY_DIR}/include/kaldi_native_io/csrc
-)
-
-file(GLOB_RECURSE all_headers *.h)
-
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-  message(STATUS "All headers: ${all_headers}")
-endif()
-
-file(COPY
-  ${all_headers}
-  DESTINATION
-    ${PROJECT_BINARY_DIR}/include/kaldi_native_io/csrc
-)
-
-install(TARGETS kaldi_native_io_core
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-
-if(KALDI_NATIVE_IO_BUILD_PYTHON AND WIN32)
-  install(TARGETS kaldi_native_io_core
-    DESTINATION ../
+function(kaldi_native_io_add_test source)
+  get_filename_component(name ${source} NAME_WE)
+  add_executable(${name} "${source}")
+  target_link_libraries(${name}
+    PRIVATE
+      kaldi_native_io_core
+      gtest
+      gtest_main
   )
-endif()
 
-install(FILES ${all_headers}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kaldi_native_io/csrc
-)
+  add_test(NAME "Test.${name}"
+    COMMAND
+    $<TARGET_FILE:${name}>
+  )
+endfunction()
+
+if(KALDI_NATIVE_IO_BUILD_TESTS)
+  # please sort the source files alphabetically
+  set(test_srcs
+  )
+
+  foreach(source IN LISTS test_srcs)
+    kaldi_native_io_add_test(${source})
+  endforeach()
+endif()

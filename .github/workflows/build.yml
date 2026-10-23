@@ -8,16 +8,23 @@ on:
     branches:
       - master
 
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm, macos-15-intel]
+        python-version: ["3.8", "3.12"]
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # see https://github.com/microsoft/setup-msbuild
       - name: Add msbuild to PATH
@@ -25,9 +32,9 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
 
       - name: Install Python dependencies
         shell: bash
@@ -37,21 +44,17 @@ jobs:
       - name: Configure CMake
         shell: bash
         run: |
-          mkdir build
-          cd build
-          cmake -D KALDI_NATIVE_IO_BUILD_TESTS=ON -D CMAKE_BUILD_TYPE=Release ..
+          cmake -B build -D KALDI_NATIVE_IO_BUILD_TESTS=ON -D CMAKE_BUILD_TYPE=Release .
 
       - name: Build kaldi_native_io for ubuntu/macos
         if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')
         run: |
-          cd build
-          make -j
+          cmake --build build -j
 
       - name: Build kaldi_native_io for windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          cd build
-          cmake --build . --target ALL_BUILD --config Release
+          cmake --build build --config Release
 
       - name: Test
         if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')
@@ -65,4 +68,4 @@ jobs:
         shell: bash
         run: |
           cd build
-          ctest -C Release --output-on-failure -E py
+          ctest -C Release --output-on-failure

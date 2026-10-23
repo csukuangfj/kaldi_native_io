@@ -2,3 +2,13 @@ dist
 *.egg-info
 __pycache__
 build*/
+
+# The CMake build copies the extension into kaldi_native_io/python/kaldi_native_io/lib/
+# so an uninstalled build is importable. Only .gitkeep is tracked there.
+*.so
+*.dylib
+*.pyd
+
+# Scratch files written by the tests in kaldi_native_io/python/tests/
+*.ark
+*.scp

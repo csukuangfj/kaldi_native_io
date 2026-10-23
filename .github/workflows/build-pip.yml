@@ -4,38 +4,76 @@ on:
   push:
     branches:
       - master
+    paths:
+      - '.github/workflows/build-pip.yml'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'kaldi_native_io/**'
+      - 'setup.py'
+      - 'scripts/**'
   pull_request:
     branches:
       - master
+    paths:
+      - '.github/workflows/build-pip.yml'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'kaldi_native_io/**'
+      - 'setup.py'
+      - 'scripts/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: build-pip-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-pip:
+    name: ${{ matrix.os }} ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        os: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm, macos-15-intel]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      # see https://github.com/microsoft/setup-msbuild
-      - name: Add msbuild to PATH
-        if: startsWith(matrix.os, 'windows')
-        uses: microsoft/setup-msbuild@v1.0.2
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: ${{ matrix.os }}-${{ matrix.python-version }}
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Build
         shell: bash
         run: |
-          python3 -m pip install -U pip wheel numpy
+          export CMAKE_CXX_COMPILER_LAUNCHER=ccache
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          cmake --version
+
+          python3 -m pip install -U pip wheel numpy setuptools
           python3 setup.py bdist_wheel
           ls -lh dist
+          unzip -l ./dist/*.whl
+
           python3 -m pip install ./dist/kaldi*.whl
-          cd ../..
+
+      - name: Test Python
+        shell: bash
+        run: |
+          # Run from outside the source tree so `import kaldi_native_io`
+          # resolves to the wheel we just installed, not to this checkout.
+          cd "$RUNNER_TEMP"
+
           python3 -c "import kaldi_native_io; print(kaldi_native_io.__version__)"
           python3 -c "import kaldi_native_io; print(kaldi_native_io.__file__)"
+          python3 -c "import kaldi_native_io; print(kaldi_native_io._kaldi_native_io.__file__)"
+
+          python3 "$GITHUB_WORKSPACE/scripts/smoke_test.py"
+          python3 "$GITHUB_WORKSPACE/scripts/run_python_tests.py"

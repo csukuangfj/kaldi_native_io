@@ -23,11 +23,22 @@ cd kaldi_native_io
 python3 setup.py install
 ```
 
-or
+## Pre-built wheels
 
-```bash
-conda install -c kaldi_native_io kaldi_native_io
-```
+We publish pre-built wheels for **CPython 3.8 – 3.15** on the following
+platforms:
+
+| Platform | Architectures |
+|----------|---------------|
+| Linux    | x86_64, aarch64, armv7l |
+| macOS    | x86_64, arm64, universal2 |
+| Windows  | x86 (win32), x64, ARM64 |
+
+Notes:
+
+* Windows ARM64 wheels are provided for CPython 3.11 and later only
+  (CPython has no native Windows ARM64 builds before 3.11).
+* Linux armv7l wheels are provided for CPython 3.9 and later only.
 
 
 # Features
