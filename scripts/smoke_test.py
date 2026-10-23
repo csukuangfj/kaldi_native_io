@@ -18,20 +18,28 @@
 import os
 import platform
 import sys
-import tempfile
 
 import numpy as np
 
 import kaldi_native_io
 
 
-# NOTE: every rxfilename/wxfilename below is *relative* to the current working
-# directory, on purpose. Kaldi splits a wspecifier at its first ':' and an
-# rxfilename at its last ':', so an absolute Windows path ("C:\...") injects a
-# drive colon and corrupts the parse -- the ark is written somewhere other than
-# where the scp entry points, and the read then fails with "Failed to open
-# file". The tests in kaldi_native_io/python/tests use relative names for the
-# same reason. check_table_io() chdirs into a scratch directory first.
+# NOTE: every rxfilename/wxfilename below is *relative* to the process's
+# current working directory, on purpose. Two reasons:
+#
+#   1. Kaldi splits a wspecifier at its first ':' and an rxfilename at its last
+#      ':', so an absolute Windows path ("C:\...") injects a drive colon and
+#      corrupts the parse.
+#
+#   2. os.chdir() does NOT reliably change what the C++ extension resolves
+#      relative paths against on Windows -- it was tried and the read failed
+#      with "Failed to open file smoke.ark:2" even though the ark had just been
+#      written to the chdir'd directory. The 24 tests in
+#      kaldi_native_io/python/tests avoid this by being launched with
+#      subprocess.run(cwd=...), so cwd is correct before the process starts.
+#
+# So: write into the caller's cwd (the workflows `cd` to a scratch dir first)
+# and clean up afterwards. Same shape as the tests in python/tests.
 def check_table_io() -> None:
     """Round trip a few table types through the real C++ implementation."""
     base = "smoke"
@@ -142,15 +150,24 @@ def main() -> int:
     ), f"extension is not in the package's lib/ dir: {ext_file}"
 
     # Relative rxfilenames are required -- see the comment at the top of
-    # check_table_io(). Run the file round trips in a scratch directory so we
-    # neither pollute the caller's cwd nor depend on it being writable later.
-    with tempfile.TemporaryDirectory() as tmp:
-        saved = os.getcwd()
-        os.chdir(tmp)
-        try:
-            check_table_io()
-        finally:
-            os.chdir(saved)
+    # check_table_io(). Write into the caller's cwd (the workflows cd to a
+    # scratch dir before invoking us) and remove the scratch files afterwards.
+    # Do NOT os.chdir: it does not reach the C++ extension on Windows.
+    try:
+        check_table_io()
+    finally:
+        for leftover in (
+            "smoke.ark", "smoke.scp",
+            "smoke_int32.ark", "smoke_int32.scp",
+            "smoke_blob.ark", "smoke_blob.scp",
+            "smoke_fv.ark", "smoke_fv.scp",
+            "smoke_fm.ark", "smoke_fm.scp",
+            "smoke_iv.ark", "smoke_iv.scp",
+        ):
+            try:
+                os.remove(leftover)
+            except OSError:
+                pass
 
     check_wave_data()
 

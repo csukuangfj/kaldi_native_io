@@ -26,7 +26,16 @@ jobs:
       matrix:
         # The pinned manylinux_2_31_armv7l image ships CPython 3.9+, so cp38
         # is omitted here only; the x86_64/aarch64/win jobs still build it.
-        python-version: ["cp39", "cp310", "cp311", "cp312", "cp313", "cp314", "cp315"]
+        #
+        # cp313+ are omitted on armv7l as well. PyPI has no armv7l wheels for
+        # numpy, so pip builds it from source inside the image, and the image
+        # only has GCC 9.4. numpy 2.5.x -- the first release supporting
+        # CPython 3.15 -- needs GCC >= 10.3 and fails with
+        # "ERROR: Problem encountered: NumPy requires GCC >= 10.3". numpy
+        # 1.26.x is pinned here (see the install steps) and it stops at
+        # CPython 3.12. So armv7l covers 3.9-3.12; the x86_64/aarch64/win
+        # jobs still cover 3.13-3.15.
+        python-version: ["cp39", "cp310", "cp311", "cp312"]
 
     steps:
       - uses: actions/checkout@v7
@@ -78,10 +87,18 @@ jobs:
             set -e
             PY=/opt/python/${{ matrix.python-version }}-${{ matrix.python-version }}/bin/python
             "$PY" -m pip install --upgrade pip
-            "$PY" -m pip install /wheels/*.whl
+
+            # PyPI publishes no armv7l numpy wheels, so pip would build numpy
+            # from source -- and the newest release needs GCC >= 10.3 while
+            # this image has 9.4. Install numpy 1.26.x explicitly first, then
+            # install our wheel with --no-deps so pip does not try to
+            # re-resolve (and rebuild) numpy.
+            "$PY" -m pip install "numpy==1.26.*"
+            "$PY" -m pip install --no-deps /wheels/*.whl
 
             # Run from / so `import kaldi_native_io` cannot pick up a source tree.
             cd /
+            "$PY" -c "import numpy; print(\"numpy\", numpy.__version__)"
             "$PY" -c "import kaldi_native_io; print(kaldi_native_io.__file__)"
             "$PY" -c "import kaldi_native_io; print(kaldi_native_io.__version__)"
           '
@@ -98,7 +115,8 @@ jobs:
             set -e
             PY=/opt/python/${{ matrix.python-version }}-${{ matrix.python-version }}/bin/python
             "$PY" -m pip install --upgrade pip
-            "$PY" -m pip install /wheels/*.whl
+            "$PY" -m pip install "numpy==1.26.*"
+            "$PY" -m pip install --no-deps /wheels/*.whl
 
             cd /
             "$PY" /scripts/smoke_test.py
@@ -111,12 +129,19 @@ jobs:
             --user 0:0 \
             --volume ${{ github.workspace }}/wheelhouse:/wheels:ro \
             --volume ${{ github.workspace }}/scripts:/scripts:ro \
+            --volume ${{ github.workspace }}/kaldi_native_io/python/tests:/tests:ro \
             quay.io/pypa/manylinux_2_31_armv7l \
           bash -c '
             set -e
             PY=/opt/python/${{ matrix.python-version }}-${{ matrix.python-version }}/bin/python
             "$PY" -m pip install --upgrade pip
-            "$PY" -m pip install /wheels/*.whl
+            "$PY" -m pip install "numpy==1.26.*"
+            "$PY" -m pip install --no-deps /wheels/*.whl
+
+            # Only scripts/ is mounted at /scripts, so the tests are not
+            # beside the script the way they are in a source checkout. Point
+            # the runner at the mounted copy.
+            export KALDI_NATIVE_IO_TESTS_DIR=/tests
 
             cd /
             "$PY" /scripts/run_python_tests.py

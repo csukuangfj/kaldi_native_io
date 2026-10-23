@@ -25,6 +25,7 @@
 #
 # Run it from outside the source tree (e.g. cd "$RUNNER_TEMP" first).
 
+import os
 import shutil
 import subprocess
 import sys
@@ -62,9 +63,19 @@ EXPECTED_TESTS = [
 
 
 def find_tests_dir() -> Path:
-    """Locate kaldi_native_io/python/tests relative to this script."""
-    here = Path(__file__).resolve().parent
-    tests_dir = here.parent / "kaldi_native_io" / "python" / "tests"
+    """Locate kaldi_native_io/python/tests.
+
+    Honours KALDI_NATIVE_IO_TESTS_DIR first, so a container that mounts the
+    tests somewhere other than next to this script (see the docker runs in
+    build-wheels-armv7l.yaml) can point us at them. Falls back to the path
+    relative to this script for a normal source checkout.
+    """
+    override = os.environ.get("KALDI_NATIVE_IO_TESTS_DIR")
+    if override:
+        tests_dir = Path(override)
+    else:
+        here = Path(__file__).resolve().parent
+        tests_dir = here.parent / "kaldi_native_io" / "python" / "tests"
     if not tests_dir.is_dir():
         raise SystemExit(f"cannot find the tests directory: {tests_dir}")
     return tests_dir
