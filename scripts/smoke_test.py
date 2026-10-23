@@ -51,17 +51,6 @@ def check_table_io() -> None:
         ko.write("a", "hello")
         ko["b"] = "world"
 
-    # Windows diagnostic: distinguish "ark was never written" from "ark is
-    # still locked by the writer" from "C++ cannot resolve the path".
-    print("DIAG cwd:", os.getcwd(), flush=True)
-    print("DIAG dir:", sorted(os.listdir(".")), flush=True)
-    print("DIAG scp:", repr(open(f"{base}.scp", "rb").read()), flush=True)
-    try:
-        with open(f"{base}.ark", "rb") as f:
-            print("DIAG ark opened by Python, size:", len(f.read()), flush=True)
-    except OSError as e:
-        print("DIAG ark NOT openable by Python:", repr(e), flush=True)
-
     with kaldi_native_io.SequentialTokenReader(rspecifier) as ki:
         got = {key: value for key, value in ki}
     assert got == {"a": "hello", "b": "world"}, f"token round trip: {got}"

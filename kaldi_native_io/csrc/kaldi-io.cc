@@ -684,17 +684,15 @@ class OffsetFileInputImpl : public InputImplBase {
   }
 
   bool Seek(size_t offset) {
-    size_t cur_pos = is_.tellg();
-    if (cur_pos == offset)
-      return true;
-    else if (cur_pos < offset && cur_pos + 100 > offset) {
-      // We're close enough that it may be faster to just
-      // read that data, rather than seek.
-      for (size_t i = cur_pos; i < offset; i++) is_.get();
-      return (is_.tellg() == std::streampos(offset));
-    }
-    // Try to actually seek.
-    is_.seekg(offset, std::ios_base::beg);
+    // NOTE: do not compare is_.tellg() against the target offset. The scp
+    // offset is a byte offset, but the stream may have been opened in text
+    // mode (see Holder::IsReadInBinary()); on Windows a text-mode streampos
+    // is not a plain byte offset and comparing it to std::streampos(offset)
+    // fails even when the position is correct, which made Open() report
+    // "Failed to open file" for a file that was perfectly readable. Seeking
+    // unconditionally is correct for both text and binary streams.
+    is_.clear();  // Clear any failure bits (e.g. eof) from earlier reads.
+    is_.seekg(static_cast<std::streamoff>(offset), std::ios_base::beg);
     if (is_.fail()) {  // failbit or badbit is set [error happened]
       is_.close();
       return false;  // failure.
