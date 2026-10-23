@@ -15,19 +15,26 @@
 #
 #     cd "$RUNNER_TEMP" && python3 "$GITHUB_WORKSPACE/scripts/smoke_test.py"
 
+import os
 import platform
 import sys
 import tempfile
-from pathlib import Path
 
 import numpy as np
 
 import kaldi_native_io
 
 
-def check_table_io(tmpdir: Path) -> None:
+# NOTE: every rxfilename/wxfilename below is *relative* to the current working
+# directory, on purpose. Kaldi splits a wspecifier at its first ':' and an
+# rxfilename at its last ':', so an absolute Windows path ("C:\...") injects a
+# drive colon and corrupts the parse -- the ark is written somewhere other than
+# where the scp entry points, and the read then fails with "Failed to open
+# file". The tests in kaldi_native_io/python/tests use relative names for the
+# same reason. check_table_io() chdirs into a scratch directory first.
+def check_table_io() -> None:
     """Round trip a few table types through the real C++ implementation."""
-    base = tmpdir / "smoke"
+    base = "smoke"
     wspecifier = f"ark,scp:{base}.ark,{base}.scp"
     rspecifier = f"scp:{base}.scp"
 
@@ -45,7 +52,7 @@ def check_table_io(tmpdir: Path) -> None:
         assert ki["a"] == "hello" and ki["b"] == "world"
 
     # int32
-    base2 = tmpdir / "smoke_int32"
+    base2 = "smoke_int32"
     ws2 = f"ark,scp:{base2}.ark,{base2}.scp"
     rs2 = f"scp:{base2}.scp"
     with kaldi_native_io.Int32Writer(ws2) as ko:
@@ -56,7 +63,7 @@ def check_table_io(tmpdir: Path) -> None:
     assert got == {"a": 1, "b": -2}, f"int32 round trip: {got}"
 
     # bytes / blob
-    base3 = tmpdir / "smoke_blob"
+    base3 = "smoke_blob"
     ws3 = f"ark,scp:{base3}.ark,{base3}.scp"
     rs3 = f"scp:{base3}.scp"
     with kaldi_native_io.BlobWriter(ws3) as ko:
@@ -67,7 +74,7 @@ def check_table_io(tmpdir: Path) -> None:
         assert ki["b"] == b"1234"
 
     # float vector -- exercises the numpy interop path.
-    base4 = tmpdir / "smoke_fv"
+    base4 = "smoke_fv"
     ws4 = f"ark,scp,t:{base4}.ark,{base4}.scp"
     rs4 = f"scp:{base4}.scp"
     with kaldi_native_io.FloatVectorWriter(ws4) as ko:
@@ -78,7 +85,7 @@ def check_table_io(tmpdir: Path) -> None:
         assert np.array_equal(ki["b"], np.array([10.5], dtype=np.float32))
 
     # float matrix
-    base5 = tmpdir / "smoke_fm"
+    base5 = "smoke_fm"
     ws5 = f"ark,scp:{base5}.ark,{base5}.scp"
     rs5 = f"scp:{base5}.scp"
     m = np.arange(6, dtype=np.float32).reshape(2, 3)
@@ -90,16 +97,17 @@ def check_table_io(tmpdir: Path) -> None:
     # single-item readers: read_int32_vector takes an "ark:offset" rxfilename
     # into a table of int32 *vectors*, so write those and use the scp entry for
     # the offset.
-    base6 = tmpdir / "smoke_iv"
+    base6 = "smoke_iv"
     ws6 = f"ark,scp:{base6}.ark,{base6}.scp"
     with kaldi_native_io.Int32VectorWriter(ws6) as ko:
         ko.write("a", [10, 20])
         ko["b"] = [100, 200, 300]
 
     scp_entries = {}
-    for line in (tmpdir / "smoke_iv.scp").read_text().splitlines():
-        key, rxfilename = line.split(maxsplit=1)
-        scp_entries[key] = rxfilename
+    with open(f"{base6}.scp", encoding="utf-8") as f:
+        for line in f:
+            key, rxfilename = line.split(maxsplit=1)
+            scp_entries[key] = rxfilename.strip()
 
     assert kaldi_native_io.read_int32_vector(scp_entries["a"]) == [10, 20]
     assert kaldi_native_io.read_int32_vector(scp_entries["b"]) == [100, 200, 300]
@@ -128,13 +136,22 @@ def main() -> int:
     # The wheel must load the extension from inside the package, not from a
     # top-level module and not from a source tree.
     ext_file = kaldi_native_io._kaldi_native_io.__file__
-    pkg_dir = Path(kaldi_native_io.__file__).resolve().parent
-    assert Path(ext_file).resolve().parent == pkg_dir / "lib", (
-        f"extension is not in the package's lib/ dir: {ext_file}"
-    )
+    pkg_dir = os.path.dirname(os.path.abspath(kaldi_native_io.__file__))
+    assert os.path.dirname(os.path.abspath(ext_file)) == os.path.join(
+        pkg_dir, "lib"
+    ), f"extension is not in the package's lib/ dir: {ext_file}"
 
+    # Relative rxfilenames are required -- see the comment at the top of
+    # check_table_io(). Run the file round trips in a scratch directory so we
+    # neither pollute the caller's cwd nor depend on it being writable later.
     with tempfile.TemporaryDirectory() as tmp:
-        check_table_io(Path(tmp))
+        saved = os.getcwd()
+        os.chdir(tmp)
+        try:
+            check_table_io()
+        finally:
+            os.chdir(saved)
+
     check_wave_data()
 
     print("SMOKE TEST PASSED")
