@@ -4,3 +4,15 @@ include CMakeLists.txt
 exclude pyproject.toml
 recursive-include kaldi_native_io *.*
 recursive-include cmake *.*
+
+# The CMake build copies the built extension into
+# kaldi_native_io/python/kaldi_native_io/lib/ so an uninstalled build is
+# importable. Never ship that, or __pycache__, in the sdist: an sdist must
+# contain only sources.
+prune kaldi_native_io/python/kaldi_native_io/lib
+global-exclude *.pyc
+global-exclude *.so
+global-exclude *.dylib
+global-exclude *.dll
+global-exclude *.pyd
+global-exclude __pycache__

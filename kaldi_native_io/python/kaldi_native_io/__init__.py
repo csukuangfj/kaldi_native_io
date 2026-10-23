@@ -1,19 +1,22 @@
-from pathlib import Path as _Path
 from typing import List
 
-import _kaldi_native_io
-from _kaldi_native_io import (
+from kaldi_native_io.lib import _kaldi_native_io
+from kaldi_native_io.lib._kaldi_native_io import (
     CompressionMethod,
     HtkHeader,
     MatrixShape,
     WaveData,
     WaveInfo,
 )
-from _kaldi_native_io import _DoubleMatrix as DoubleMatrix
-from _kaldi_native_io import _DoubleVector as DoubleVector
-from _kaldi_native_io import _FloatMatrix as FloatMatrix
-from _kaldi_native_io import _FloatVector as FloatVector
-from _kaldi_native_io import read_blob, read_wave, read_wave_info
+from kaldi_native_io.lib._kaldi_native_io import _DoubleMatrix as DoubleMatrix
+from kaldi_native_io.lib._kaldi_native_io import _DoubleVector as DoubleVector
+from kaldi_native_io.lib._kaldi_native_io import _FloatMatrix as FloatMatrix
+from kaldi_native_io.lib._kaldi_native_io import _FloatVector as FloatVector
+from kaldi_native_io.lib._kaldi_native_io import (
+    read_blob,
+    read_wave,
+    read_wave_info,
+)
 
 from .table_types import (
     BoolWriter,
@@ -82,10 +85,6 @@ from .table_types import (
     TokenWriter,
     WaveWriter,
 )
-
-cmake_prefix_path = _Path(__file__).parent / "share" / "cmake"
-del _Path
-
 
 def read_int32_vector(rxfilename: str) -> List[int]:
     """Read a vector of int32 from an rxfilename"""

@@ -1,3 +1,7 @@
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "4.0.0")
+  set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+endif()
+
 if("x${CMAKE_SOURCE_DIR}" STREQUAL "x${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "\
 In-source build is not a good practice.
@@ -9,47 +13,47 @@ to build this project"
   )
 endif()
 
-if(POLICY CMP0057)
-  cmake_policy(SET CMP0057 NEW)
-endif()
-
-cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 project(kaldi_native_io CXX)
 
-# Remember to change scripts/conda/kaldi_native_io/meta.yaml
-set(KALDI_NATIVE_IO_VERSION "1.22.1")
-
-if(CMAKE_TOOLCHAIN_FILE)
-  set(_BUILD_PYTHON OFF)
-  set(_BUILD_TESTS OFF)
-else()
-  set(_BUILD_PYTHON ON)
-  set(_BUILD_TESTS ON)
+# Disable warning about
+#
+# "The DOWNLOAD_EXTRACT_TIMESTAMP option was not given and policy CMP0135 is
+#  not set.
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+  cmake_policy(SET CMP0135 NEW)
 endif()
+
+set(KALDI_NATIVE_IO_VERSION "1.23.0")
+
+if(NOT CMAKE_BUILD_TYPE)
+  message(STATUS "No CMAKE_BUILD_TYPE given, default to Release")
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
+# A toolchain file means we are cross-compiling (iOS, Android NDK, ...) and
+# there is no host Python to build bindings against, so default both options
+# off. Callers may still turn them on explicitly.
+if(CMAKE_TOOLCHAIN_FILE)
+  set(_BUILD_PYTHON_DEFAULT OFF)
+  set(_BUILD_TESTS_DEFAULT OFF)
+else()
+  set(_BUILD_PYTHON_DEFAULT ON)
+  set(_BUILD_TESTS_DEFAULT OFF)
+endif()
+
+option(KALDI_NATIVE_IO_BUILD_TESTS "Whether to build tests or not" ${_BUILD_TESTS_DEFAULT})
+option(KALDI_NATIVE_IO_BUILD_PYTHON "Whether to build Python" ${_BUILD_PYTHON_DEFAULT})
+
+message(STATUS "KALDI_NATIVE_IO_BUILD_TESTS: ${KALDI_NATIVE_IO_BUILD_TESTS}")
+message(STATUS "KALDI_NATIVE_IO_BUILD_PYTHON: ${KALDI_NATIVE_IO_BUILD_PYTHON}")
+message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 if(DEFINED _GLIBCXX_USE_CXX11_ABI)
   set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=${_GLIBCXX_USE_CXX11_ABI}")
 endif()
-
-if(WIN32)
-  add_definitions(-DNOMINMAX) # Otherwise, std::max() and std::min() won't work
-endif()
-
-# set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall ")
-if(CMAKE_COMPILER_IS_GNUCXX)
-  # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Werror -Wextra -Wpedantic -pedantic-errors -g ")
-endif()
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-
-option(KALDI_NATIVE_IO_BUILD_TESTS "Whether to build tests or not" ${_BUILD_TESTS})
-option(KALDI_NATIVE_IO_BUILD_PYTHON "Whether to build Python extension" ${_BUILD_PYTHON})
-option(BUILD_SHARED_LIBS "Whether to build shared libraries" ON)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -60,21 +64,27 @@ set(BUILD_RPATH_USE_ORIGIN TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 if(NOT APPLE)
-  set(kaldi_native_io_rpath_origin "$ORIGIN")
+  set(KALDI_NATIVE_IO_RPATH_ORIGIN "$ORIGIN")
 else()
-  set(kaldi_native_io_rpath_origin "@loader_path")
+  set(CMAKE_MACOSX_RPATH ON)
+  set(KALDI_NATIVE_IO_RPATH_ORIGIN "@loader_path")
 endif()
 
-set(CMAKE_INSTALL_RPATH ${kaldi_native_io_rpath_origin})
-set(CMAKE_BUILD_RPATH ${kaldi_native_io_rpath_origin})
+set(CMAKE_INSTALL_RPATH ${KALDI_NATIVE_IO_RPATH_ORIGIN})
+set(CMAKE_BUILD_RPATH ${KALDI_NATIVE_IO_RPATH_ORIGIN})
 
-set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
-
-if(BUILD_SHARED_LIBS AND MSVC)
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ version to be used.")
+  set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
+
+message(STATUS "C++ Standard version: ${CMAKE_CXX_STANDARD}")
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 if(WIN32)
+  add_definitions(-DNOMINMAX) # Otherwise, std::max() and std::min() won't work
+
   set(disabled_warnings
     /wd4018
     /wd4061
@@ -83,6 +93,8 @@ if(WIN32)
     /wd4242
     /wd4244
     /wd4267
+    /wd4291
+    /wd4305
     /wd4355
     /wd4365
     /wd4371
@@ -110,10 +122,12 @@ if(WIN32)
   foreach(w IN LISTS disabled_warnings)
     string(APPEND CMAKE_CXX_FLAGS " ${w} ")
   endforeach()
+
+  add_compile_options(/bigobj)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+
 if(KALDI_NATIVE_IO_BUILD_PYTHON)
   include(pybind11)
 endif()
@@ -123,29 +137,21 @@ if(KALDI_NATIVE_IO_BUILD_TESTS)
   include(googletest)
 endif()
 
-message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-
-include(GNUInstallDirs)
-
-message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+# PYTHON_EXECUTABLE is used to run the Python tests and to query the Python
+# site-packages directory (for the macOS rpath). pybind11 resolves the
+# interpreter into Python_EXECUTABLE, but only within its own add_subdirectory()
+# scope, so it is not visible here; fall back to FindPython3 when the Python
+# bindings are off.
+if(NOT PYTHON_EXECUTABLE)
+  if(Python_EXECUTABLE)
+    set(PYTHON_EXECUTABLE "${Python_EXECUTABLE}")
+  elseif(Python3_EXECUTABLE)
+    set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
+  else()
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
+  endif()
+endif()
+message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 
 add_subdirectory(kaldi_native_io)
-
-configure_file(
-  ${PROJECT_SOURCE_DIR}/cmake/kaldi_native_ioConfigVersion.cmake.in
-  ${PROJECT_BINARY_DIR}/kaldi_native_ioConfigVersion.cmake
-  @ONLY
-)
-
-configure_file(
-  ${PROJECT_SOURCE_DIR}/cmake/kaldi_native_ioConfig.cmake.in
-  ${PROJECT_BINARY_DIR}/kaldi_native_ioConfig.cmake
-  @ONLY
-)
-
-install(FILES
-  ${PROJECT_BINARY_DIR}/kaldi_native_ioConfigVersion.cmake
-  ${PROJECT_BINARY_DIR}/kaldi_native_ioConfig.cmake
-  DESTINATION share/cmake/kaldi_native_io
-)

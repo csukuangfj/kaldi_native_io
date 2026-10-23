@@ -5,7 +5,7 @@
 from typing import Any, List, Tuple, Union
 
 import numpy as np
-from _kaldi_native_io import (
+from kaldi_native_io.lib._kaldi_native_io import (
     CompressionMethod,
     HtkHeader,
     _BlobWriter,
