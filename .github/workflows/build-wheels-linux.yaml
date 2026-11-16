@@ -123,6 +123,7 @@ jobs:
       # uploaded. This runs on the runner -- not in a container -- so a wheel
       # that cannot load must not reach PyPI.
       - name: Setup Python ${{ matrix.python-short }} for the smoke test
+        if: matrix.python-version != 'cp38' && matrix.python-version != 'cp39'
         uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-short }}
@@ -132,11 +133,13 @@ jobs:
           architecture: x64
 
       - name: Install the wheel
+        if: matrix.python-version != 'cp38' && matrix.python-version != 'cp39'
         shell: bash
         run: |
           python3 -m pip install --force-reinstall ./wheelhouse/*.whl
 
       - name: Smoke test
+        if: matrix.python-version != 'cp38' && matrix.python-version != 'cp39'
         shell: bash
         run: |
           # Run from outside the source tree so `import kaldi_native_io`
@@ -148,11 +151,37 @@ jobs:
           python3 "$GITHUB_WORKSPACE/scripts/smoke_test.py"
 
       - name: Run Python tests
+        if: matrix.python-version != 'cp38' && matrix.python-version != 'cp39'
         shell: bash
         run: |
           cd "$RUNNER_TEMP"
 
           python3 "$GITHUB_WORKSPACE/scripts/run_python_tests.py"
+
+      # actions/setup-python cannot install Python 3.8/3.9 on the
+      # ubuntu-26.04 runners, so run the smoke test and the Python tests in
+      # a container with the matching interpreter instead.
+      - name: Smoke test and Python tests in docker (Python ${{ matrix.python-short }})
+        if: matrix.python-version == 'cp38' || matrix.python-version == 'cp39'
+        shell: bash
+        run: |
+          docker run --rm \
+            --volume "$GITHUB_WORKSPACE/wheelhouse:/wheels:ro" \
+            --volume "$GITHUB_WORKSPACE/scripts:/scripts:ro" \
+            --volume "$GITHUB_WORKSPACE/kaldi_native_io/python/tests:/tests:ro" \
+            python:${{ matrix.python-short }} \
+          bash -c '
+            set -e
+            pip install --force-reinstall /wheels/kaldi_native_io-*.whl
+
+            cd /tmp
+            python3 -c "import kaldi_native_io; print(kaldi_native_io.__file__)"
+            python3 -c "import kaldi_native_io; print(kaldi_native_io.__version__)"
+            python3 /scripts/smoke_test.py
+
+            export KALDI_NATIVE_IO_TESTS_DIR=/tests
+            python3 /scripts/run_python_tests.py
+          '
 
       - name: Publish wheels to PyPI
         env:
