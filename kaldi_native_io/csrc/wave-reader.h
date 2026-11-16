@@ -51,7 +51,7 @@ const float kWaveSampleMax = 32768.0;
 class WaveInfo {
  public:
   WaveInfo()
-      : samp_freq_(0), samp_count_(0), num_channels_(0), reverse_bytes_(0) {}
+       = default;
 
   /// Is stream size unknown? Duration and SampleCount not valid if true.
   bool IsStreamed() const { return samp_count_ < 0; }
@@ -82,10 +82,10 @@ class WaveInfo {
   void Read(std::istream &is);
 
  private:
-  float samp_freq_;
-  int32_t samp_count_;  // 0 if empty, -1 if undefined length.
-  uint8_t num_channels_;
-  bool reverse_bytes_;  // File endianness differs from host.
+  float samp_freq_ = 0;
+  int32_t samp_count_ = 0;  // 0 if empty, -1 if undefined length.
+  uint8_t num_channels_ = 0;
+  bool reverse_bytes_ = false;  // File endianness differs from host.
 };
 
 /// This class's purpose is to read in Wave files.
@@ -168,9 +168,9 @@ class WaveHolder {
     t_.CopyFrom(other.t_);
     return *this;
   }
-  WaveHolder(const WaveHolder &other) : t_(other.t_) {}
+  WaveHolder(const WaveHolder &other)  = default;
 
-  WaveHolder() {}
+  WaveHolder() = default;
 
   bool Read(std::istream &is) {
     // We don't look for the binary-mode header here [always binary]

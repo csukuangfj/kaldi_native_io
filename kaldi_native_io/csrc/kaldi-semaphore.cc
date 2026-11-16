@@ -29,7 +29,7 @@ Semaphore::Semaphore(int32_t count) {
   count_ = count;
 }
 
-Semaphore::~Semaphore() {}
+Semaphore::~Semaphore() = default;
 
 bool Semaphore::TryWait() {
   std::unique_lock<std::mutex> lock(mutex_);

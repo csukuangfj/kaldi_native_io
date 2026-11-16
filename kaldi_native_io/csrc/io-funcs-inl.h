@@ -56,7 +56,7 @@ inline bool InitKaldiInputStream(std::istream &is, bool *binary) {
 template <class T>
 void WriteBasicType(std::ostream &os, bool binary, T t) {
   // Compile time assertion that this is not called with a wrong type.
-  static_assert(std::is_integral<T>::value, "");
+  static_assert(std::is_integral_v<T>);
   if (binary) {
     char len_c = (std::numeric_limits<T>::is_signed ? 1 : -1) *
                  static_cast<char>(sizeof(t));
@@ -76,9 +76,9 @@ void WriteBasicType(std::ostream &os, bool binary, T t) {
 // Template that covers integers.
 template <class T>
 inline void ReadBasicType(std::istream &is, bool binary, T *t) {
-  KALDIIO_PARANOID_ASSERT(t != NULL);
+  KALDIIO_PARANOID_ASSERT(t != nullptr);
   // Compile time assertion that this is not called with a wrong type.
-  static_assert(std::is_integral<T>::value, "");
+  static_assert(std::is_integral_v<T>);
   if (binary) {
     int len_c_in = is.get();
     if (len_c_in == -1)
@@ -97,7 +97,7 @@ inline void ReadBasicType(std::istream &is, bool binary, T *t) {
     is.read(reinterpret_cast<char *>(t), sizeof(*t));
   } else {
     if (sizeof(*t) == 1) {
-      int16_t i;
+      int16_t i = 0;
       is >> i;
       *t = i;
     } else {

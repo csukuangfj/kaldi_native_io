@@ -40,7 +40,7 @@ void MatrixShape::ReadCompressedBinary(std::istream &is) {
   std::string tok;  // Should be CM (format 1) or CM2 (format 2)
   ReadToken(is, binary, &tok);
 
-  CompressedMatrix::GlobalHeader h;
+  CompressedMatrix::GlobalHeader h = {};
   if (tok == "CM") {
     h.format = 1;  //  kOneByteWithColHeaders
   } else if (tok == "CM2") {

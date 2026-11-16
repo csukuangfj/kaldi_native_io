@@ -21,12 +21,13 @@
 namespace kaldiio {
 
 // A utility class for reading wave header.
+namespace {
 struct WaveHeaderReadGofer {
   std::istream &is;
-  bool swap;
-  char tag[5];
+  bool swap = false;
+  char tag[5] = {};
 
-  explicit WaveHeaderReadGofer(std::istream &is) : is(is), swap(false) {
+  explicit WaveHeaderReadGofer(std::istream &is) : is(is) {
     memset(tag, '\0', sizeof tag);
   }
 
@@ -35,7 +36,7 @@ struct WaveHeaderReadGofer {
     if (is.fail())
       KALDIIO_ERR << "WaveData: expected " << expected
                   << ", failed to read anything";
-    if (strcmp(tag, expected))
+    if (strcmp(tag, expected) != 0)
       KALDIIO_ERR << "WaveData: expected " << expected << ", got " << tag;
   }
 
@@ -49,7 +50,7 @@ struct WaveHeaderReadGofer {
     union {
       char result[4];
       uint32 ans;
-    } u;
+    } u = {};
     is.read(u.result, 4);
     if (swap) KALDIIO_SWAP4(u.result);
     if (is.fail())
@@ -61,7 +62,7 @@ struct WaveHeaderReadGofer {
     union {
       char result[2];
       int16 ans;
-    } u;
+    } u = {};
     is.read(u.result, 2);
     if (swap) KALDIIO_SWAP2(u.result);
     if (is.fail())
@@ -75,8 +76,8 @@ struct WaveHeaderReadGofer {
       is.get();
     }
   }
-
 };
+}  // namespace
 
 
 
@@ -84,7 +85,7 @@ static void WriteUint32(std::ostream &os, int32_t i) {
   union {
     char buf[4];
     int i;
-  } u;
+  } u = {};
   u.i = i;
 #ifdef __BIG_ENDIAN__
   KALDIIO_SWAP4(u.buf);
@@ -97,7 +98,7 @@ static void WriteUint16(std::ostream &os, int16 i) {
   union {
     char buf[2];
     int16 i;
-  } u;
+  } u = {};
   u.i = i;
 #ifdef __BIG_ENDIAN__
   KALDIIO_SWAP2(u.buf);
@@ -162,7 +163,7 @@ void WaveInfo::Read(std::istream &is) {
   fmt_chunk_read += 16;
 
   if (audio_format == 1) {
-    ;
+    // WAVE_FORMAT_PCM: nothing extra to read.
   } else if (audio_format == 0xFFFE) {  // WAVE_FORMAT_EXTENSIBLE
     uint16 extra_size = reader.ReadUint16();
     if (fmt_chunk_size < 40 || extra_size < 22) {
@@ -237,8 +238,9 @@ void WaveInfo::Read(std::istream &is) {
   bool is_stream_mode =
       riff_chunk_size == 0 || riff_chunk_size == 0xFFFFFFFF ||
       data_chunk_size == 0 || data_chunk_size == 0xFFFFFFFF ||
-      data_chunk_size == 0x7FFFF000 || // This value is used by SoX
-      data_chunk_size == 0xFFFFFFFE; // This value was seen from ffmpeg -> SoX pipeline
+      data_chunk_size == 0x7FFFF000 ||  // This value is used by SoX
+      data_chunk_size == 0xFFFFFFFE;  // This value was seen from ffmpeg ->
+                                     // SoX pipeline
 
 #if 0
   if (is_stream_mode)
@@ -292,7 +294,7 @@ void WaveData::Read(std::istream &is) {
 
   if (is.bad()) KALDIIO_ERR << "WaveData: file read error";
 
-  if (buffer.size() == 0) KALDIIO_ERR << "WaveData: empty file (no data)";
+  if (buffer.empty()) KALDIIO_ERR << "WaveData: empty file (no data)";
 
   if (!header.IsStreamed() && buffer.size() < header.DataBytes()) {
     KALDIIO_WARN << "Expected " << header.DataBytes() << " bytes of wave data, "

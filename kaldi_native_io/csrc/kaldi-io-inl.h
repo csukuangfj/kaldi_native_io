@@ -28,12 +28,12 @@ bool Input::Open(const std::string &rxfilename, bool *binary) {
 }
 
 bool Input::OpenTextMode(const std::string &rxfilename) {
-  return OpenInternal(rxfilename, false, NULL);
+  return OpenInternal(rxfilename, false, nullptr);
 }
 
-bool Input::IsOpen() { return impl_ != NULL; }
+bool Input::IsOpen() { return impl_ != nullptr; }
 
-bool Output::IsOpen() { return impl_ != NULL; }
+bool Output::IsOpen() { return impl_ != nullptr; }
 
 }  // namespace kaldiio
 

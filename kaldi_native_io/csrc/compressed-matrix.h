@@ -70,14 +70,14 @@ enum CompressionMethod {
 
 class CompressedMatrix {
  public:
-  CompressedMatrix() : data_(NULL) {}
+  CompressedMatrix() : data_(nullptr) {}
 
   ~CompressedMatrix() { Clear(); }
 
   template <typename Real>
   explicit CompressedMatrix(const MatrixBase<Real> &mat,
                             CompressionMethod method = kAutomaticMethod)
-      : data_(NULL) {
+      : data_(nullptr) {
     CopyFromMat(mat, method);
   }
 
@@ -125,14 +125,14 @@ class CompressedMatrix {
 
   /// Returns number of rows (or zero for emtpy matrix).
   inline MatrixIndexT NumRows() const {
-    return (data_ == NULL)
+    return (data_ == nullptr)
                ? 0
                : (*reinterpret_cast<GlobalHeader *>(data_)).num_rows;
   }
 
   /// Returns number of columns (or zero for emtpy matrix).
   inline MatrixIndexT NumCols() const {
-    return (data_ == NULL)
+    return (data_ == nullptr)
                ? 0
                : (*reinterpret_cast<GlobalHeader *>(data_)).num_cols;
   }

@@ -51,7 +51,7 @@ bool ExtractObjectRange(const Vector<Real> &input, const std::string &range,
   if (splits[0] != ":")
     status = SplitStringToIntegers(splits[0], ":", false, &index_range);
 
-  if (index_range.size() == 0) {
+  if (index_range.empty()) {
     index_range.push_back(0);
     index_range.push_back(input.Dim() - 1);
   }
@@ -90,7 +90,7 @@ template bool ExtractObjectRange(const Vector<float> &, const std::string &,
 // represent the dimensions of the original matrix) for missing
 // r2 or c2, respectively.
 // Examples of valid ranges: 0:39,: or :,:3 or :,5:10
-bool ParseMatrixRangeSpecifier(const std::string &range, const int rows,
+static bool ParseMatrixRangeSpecifier(const std::string &range, const int rows,
                                const int cols, std::vector<int32> *row_range,
                                std::vector<int32> *col_range) {
   if (range.empty()) {
@@ -113,11 +113,11 @@ bool ParseMatrixRangeSpecifier(const std::string &range, const int rows,
   if (splits.size() == 2 && splits[1] != ":") {
     status = status && SplitStringToIntegers(splits[1], ":", false, col_range);
   }
-  if (row_range->size() == 0) {
+  if (row_range->empty()) {
     row_range->push_back(0);
     row_range->push_back(rows - 1);
   }
-  if (col_range->size() == 0) {
+  if (col_range->empty()) {
     col_range->push_back(0);
     col_range->push_back(cols - 1);
   }

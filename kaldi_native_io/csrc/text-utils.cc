@@ -30,7 +30,8 @@ bool IsToken(const std::string &token) {
   if (l == 0) return false;
   for (size_t i = 0; i < l; i++) {
     unsigned char c = token[i];
-    if ((!isprint(c) || isspace(c)) && (isascii(c) || c == (unsigned char)255))
+    if ((!isprint(c) || isspace(c)) &&
+        (isascii(c) || c == static_cast<unsigned char>(255)))
       return false;
     // The "&& (isascii(c) || c == 255)" was added so that we won't reject
     // non-ASCII characters such as French characters with accents [except for

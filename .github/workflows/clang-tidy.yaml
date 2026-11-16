@@ -1,0 +1,52 @@
+name: clang-tidy
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'kaldi_native_io/csrc/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'kaldi_native_io/csrc/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: clang-tidy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  clang-tidy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install clang-tidy
+        shell: bash
+        run: |
+          pip install clang-tidy
+
+      - name: Configure
+        shell: bash
+        run: |
+          mkdir build
+          cd build
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+
+      - name: Check with clang-tidy
+        shell: bash
+        run: |
+          cd build
+          make check

@@ -75,23 +75,24 @@ class TableWriterImplBase;
 
 struct RspecifierOptions {
   // These options only make a difference for the RandomAccessTableReader class.
-  bool once;    // we assert that the program will only ask for each key once.
-  bool sorted;  // we assert that the keys are sorted.
-  bool called_sorted;  // we assert that the (HasKey(), Value() functions will
+  bool once = false;    // we assert that the program will only ask for
+                      // each key once.
+  bool sorted = false;  // we assert that the keys are sorted.
+  bool called_sorted = false;  // we assert that the (HasKey(), Value()
+                              // functions will
   // also be called in sorted order.  [this implies "once" but not vice versa].
-  bool permissive;  // If "permissive", when reading from scp files it treats
+  bool permissive = false;  // If "permissive", when reading from scp files
+                           // it treats
   // scp files that can't be read as if the corresponding key were not there.
   // For archive files it will suppress errors getting thrown if the archive
   // is corrupted and can't be read to the end.
-  bool background;  // For sequential readers, if the background option ("bg")
+  bool background = false;  // For sequential readers, if the background
+                           // option ("bg")
                     // is provided, it will read ahead to the next object in a
                     // background thread.
   RspecifierOptions()
-      : once(false),
-        sorted(false),
-        called_sorted(false),
-        permissive(false),
-        background(false) {}
+
+        = default;
 };
 
 enum RspecifierType {
@@ -162,10 +163,10 @@ enum WspecifierType {
 };
 
 struct WspecifierOptions {
-  bool binary;
-  bool flush;
-  bool permissive;  // will ignore absent scp entries.
-  WspecifierOptions() : binary(true), flush(false), permissive(false) {}
+  bool binary = true;
+  bool flush = false;
+  bool permissive = false;  // will ignore absent scp entries.
+  WspecifierOptions()  = default;
 };
 
 // ClassifyWspecifier returns the type of the wspecifier string,
@@ -256,9 +257,12 @@ class RandomAccessTableReader {
     KALDI_ASSERT(other.impl_ == NULL);
   }
 
- private:
+ public:
   // Disallow assignment.
-  RandomAccessTableReader &operator=(const RandomAccessTableReader<Holder> &);
+  RandomAccessTableReader &operator=(
+      const RandomAccessTableReader<Holder> &) = delete;
+
+ private:
   void CheckImpl() const;  // Checks that impl_ is non-NULL; prints an error
                            // message and dies (with KALDI_ERR) if NULL.
   RandomAccessTableReaderImplBase<Holder> *impl_;
@@ -339,9 +343,12 @@ class SequentialTableReader {
     KALDI_ASSERT(other.impl_ == NULL);
   }
 
- private:
+ public:
   // Disallow assignment.
-  SequentialTableReader &operator=(const SequentialTableReader<Holder> &);
+  SequentialTableReader &operator=(
+      const SequentialTableReader<Holder> &) = delete;
+
+ private:
   void CheckImpl() const;  // Checks that impl_ is non-NULL; prints an error
                            // message and dies (with KALDI_ERR) if NULL.
   SequentialTableReaderImplBase<Holder> *impl_;
@@ -391,9 +398,10 @@ class TableWriter {
     KALDI_ASSERT(other.impl_ == NULL);
   }
 
- private:
-  TableWriter &operator=(const TableWriter &);  // Disallow assignment.
+ public:
+  TableWriter &operator=(const TableWriter &) = delete;  // Disallow assignment.
 
+ private:
   void CheckImpl() const;  // Checks that impl_ is non-NULL; prints an error
                            // message and dies (with KALDI_ERR) if NULL.
   TableWriterImplBase<Holder> *impl_;
@@ -422,7 +430,7 @@ class RandomAccessTableReaderMapped {
   RandomAccessTableReaderMapped(const std::string &table_rxfilename,
                                 const std::string &utt2spk_rxfilename);
 
-  RandomAccessTableReaderMapped() {}
+  RandomAccessTableReaderMapped() = default;
 
   /// Note: when calling Open, utt2spk_rxfilename may be empty.
   bool Open(const std::string &table_rxfilename,
@@ -435,10 +443,12 @@ class RandomAccessTableReaderMapped {
 
   // The default copy-constructor will do what we want: it will crash for
   // already-opened readers, by calling the member-variable copy-constructors.
- private:
+ public:
   // Disallow assignment.
   RandomAccessTableReaderMapped &operator=(
-      const RandomAccessTableReaderMapped<Holder> &);
+      const RandomAccessTableReaderMapped<Holder> &) = delete;
+
+ private:
   RandomAccessTableReader<Holder> reader_;
   RandomAccessTableReader<TokenHolder> token_reader_;
   std::string utt2spk_rxfilename_;  // Used only in diagnostic messages.

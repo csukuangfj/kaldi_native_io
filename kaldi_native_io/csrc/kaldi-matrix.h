@@ -128,16 +128,16 @@ class MatrixBase {
   explicit MatrixBase(Real *data, MatrixIndexT cols, MatrixIndexT rows,
                       MatrixIndexT stride)
       : data_(data), num_cols_(cols), num_rows_(rows), stride_(stride) {
-    static_assert(std::is_floating_point<Real>::value, "");
+    static_assert(std::is_floating_point_v<Real>);
   }
   ///  Initializer, callable only from child.
   /// Empty initializer, for un-initialized matrix.
-  MatrixBase() : data_(NULL) {
-    static_assert(std::is_floating_point<Real>::value, "");
+  MatrixBase() : data_(nullptr) {
+    static_assert(std::is_floating_point_v<Real>);
   }
 
   // Make sure pointers to MatrixBase cannot be deleted.
-  ~MatrixBase() {}
+  ~MatrixBase() = default;
 
   /// A workaround that allows SubMatrix to get a pointer to non-const data
   /// for const Matrix. Unfortunately C++ does not allow us to declare a
@@ -151,11 +151,11 @@ class MatrixBase {
 
   /// these attributes store the real matrix size as it is stored in memory
   /// including memalignment
-  MatrixIndexT num_cols_;  /// < Number of columns
-  MatrixIndexT num_rows_;  /// < Number of rows
+  MatrixIndexT num_cols_ = {};  /// < Number of columns
+  MatrixIndexT num_rows_ = {};  /// < Number of rows
   /** True number of columns for the internal matrix. This number may differ
    * from num_cols_ as memory alignment might be used. */
-  MatrixIndexT stride_;
+  MatrixIndexT stride_ = {};
 
  private:
   KALDIIO_DISALLOW_COPY_AND_ASSIGN(MatrixBase)
@@ -240,7 +240,7 @@ class SubMatrix : public MatrixBase<Real> {
       : MatrixBase<Real>(other.data_, other.num_cols_, other.num_rows_,
                          other.stride_) {}
 
-  ~SubMatrix<Real>() {}
+  ~SubMatrix<Real>() = default;
 
   // private:
   //  /// Disallow assignment.

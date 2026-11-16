@@ -42,7 +42,7 @@ RspecifierType ClassifyRspecifier(const std::string &rspecifier,
 
   if (rxfilename) rxfilename->clear();
 
-  if (opts != NULL)
+  if (opts != nullptr)
     *opts = RspecifierOptions();  // Make sure all the defaults are as in the
                                   // default constructor of the options class.
 
@@ -61,15 +61,13 @@ RspecifierType ClassifyRspecifier(const std::string &rspecifier,
 
   RspecifierType rs = kNoRspecifier;
 
-  for (size_t i = 0; i < split_first_part.size(); i++) {
-    const std::string &str = split_first_part[i];  // e.g. "b", "t", "f", "ark",
+  for (const auto & str : split_first_part) {
+    // e.g. "b", "t", "f", "ark",
     // "scp".
     const char *c = str.c_str();
-    if (!strcmp(c, "b")) {
-      // Ignore this option.  It's so we can use the same
-    } else if (!strcmp(c, "t")) {
-      // specifiers for rspecifiers and wspecifiers.
-      // Ignore this option too.
+    if (!strcmp(c, "b") || !strcmp(c, "t")) {
+      // Ignore these options.  It's so we can use the same specifiers for
+      // rspecifiers and wspecifiers.
     } else if (!strcmp(c, "o")) {
       if (opts) opts->once = true;
     } else if (!strcmp(c, "no")) {
@@ -105,7 +103,7 @@ RspecifierType ClassifyRspecifier(const std::string &rspecifier,
     }
   }
   if ((rs == kArchiveRspecifier || rs == kScriptRspecifier) &&
-      rxfilename != NULL)
+      rxfilename != nullptr)
     *rxfilename = after_colon;
   return rs;
 }
@@ -144,12 +142,12 @@ WspecifierType ClassifyWspecifier(const std::string &wspecifier,
 
   WspecifierType ws = kNoWspecifier;
 
-  if (opts != NULL)
+  if (opts != nullptr)
     *opts = WspecifierOptions();  // Make sure all the defaults are as in the
                                   // default constructor of the options class.
 
-  for (size_t i = 0; i < split_first_part.size(); i++) {
-    const std::string &str = split_first_part[i];  // e.g. "b", "t", "f", "ark",
+  for (const auto & str : split_first_part) {
+    // e.g. "b", "t", "f", "ark",
     // "scp".
     const char *c = str.c_str();
     if (!strcmp(c, "b")) {
@@ -205,7 +203,7 @@ WspecifierType ClassifyWspecifier(const std::string &wspecifier,
 bool ReadScriptFile(
     const std::string &rxfilename, bool warn,
     std::vector<std::pair<std::string, std::string>> *script_out) {
-  bool is_binary;
+  bool is_binary = false;
   Input input;
 
   if (!input.Open(rxfilename, &is_binary)) {
@@ -231,7 +229,7 @@ bool ReadScriptFile(
 bool ReadScriptFile(
     std::istream &is, bool warn,
     std::vector<std::pair<std::string, std::string>> *script_out) {
-  KALDIIO_ASSERT(script_out != NULL);
+  KALDIIO_ASSERT(script_out != nullptr);
   std::string line;
   int line_number = 0;
   while (getline(is, line)) {
@@ -274,7 +272,7 @@ bool WriteScriptFile(
       return false;
     }
     if (iter->second.find('\n') != std::string::npos ||
-        (iter->second.length() != 0 &&
+        (!iter->second.empty() &&
          (isspace(iter->second[0]) ||
           isspace(iter->second[iter->second.length() - 1])))) {
       // second part contains newline or leading or trailing space.

@@ -12,7 +12,7 @@
 
 #include "kaldi_native_io/csrc/kaldi-matrix.h"
 
-#include <string.h>
+#include <cstring>
 
 #include <algorithm>
 #include <limits>
@@ -58,7 +58,7 @@ void Matrix<Real>::Swap(Matrix<Real> *other) {
 template <typename Real>
 void MatrixBase<Real>::SetZero() {
   // Avoid calling memset on NULL, that's undefined behaviour.
-  if (data_ == NULL) return;
+  if (data_ == nullptr) return;
 
   if (num_cols_ == stride_)
     memset(data_, 0, sizeof(Real) * num_rows_ * num_cols_);
@@ -97,7 +97,7 @@ SubMatrix<Real>::SubMatrix(const MatrixBase<Real> &M, const MatrixIndexT ro,
   if (r == 0 || c == 0) {
     // we support the empty sub-matrix as a special case.
     KALDIIO_ASSERT(c == 0 && r == 0);
-    this->data_ = NULL;
+    this->data_ = nullptr;
     this->num_cols_ = 0;
     this->num_rows_ = 0;
     this->stride_ = 0;
@@ -165,14 +165,14 @@ inline void Matrix<Real>::Init(const MatrixIndexT rows, const MatrixIndexT cols,
     this->num_rows_ = 0;
     this->num_cols_ = 0;
     this->stride_ = 0;
-    this->data_ = NULL;
+    this->data_ = nullptr;
     return;
   }
   KALDIIO_ASSERT(rows > 0 && cols > 0);
-  MatrixIndexT skip, stride;
-  size_t size;
-  void *data;  // aligned memory block
-  void *temp;  // memory block to be really freed
+  MatrixIndexT skip = 0, stride = 0;
+  size_t size = 0;
+  void *data = nullptr;  // aligned memory block
+  void *temp = nullptr;  // memory block to be really freed
 
   // compute the size of skip and real cols
   skip =
@@ -181,7 +181,8 @@ inline void Matrix<Real>::Init(const MatrixIndexT rows, const MatrixIndexT cols,
   size = static_cast<size_t>(rows) * static_cast<size_t>(stride) * sizeof(Real);
 
   // allocate the memory and set the right dimensions and parameters
-  if (NULL != (data = KALDIIO_MEMALIGN(16, size, &temp))) {
+  data = KALDIIO_MEMALIGN(16, size, &temp);
+  if (nullptr != data) {
     MatrixBase<Real>::data_ = static_cast<Real *>(data);
     MatrixBase<Real>::num_rows_ = rows;
     MatrixBase<Real>::num_cols_ = cols;
@@ -194,9 +195,9 @@ inline void Matrix<Real>::Init(const MatrixIndexT rows, const MatrixIndexT cols,
 template <typename Real>
 void Matrix<Real>::Destroy() {
   // we need to free the data block if it was defined
-  if (NULL != MatrixBase<Real>::data_)
-    KALDIIO_MEMALIGN_FREE(MatrixBase<Real>::data_);
-  MatrixBase<Real>::data_ = NULL;
+  if (nullptr != MatrixBase<Real>::data_)
+    KALDIIO_MEMALIGN_FREE(MatrixBase<Real>::data_);  // NOLINT
+  MatrixBase<Real>::data_ = nullptr;
   MatrixBase<Real>::num_rows_ = MatrixBase<Real>::num_cols_ =
       MatrixBase<Real>::stride_ = 0;
 }
@@ -208,7 +209,7 @@ void Matrix<Real>::Resize(const MatrixIndexT rows, const MatrixIndexT cols,
   // the next block uses recursion to handle what we have to do if
   // resize_type == kCopyData.
   if (resize_type == kCopyData) {
-    if (this->data_ == NULL || rows == 0)
+    if (this->data_ == nullptr || rows == 0)
       resize_type = kSetZero;  // nothing to copy.
     else if (rows == this->num_rows_ && cols == this->num_cols_ &&
              (stride_type == kDefaultStride ||
@@ -233,7 +234,7 @@ void Matrix<Real>::Resize(const MatrixIndexT rows, const MatrixIndexT cols,
   }
   // At this point, resize_type == kSetZero or kUndefined.
 
-  if (MatrixBase<Real>::data_ != NULL) {
+  if (MatrixBase<Real>::data_ != nullptr) {
     if (rows == MatrixBase<Real>::num_rows_ &&
         cols == MatrixBase<Real>::num_cols_) {
       if (resize_type == kSetZero) this->SetZero();
@@ -335,8 +336,8 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
         other_token_start) {  // need to instantiate the other type to read it.
       // if Real == float, OtherType == double, and vice versa.
       using OtherType =
-          typename std::conditional<std::is_same<Real, float>::value, double,
-                                    float>::type;
+          std::conditional_t<std::is_same_v<Real, float>, double,
+                                    float>;
 
       Matrix<OtherType> other(this->num_rows_, this->num_cols_);
       other.Read(is, binary, false);  // add is false at this point anyway.
@@ -351,11 +352,11 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
       specific_error << ": Expected token " << my_token << ", got " << token;
       goto bad;
     }
-    int32_t rows, cols;
+    int32_t rows = 0, cols = 0;
     ReadBasicType(is, binary, &rows);  // throws on error.
     ReadBasicType(is, binary, &cols);  // throws on error.
-    if ((MatrixIndexT)rows != this->num_rows_ ||
-        (MatrixIndexT)cols != this->num_cols_) {
+    if (static_cast<MatrixIndexT>(rows) != this->num_rows_ ||
+        static_cast<MatrixIndexT>(cols) != this->num_cols_) {
       this->Resize(rows, cols);
     }
     if (this->Stride() == this->NumCols() && rows * cols != 0) {
@@ -363,7 +364,7 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
               sizeof(Real) * rows * cols);
       if (is.fail()) goto bad;
     } else {
-      for (MatrixIndexT i = 0; i < (MatrixIndexT)rows; i++) {
+      for (MatrixIndexT i = 0; i < static_cast<MatrixIndexT>(rows); i++) {
         is.read(reinterpret_cast<char *>(this->RowData(i)),
                 sizeof(Real) * cols);
         if (is.fail()) goto bad;
@@ -390,13 +391,13 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
       return;
     } else if (str != "[") {
       if (str.length() > 20) str = str.substr(0, 17) + "...";
-      specific_error << ": Expected \"[\", got \"" << str << '"';
+      specific_error << R"(: Expected "[", got ")" << str << '"';
       goto bad;
     }
     // At this point, we have read "[".
     std::vector<std::vector<Real> *> data;
     std::vector<Real> *cur_row = new std::vector<Real>;
-    while (1) {
+    while (true) {
       int i = is.peek();
       if (i == -1) {
         specific_error << "Got EOF while reading matrix data";
@@ -419,7 +420,7 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
           data.push_back(cur_row);
         else
           delete (cur_row);
-        cur_row = NULL;
+        cur_row = nullptr;
         if (data.empty()) {
           this->Resize(0, 0);
           return;
@@ -436,7 +437,7 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
             for (int32_t j = 0; j < num_cols; j++)
               (*this)(i, j) = (*(data[i]))[j];
             delete data[i];
-            data[i] = NULL;
+            data[i] = nullptr;
           }
         }
         return;
@@ -478,9 +479,9 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
     // Note, we never leave the while () loop before this
     // line (we return from it.)
   cleanup:  // We only reach here in case of error in the while loop above.
-    if (cur_row != NULL) delete cur_row;
+    delete cur_row;
     for (size_t i = 0; i < data.size(); i++)
-      if (data[i] != NULL) delete data[i];
+      if (data[i] != nullptr) delete data[i];
     // and then go on to "bad" below, where we print error.
   }
 bad:
@@ -492,9 +493,9 @@ bad:
 template <typename Real>
 bool ReadHtk(std::istream &is, Matrix<Real> *M_ptr, HtkHeader *header_ptr) {
   // check instantiated with double or float.
-  static_assert(std::is_floating_point<Real>::value, "");
+  static_assert(std::is_floating_point_v<Real>);
   Matrix<Real> &M = *M_ptr;
-  HtkHeader htk_hdr;
+  HtkHeader htk_hdr = {};
 
   // TODO(arnab): this fails if the HTK file has CRC cheksum or is compressed.
   is.read(reinterpret_cast<char *>(&htk_hdr),
@@ -549,8 +550,8 @@ bool ReadHtk(std::istream &is, Matrix<Real> *M_ptr, HtkHeader *header_ptr) {
 
   M.Resize(htk_hdr.mNSamples, htk_hdr.mSampleSize / sizeof(float));
 
-  MatrixIndexT i;
-  MatrixIndexT j;
+  MatrixIndexT i = 0;
+  MatrixIndexT j = 0;
   if (sizeof(Real) == sizeof(float)) {
     for (i = 0; i < M.NumRows(); i++) {
       is.read(reinterpret_cast<char *>(M.RowData(i)),
@@ -586,7 +587,7 @@ bool ReadHtk(std::istream &is, Matrix<Real> *M_ptr, HtkHeader *header_ptr) {
   }
   if (header_ptr) *header_ptr = htk_hdr;
   if (has_checksum) {
-    int16_t checksum;
+    int16_t checksum = 0;
     is.read(reinterpret_cast<char *>(&checksum), sizeof(checksum));
     if (is.fail())
       KALDIIO_WARN << "Could not read checksum from HTK feature file ";
@@ -609,6 +610,9 @@ bool WriteHtk(std::ostream &os, const MatrixBase<Real> &M, HtkHeader htk_hdr) {
   KALDIIO_ASSERT(M.NumCols() == static_cast<MatrixIndexT>(htk_hdr.mSampleSize) /
                                     static_cast<MatrixIndexT>(sizeof(float)));
 
+  MatrixIndexT i = 0;
+  MatrixIndexT j = 0;
+
   KALDIIO_SWAP4(htk_hdr.mNSamples);
   KALDIIO_SWAP4(htk_hdr.mSamplePeriod);
   KALDIIO_SWAP2(htk_hdr.mSampleSize);
@@ -617,8 +621,6 @@ bool WriteHtk(std::ostream &os, const MatrixBase<Real> &M, HtkHeader htk_hdr) {
   os.write(reinterpret_cast<char *>(&htk_hdr), sizeof(htk_hdr));
   if (os.fail()) goto bad;
 
-  MatrixIndexT i;
-  MatrixIndexT j;
   if (sizeof(Real) == sizeof(float) && !MachineIsLittleEndian()) {
     for (i = 0; i < M.NumRows(); i++) {  // Unlikely to reach here ever!
       os.write(reinterpret_cast<char *>(const_cast<Real *>(M.RowData(i))),
