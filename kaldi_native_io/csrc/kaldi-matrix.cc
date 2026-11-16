@@ -444,7 +444,7 @@ void Matrix<Real>::Read(std::istream &is, bool binary, bool add) {
       } else if (static_cast<char>(i) == '\n' || static_cast<char>(i) == ';') {
         // End of matrix row.
         is.get();
-        if (cur_row->size() != 0) {
+        if (!cur_row->empty()) {
           data.push_back(cur_row);
           cur_row = new std::vector<Real>;
           cur_row->reserve(data.back()->size());

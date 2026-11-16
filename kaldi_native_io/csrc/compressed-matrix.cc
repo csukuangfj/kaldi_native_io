@@ -87,7 +87,7 @@ void CompressedMatrix::ComputeGlobalHeader(const MatrixBase<Real> &mat,
       // matrix is constant; this avoids crashes in ComputeColHeader when
       // compressing speech featupres.
       if (max_value == min_value)
-        max_value = min_value + (1.0 + fabs(min_value));
+        max_value = min_value + (1.0 + std::fabs(min_value));
       KALDIIO_ASSERT(min_value - min_value == 0 && max_value - max_value == 0 &&
                      "Cannot compress a matrix with Nan's or Inf's");
 
