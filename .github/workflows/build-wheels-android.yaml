@@ -27,8 +27,8 @@ jobs:
           # toolchain involved. Same approach as sherpa-onnx and
           # piper-phonemize.
           #
-          # aarch64 + arm run on an ARM host so no qemu is needed; i686 +
-          # x86_64 run on the x64 host.
+          # aarch64 + arm run on an ARM host so no qemu is needed; x86_64
+          # runs on the x64 host.
           - abi: aarch64
             os: ubuntu-24.04-arm
             docker: aarch64
@@ -43,11 +43,6 @@ jobs:
             # through the pybind11 sources. -j1 both halves peak memory and
             # keeps make from creating a jobserver at all.
             makejobs: "-j1"
-          - abi: i686
-            os: ubuntu-latest
-            docker: i686
-            plat: android_24_x86
-            makejobs: "-j$(nproc)"
           - abi: x86_64
             os: ubuntu-latest
             docker: x86_64
@@ -138,10 +133,16 @@ jobs:
         run: |
           chmod -R a+w "${{ github.workspace }}" || true
 
+          # termux has no /tmp and its / is not writable even as root, so
+          # create a scratch dir on the host and mount it into the container.
+          mkdir -p "${{ github.workspace }}/smoke-dir"
+          chmod a+rwx "${{ github.workspace }}/smoke-dir"
+
           docker run --rm \
             --user 0:0 \
             --volume ${{ github.workspace }}/wheelhouse:/wheels:ro \
             --volume ${{ github.workspace }}/scripts:/scripts:ro \
+            --volume ${{ github.workspace }}/smoke-dir:/smoke:rw \
             termux/termux-docker:${{ matrix.docker }} \
           bash -c '
             set -e
@@ -154,14 +155,12 @@ jobs:
             pip install --upgrade pip setuptools wheel
             pip install --no-deps /wheels/kaldi_native_io-*.whl
 
-            # termux has no /tmp, so tempfile would fail. Point it at /,
-            # which is writable here because the container runs as root.
-            export TMPDIR=/
+            export TMPDIR=/smoke
 
-            # cd / so `import kaldi_native_io` cannot pick up a source tree.
-            # sys.path[0] is the directory of the script itself (/scripts),
-            # which holds the two scripts and no package.
-            cd /
+            # cd /smoke so `import kaldi_native_io` cannot pick up a source
+            # tree. sys.path[0] is the directory of the script itself
+            # (/scripts), which holds the two scripts and no package.
+            cd /smoke
             python3 -c "import numpy; print(\"numpy\", numpy.__version__)"
             python3 /scripts/smoke_test.py
           '
@@ -171,11 +170,17 @@ jobs:
         run: |
           chmod -R a+w "${{ github.workspace }}" || true
 
+          # termux has no /tmp and its / is not writable even as root, so
+          # create a scratch dir on the host and mount it into the container.
+          mkdir -p "${{ github.workspace }}/smoke-dir"
+          chmod a+rwx "${{ github.workspace }}/smoke-dir"
+
           docker run --rm \
             --user 0:0 \
             --volume ${{ github.workspace }}/wheelhouse:/wheels:ro \
             --volume ${{ github.workspace }}/scripts:/scripts:ro \
             --volume ${{ github.workspace }}/kaldi_native_io/python/tests:/tests:ro \
+            --volume ${{ github.workspace }}/smoke-dir:/smoke:rw \
             termux/termux-docker:${{ matrix.docker }} \
           bash -c '
             set -e
@@ -188,13 +193,13 @@ jobs:
             pip install --upgrade pip setuptools wheel
             pip install --no-deps /wheels/kaldi_native_io-*.whl
 
-            export TMPDIR=/
+            export TMPDIR=/smoke
             # Only scripts/ is mounted at /scripts, so the tests are not
             # beside the script the way they are in a source checkout. Point
             # the runner at the mounted copy.
             export KALDI_NATIVE_IO_TESTS_DIR=/tests
 
-            cd /
+            cd /smoke
             python3 /scripts/run_python_tests.py
           '
 
