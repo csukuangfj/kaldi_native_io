@@ -92,17 +92,17 @@ class VectorBase {
   /// Destructor;  does not deallocate memory, this is handled by child classes.
   /// This destructor is protected so this object can only be
   /// deleted via a child.
-  ~VectorBase() {}
+  ~VectorBase() = default;
 
   /// Empty initializer, corresponds to vector of zero size.
-  VectorBase() : data_(NULL), dim_(0) {
-    static_assert(std::is_floating_point<Real>::value, "");
+  VectorBase() : data_(nullptr) {
+    static_assert(std::is_floating_point_v<Real>);
   }
 
   /// data memory area
   Real *data_;
   /// dimension of vector
-  MatrixIndexT dim_;
+  MatrixIndexT dim_ = 0;
   KALDIIO_DISALLOW_COPY_AND_ASSIGN(VectorBase)
 };
 
@@ -198,7 +198,8 @@ class SubVector : public VectorBase<Real> {
     this->dim_ = length;
   }
 
-  ~SubVector() {}  ///< Destructor (does nothing; no pointers are owned here).
+  ~SubVector() = default;  ///< Destructor (does nothing; no pointers are
+                          ///< owned here).
 
  private:
   /// Disallow assignment operator.

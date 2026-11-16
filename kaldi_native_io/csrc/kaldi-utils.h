@@ -36,29 +36,29 @@
 
 // clang-format off
 #define KALDIIO_SWAP8(a) do { \
-  int t = (reinterpret_cast<char*>(&a))[0];\
-          (reinterpret_cast<char*>(&a))[0]=(reinterpret_cast<char*>(&a))[7];\
-          (reinterpret_cast<char*>(&a))[7]=t;\
-      t = (reinterpret_cast<char*>(&a))[1];\
-          (reinterpret_cast<char*>(&a))[1]=(reinterpret_cast<char*>(&a))[6];\
-          (reinterpret_cast<char*>(&a))[6]=t;\
-      t = (reinterpret_cast<char*>(&a))[2];\
-          (reinterpret_cast<char*>(&a))[2]=(reinterpret_cast<char*>(&a))[5];\
-          (reinterpret_cast<char*>(&a))[5]=t;\
-      t = (reinterpret_cast<char*>(&a))[3];\
-          (reinterpret_cast<char*>(&a))[3]=(reinterpret_cast<char*>(&a))[4];\
-          (reinterpret_cast<char*>(&a))[4]=t;} while (0)
+  int t = (reinterpret_cast<unsigned char*>(&a))[0];\
+          (reinterpret_cast<unsigned char*>(&a))[0]=(reinterpret_cast<unsigned char*>(&a))[7];\
+          (reinterpret_cast<unsigned char*>(&a))[7]=t;\
+      t = (reinterpret_cast<unsigned char*>(&a))[1];\
+          (reinterpret_cast<unsigned char*>(&a))[1]=(reinterpret_cast<unsigned char*>(&a))[6];\
+          (reinterpret_cast<unsigned char*>(&a))[6]=t;\
+      t = (reinterpret_cast<unsigned char*>(&a))[2];\
+          (reinterpret_cast<unsigned char*>(&a))[2]=(reinterpret_cast<unsigned char*>(&a))[5];\
+          (reinterpret_cast<unsigned char*>(&a))[5]=t;\
+      t = (reinterpret_cast<unsigned char*>(&a))[3];\
+          (reinterpret_cast<unsigned char*>(&a))[3]=(reinterpret_cast<unsigned char*>(&a))[4];\
+          (reinterpret_cast<unsigned char*>(&a))[4]=t;} while (0)
 #define KALDIIO_SWAP4(a) do { \
-  int t = (reinterpret_cast<char*>(&a))[0];\
-          (reinterpret_cast<char*>(&a))[0]=(reinterpret_cast<char*>(&a))[3];\
-          (reinterpret_cast<char*>(&a))[3]=t;\
-      t = (reinterpret_cast<char*>(&a))[1];\
-          (reinterpret_cast<char*>(&a))[1]=(reinterpret_cast<char*>(&a))[2];\
-          (reinterpret_cast<char*>(&a))[2]=t;} while (0)
+  int t = (reinterpret_cast<unsigned char*>(&a))[0];\
+          (reinterpret_cast<unsigned char*>(&a))[0]=(reinterpret_cast<unsigned char*>(&a))[3];\
+          (reinterpret_cast<unsigned char*>(&a))[3]=t;\
+      t = (reinterpret_cast<unsigned char*>(&a))[1];\
+          (reinterpret_cast<unsigned char*>(&a))[1]=(reinterpret_cast<unsigned char*>(&a))[2];\
+          (reinterpret_cast<unsigned char*>(&a))[2]=t;} while (0)
 #define KALDIIO_SWAP2(a) do { \
-  int t = (reinterpret_cast<char*>(&a))[0];\
-          (reinterpret_cast<char*>(&a))[0]=(reinterpret_cast<char*>(&a))[1];\
-          (reinterpret_cast<char*>(&a))[1]=t;} while (0)
+  int t = (reinterpret_cast<unsigned char*>(&a))[0];\
+          (reinterpret_cast<unsigned char*>(&a))[0]=(reinterpret_cast<unsigned char*>(&a))[1];\
+          (reinterpret_cast<unsigned char*>(&a))[1]=t;} while (0)
 // clang-format on
 
 namespace kaldiio {

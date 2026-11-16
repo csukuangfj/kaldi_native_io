@@ -12,10 +12,9 @@
 //                2019  Yiwen Shao
 #include "kaldi_native_io/csrc/kaldi-vector.h"
 
-#include <string.h>
+#include <cstring>
 
 #include <cctype>
-#include <cstring>
 #include <limits>
 #include <string>
 #include <utility>
@@ -86,7 +85,7 @@ void Vector<Real>::Resize(const MatrixIndexT dim,
   // the next block uses recursion to handle what we have to do if
   // resize_type == kCopyData.
   if (resize_type == kCopyData) {
-    if (this->data_ == NULL || dim == 0)
+    if (this->data_ == nullptr || dim == 0)
       resize_type = kSetZero;  // nothing to copy.
     else if (this->dim_ == dim) {
       // nothing to do.
@@ -107,7 +106,7 @@ void Vector<Real>::Resize(const MatrixIndexT dim,
   }
   // At this point, resize_type == kSetZero or kUndefined.
 
-  if (this->data_ != NULL) {
+  if (this->data_ != nullptr) {
     if (this->dim_ == dim) {
       if (resize_type == kSetZero) this->SetZero();
       return;
@@ -124,16 +123,17 @@ inline void Vector<Real>::Init(const MatrixIndexT dim) {
   KALDIIO_ASSERT(dim >= 0);
   if (dim == 0) {
     this->dim_ = 0;
-    this->data_ = NULL;
+    this->data_ = nullptr;
     return;
   }
-  MatrixIndexT size;
-  void *data;
-  void *free_data;
+  MatrixIndexT size = 0;
+  void *data = nullptr;
+  void *free_data = nullptr;
 
   size = dim * sizeof(Real);
 
-  if ((data = KALDIIO_MEMALIGN(16, size, &free_data)) != NULL) {
+  data = KALDIIO_MEMALIGN(16, size, &free_data);
+  if (data != nullptr) {
     this->data_ = static_cast<Real *>(data);
     this->dim_ = dim;
   } else {
@@ -145,8 +145,8 @@ inline void Vector<Real>::Init(const MatrixIndexT dim) {
 template <typename Real>
 void Vector<Real>::Destroy() {
   /// we need to free the data block if it was defined
-  if (this->data_ != NULL) KALDIIO_MEMALIGN_FREE(this->data_);
-  this->data_ = NULL;
+  if (this->data_ != nullptr) KALDIIO_MEMALIGN_FREE(this->data_);  // NOLINT
+  this->data_ = nullptr;
   this->dim_ = 0;
 }
 
@@ -219,8 +219,8 @@ void Vector<Real>::Read(std::istream &is, bool binary, bool add) {
         other_token_start) {  // need to instantiate the other type to read it.
       // if Real == float, OtherType == double, and vice versa.
       using OtherType =
-          typename std::conditional<std::is_same<Real, float>::value, double,
-                                    float>::type;
+          std::conditional_t<std::is_same_v<Real, float>, double,
+                                    float>;
 
       Vector<OtherType> other(this->Dim());
       other.Read(is, binary, false);  // add is false at this point.
@@ -235,9 +235,9 @@ void Vector<Real>::Read(std::istream &is, bool binary, bool add) {
       specific_error << ": Expected token " << my_token << ", got " << token;
       goto bad;
     }
-    int32_t size;
+    int32_t size = 0;
     ReadBasicType(is, binary, &size);  // throws on error.
-    if ((MatrixIndexT)size != this->Dim()) this->Resize(size);
+    if (static_cast<MatrixIndexT>(size) != this->Dim()) this->Resize(size);
     if (size > 0)
       is.read(reinterpret_cast<char *>(this->data_), sizeof(Real) * size);
     if (is.fail()) {
@@ -259,17 +259,17 @@ void Vector<Real>::Read(std::istream &is, bool binary, bool add) {
       specific_error << "EOF while trying to read vector.";
       goto bad;
     }
-    if (s.compare("[]") == 0) {
+    if (s == "[]") {
       Resize(0);
       return;
     }  // tolerate this variant.
-    if (s.compare("[")) {
+    if (s != "[") {
       if (s.length() > 20) s = s.substr(0, 17) + "...";
       specific_error << "Expected \"[\" but got " << s;
       goto bad;
     }
     std::vector<Real> data;
-    while (1) {
+    while (true) {
       int i = is.peek();
       if (i == '-' || (i >= '0' && i <= '9')) {  // common cases first.
         Real r;

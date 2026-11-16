@@ -37,7 +37,7 @@ MatrixIndexT CompressedMatrix::DataSize(const GlobalHeader &header) {
 // scale all element of matrix by scaling floats
 // in GlobalHeader with alpha.
 void CompressedMatrix::Scale(float alpha) {
-  if (data_ != NULL) {
+  if (data_ != nullptr) {
     GlobalHeader *h = reinterpret_cast<GlobalHeader *>(data_);
     // scale the floating point values in each PerColHolder
     // and leave all integers the same.
@@ -87,7 +87,7 @@ void CompressedMatrix::ComputeGlobalHeader(const MatrixBase<Real> &mat,
       // matrix is constant; this avoids crashes in ComputeColHeader when
       // compressing speech featupres.
       if (max_value == min_value)
-        max_value = min_value + (1.0 + fabs(min_value));
+        max_value = min_value + (1.0 + std::fabs(min_value));
       KALDIIO_ASSERT(min_value - min_value == 0 && max_value - max_value == 0 &&
                      "Cannot compress a matrix with Nan's or Inf's");
 
@@ -118,7 +118,7 @@ void CompressedMatrix::ComputeGlobalHeader(const MatrixBase<Real> &mat,
       KALDIIO_ERR << "Unknown compression method = "
                   << static_cast<int32>(method);
   }
-  static_assert(sizeof(*header) == 20, "");  // otherwise
+  static_assert(sizeof(*header) == 20 );  // otherwise
   // something weird is happening and our code probably won't work or
   // won't be robust across platforms.
 }
@@ -126,16 +126,16 @@ void CompressedMatrix::ComputeGlobalHeader(const MatrixBase<Real> &mat,
 template <typename Real>
 void CompressedMatrix::CopyFromMat(const MatrixBase<Real> &mat,
                                    CompressionMethod method) {
-  if (data_ != NULL) {
+  if (data_ != nullptr) {
     delete[] static_cast<float *>(
         data_);  // call delete [] because was allocated with new float[]
-    data_ = NULL;
+    data_ = nullptr;
   }
   if (mat.NumRows() == 0) {
     return;
   }  // Zero-size matrix stored as zero pointer.
 
-  GlobalHeader global_header;
+  GlobalHeader global_header = {};
   ComputeGlobalHeader(mat, method, &global_header);
 
   int32 data_size = DataSize(global_header);
@@ -196,7 +196,7 @@ CompressedMatrix::CompressedMatrix(const CompressedMatrix &cmat,
                                    const MatrixIndexT col_offset,
                                    const MatrixIndexT num_cols,
                                    bool allow_padding)
-    : data_(NULL) {
+    : data_(nullptr) {
   int32 old_num_rows = cmat.NumRows(), old_num_cols = cmat.NumCols();
 
   if (old_num_rows == 0) {
@@ -219,8 +219,8 @@ CompressedMatrix::CompressedMatrix(const CompressedMatrix &cmat,
   bool padding_is_used =
       (row_offset < 0 || row_offset + num_rows > old_num_rows);
 
-  GlobalHeader new_global_header;
-  static_assert(sizeof(new_global_header) == 20, "");
+  GlobalHeader new_global_header = {};
+  static_assert(sizeof(new_global_header) == 20 );
 
   GlobalHeader *old_global_header =
       reinterpret_cast<GlobalHeader *>(cmat.Data());
@@ -440,11 +440,11 @@ void CompressedMatrix::ComputeColHeader(
 // static
 inline uint8 CompressedMatrix::FloatToChar(float p0, float p25, float p75,
                                            float p100, float value) {
-  int ans;
+  int ans = 0;
   if (value < p25) {  // range [ p0, p25 ) covered by
     // characters 0 .. 64.  We round to the closest int.
     float f = (value - p0) / (p25 - p0);
-    ans = static_cast<int>(f * 64 + 0.5);
+    ans = static_cast<int>(f * 64 + 0.5);  // NOLINT
     // Note: the checks on the next two lines
     // are necessary in pathological cases when all the elements in a row
     // are the same and the percentile_* values are separated by one.
@@ -453,7 +453,7 @@ inline uint8 CompressedMatrix::FloatToChar(float p0, float p25, float p75,
   } else if (value < p75) {  // range [ p25, p75 )covered
     // by characters 64 .. 192.  We round to the closest int.
     float f = (value - p25) / (p75 - p25);
-    ans = 64 + static_cast<int>(f * 128 + 0.5);
+    ans = 64 + static_cast<int>(f * 128 + 0.5);  // NOLINT
     if (ans < 64) ans = 64;
     if (ans > 192) ans = 192;
   } else {  // range [ p75, p100 ] covered by
@@ -461,7 +461,7 @@ inline uint8 CompressedMatrix::FloatToChar(float p0, float p25, float p75,
     // has fewer characters than the left range, because
     // we go up to 255, not 256.
     float f = (value - p75) / (p100 - p75);
-    ans = 192 + static_cast<int>(f * 63 + 0.5);
+    ans = 192 + static_cast<int>(f * 63 + 0.5);  // NOLINT
     if (ans < 192) ans = 192;
     if (ans > 255) ans = 255;
   }
@@ -502,14 +502,14 @@ void CompressedMatrix::CompressColumn(const GlobalHeader &global_header,
 // static
 void *CompressedMatrix::AllocateData(int32 num_bytes) {
   KALDIIO_ASSERT(num_bytes > 0);
-  static_assert(sizeof(float) == 4, "");
+  static_assert(sizeof(float) == 4 );
   // round size up to nearest number of floats.
   return reinterpret_cast<void *>(new float[(num_bytes / 3) + 4]);
 }
 
 void CompressedMatrix::Write(std::ostream &os, bool binary) const {
   if (binary) {  // Binary-mode write:
-    if (data_ != NULL) {
+    if (data_ != nullptr) {
       GlobalHeader &h = *reinterpret_cast<GlobalHeader *>(data_);
       DataFormat format = static_cast<DataFormat>(h.format);
       if (format == kOneByteWithColHeaders) {
@@ -525,7 +525,7 @@ void CompressedMatrix::Write(std::ostream &os, bool binary) const {
     } else {  // special case: where data_ == NULL, we treat it as an empty
       // matrix.
       WriteToken(os, binary, "CM");
-      GlobalHeader h;
+      GlobalHeader h = {};
       h.range = h.min_value = 0.0;
       h.num_rows = h.num_cols = 0;
       os.write(reinterpret_cast<const char *>(&h), sizeof(h));
@@ -541,16 +541,16 @@ void CompressedMatrix::Write(std::ostream &os, bool binary) const {
 }
 
 void CompressedMatrix::Read(std::istream &is, bool binary) {
-  if (data_ != NULL) {
+  if (data_ != nullptr) {
     delete[](static_cast<float *>(data_));
-    data_ = NULL;
+    data_ = nullptr;
   }
   if (binary) {
     int peekval = Peek(is, binary);
     if (peekval == 'C') {
       std::string tok;  // Should be CM (format 1) or CM2 (format 2)
       ReadToken(is, binary, &tok);
-      GlobalHeader h;
+      GlobalHeader h = {};
       if (tok == "CM") {
         //  kOneByteWithColHeaders
         h.format = 1;
@@ -602,7 +602,7 @@ void CompressedMatrix::CopyToMat(MatrixBase<Real> *mat,
     return;
   }
 
-  if (data_ == NULL) {
+  if (data_ == nullptr) {
     KALDIIO_ASSERT(mat->NumRows() == 0);
     KALDIIO_ASSERT(mat->NumCols() == 0);
     return;
@@ -818,19 +818,23 @@ template void CompressedMatrix::CopyToMat(int32, int32,
                                           MatrixBase<double> *dest) const;
 
 void CompressedMatrix::Clear() {
-  if (data_ != NULL) {
+  if (data_ != nullptr) {
     delete[] static_cast<float *>(data_);
-    data_ = NULL;
+    data_ = nullptr;
   }
 }
 
-CompressedMatrix::CompressedMatrix(const CompressedMatrix &mat) : data_(NULL) {
+CompressedMatrix::CompressedMatrix(const CompressedMatrix &mat)
+    : data_(nullptr) {
   *this = mat;  // use assignment operator.
 }
 
 CompressedMatrix &CompressedMatrix::operator=(const CompressedMatrix &mat) {
+  if (this == &mat) {
+    return *this;
+  }
   Clear();  // now this->data_ == NULL.
-  if (mat.data_ != NULL) {
+  if (mat.data_ != nullptr) {
     MatrixIndexT data_size = DataSize(*static_cast<GlobalHeader *>(mat.data_));
     data_ = AllocateData(data_size);
     memcpy(static_cast<void *>(data_), static_cast<void *>(mat.data_),

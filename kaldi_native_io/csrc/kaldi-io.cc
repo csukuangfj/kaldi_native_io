@@ -7,7 +7,7 @@
 //                2016  Xiaohui Zhang
 #include "kaldi_native_io/csrc/kaldi-io.h"
 
-#include <string.h>
+#include <cstring>
 
 #ifdef _MSC_VER
 #include <fcntl.h>
@@ -67,7 +67,7 @@ std::string OutputTypeToString(OutputType t) {
 }
 
 std::string PrintableRxfilename(const std::string &rxfilename) {
-  if (rxfilename == "" || rxfilename == "-") {
+  if (rxfilename.empty() || rxfilename == "-") {
     return "standard input";
   } else {
     // If this call to Escape later causes compilation issues,
@@ -78,7 +78,7 @@ std::string PrintableRxfilename(const std::string &rxfilename) {
 }
 
 std::string PrintableWxfilename(const std::string &wxfilename) {
-  if (wxfilename == "" || wxfilename == "-") {
+  if (wxfilename.empty() || wxfilename == "-") {
     return "standard output";
   } else {
     // If this call to Escape later causes compilation issues,
@@ -99,14 +99,16 @@ OutputType ClassifyWxfilename(const std::string &filename) {
     return kStandardOutput;
   else if (first_char == '|')
     return kPipeOutput;  // An output pipe like "|blah".
-  else if (isspace(first_char) || isspace(last_char) || last_char == '|') {
-    return kNoOutput;  // Leading or trailing space: can't interpret this.
-                       // Final '|' would represent an input pipe, not an
-                       // output pipe.
-  } else if ((first_char == 'a' || first_char == 's') &&
-             strchr(c, ':') != NULL &&
-             (ClassifyWspecifier(filename, NULL, NULL, NULL) != kNoWspecifier ||
-              ClassifyRspecifier(filename, NULL, NULL) != kNoRspecifier)) {
+  else if (isspace(first_char) || isspace(last_char) || last_char == '|' ||
+           ((first_char == 'a' || first_char == 's') &&
+            strchr(c, ':') != nullptr &&
+            (ClassifyWspecifier(filename, nullptr, nullptr, nullptr) !=
+                 kNoWspecifier ||
+             ClassifyRspecifier(filename, nullptr, nullptr) !=
+                 kNoRspecifier))) {
+    // Leading or trailing space: can't interpret this. Final '|' would
+    // represent an input pipe, not an output pipe.
+    //
     // e.g. ark:something or scp:something... this is almost certainly a
     // scripting error, so call it an error rather than treating it as a file.
     // In practice in modern kaldi scripts all (r,w)filenames begin with "ark"
@@ -132,7 +134,7 @@ OutputType ClassifyWxfilename(const std::string &filename) {
   // check for internal '|' as it's a common source of errors to have pipe
   // commands without the pipe in the right place.  Say that it can't be
   // classified.
-  if (strchr(c, '|') != NULL) {
+  if (strchr(c, '|') != nullptr) {
     KALDIIO_WARN << "Trying to classify wxfilename with pipe symbol in the"
                     " wrong place (pipe without | at the beginning?): "
                  << filename;
@@ -150,17 +152,19 @@ InputType ClassifyRxfilename(const std::string &filename) {
   // if 'filename' is "" or "-", return kStandardInput.
   if (length == 0 || (length == 1 && first_char == '-')) {
     return kStandardInput;
-  } else if (first_char == '|') {
+  } else if (first_char == '|') {  // NOLINT
     return kNoInput;  // An output pipe like "|blah": not
                       // valid for input.
   } else if (last_char == '|') {
     return kPipeInput;
-  } else if (isspace(first_char) || isspace(last_char)) {
+  } else if (isspace(first_char) || isspace(last_char)) {  // NOLINT
     return kNoInput;  // We don't allow leading or trailing space in a filename.
   } else if ((first_char == 'a' || first_char == 's') &&
-             strchr(c, ':') != NULL &&
-             (ClassifyWspecifier(filename, NULL, NULL, NULL) != kNoWspecifier ||
-              ClassifyRspecifier(filename, NULL, NULL) != kNoRspecifier)) {
+             strchr(c, ':') != nullptr &&
+             (ClassifyWspecifier(filename, nullptr, nullptr, nullptr) !=
+                  kNoWspecifier ||
+              ClassifyRspecifier(filename, nullptr, nullptr) !=
+                  kNoRspecifier)) {
     // e.g. ark:something or scp:something... this is almost certainly a
     // scripting error, so call it an error rather than treating it as a file.
     // In practice in modern kaldi scripts all (r,w)filenames begin with "ark"
@@ -183,7 +187,7 @@ InputType ClassifyRxfilename(const std::string &filename) {
   // we check for '|' as it's a common source of errors to have pipe
   // commands without the pipe in the right place.  Say that it can't be
   // classified in this case.
-  if (strchr(c, '|') != NULL) {
+  if (strchr(c, '|') != nullptr) {
     KALDIIO_WARN << "Trying to classify rxfilename with pipe symbol in the"
                     " wrong place (pipe without | at the end?): "
                  << filename;
@@ -205,12 +209,13 @@ class OutputImplBase {
   virtual bool Open(const std::string &filename, bool binary) = 0;
   virtual std::ostream &Stream() = 0;
   virtual bool Close() = 0;
-  virtual ~OutputImplBase() {}
+  virtual ~OutputImplBase() = default;
 };
 
+namespace {
 class FileOutputImpl : public OutputImplBase {
  public:
-  virtual bool Open(const std::string &filename, bool binary) {
+  bool Open(const std::string &filename, bool binary) override {
     if (os_.is_open())
       KALDIIO_ERR << "FileOutputImpl::Open(), "
                   << "open called on already open file.";
@@ -221,21 +226,21 @@ class FileOutputImpl : public OutputImplBase {
     return os_.is_open();
   }
 
-  virtual std::ostream &Stream() {
+  std::ostream &Stream() override {
     if (!os_.is_open())
       KALDIIO_ERR << "FileOutputImpl::Stream(), file is not open.";
     // I believe this error can only arise from coding error.
     return os_;
   }
 
-  virtual bool Close() {
+  bool Close() override {
     if (!os_.is_open())
       KALDIIO_ERR << "FileOutputImpl::Close(), file is not open.";
     // I believe this error can only arise from coding error.
     os_.close();
     return !(os_.fail());
   }
-  virtual ~FileOutputImpl() {
+  ~FileOutputImpl() override {
     if (os_.is_open()) {
       os_.close();
       if (os_.fail()) KALDIIO_ERR << "Error closing output file " << filename_;
@@ -249,9 +254,9 @@ class FileOutputImpl : public OutputImplBase {
 
 class StandardOutputImpl : public OutputImplBase {
  public:
-  StandardOutputImpl() : is_open_(false) {}
+  StandardOutputImpl()  = default;
 
-  virtual bool Open(const std::string & /*filename*/, bool binary) {
+  bool Open(const std::string & /*filename*/, bool binary) override {
     if (is_open_)
       KALDIIO_ERR << "StandardOutputImpl::Open(), "
                      "open called on already open file.";
@@ -263,21 +268,21 @@ class StandardOutputImpl : public OutputImplBase {
     return is_open_;
   }
 
-  virtual std::ostream &Stream() {
+  std::ostream &Stream() override {
     if (!is_open_)
       KALDIIO_ERR << "StandardOutputImpl::Stream(), object not initialized.";
     // I believe this error can only arise from coding error.
     return std::cout;
   }
 
-  virtual bool Close() {
+  bool Close() override {
     if (!is_open_)
       KALDIIO_ERR << "StandardOutputImpl::Close(), file is not open.";
     is_open_ = false;
     std::cout << std::flush;
     return !(std::cout.fail());
   }
-  virtual ~StandardOutputImpl() {
+  ~StandardOutputImpl() override {
     if (is_open_) {
       std::cout << std::flush;
       if (std::cout.fail()) KALDIIO_ERR << "Error writing to standard output";
@@ -285,23 +290,23 @@ class StandardOutputImpl : public OutputImplBase {
   }
 
  private:
-  bool is_open_;
+  bool is_open_ = false;
 };
 
 class PipeOutputImpl : public OutputImplBase {
  public:
-  PipeOutputImpl() : f_(NULL), os_(NULL) {}
+  PipeOutputImpl() = default;
 
-  virtual bool Open(const std::string &wxfilename, bool binary) {
+  bool Open(const std::string &wxfilename, bool binary) override {
     filename_ = wxfilename;
-    KALDIIO_ASSERT(f_ == NULL);  // Make sure closed.
-    KALDIIO_ASSERT(wxfilename.length() != 0 && wxfilename[0] == '|');  // should
+    KALDIIO_ASSERT(f_ == nullptr);  // Make sure closed.
+    KALDIIO_ASSERT(!wxfilename.empty() && wxfilename[0] == '|');  // should
     // start with '|'
     std::string cmd_name(wxfilename, 1);
 #if defined(_MSC_VER) || defined(__CYGWIN__)
-    f_ = popen(cmd_name.c_str(), (binary ? "wb" : "w"));
+    f_ = popen(cmd_name.c_str(), (binary ? "wb" : "w"));  // NOLINT
 #else
-    f_ = popen(cmd_name.c_str(), "w");
+    f_ = popen(cmd_name.c_str(), "w");  // NOLINT
 #endif
     if (!f_) {  // Failure.
       KALDIIO_WARN << "Failed opening pipe for writing, command is: "
@@ -314,7 +319,7 @@ class PipeOutputImpl : public OutputImplBase {
                                  // we're done.
                             (binary ? std::ios_base::out | std::ios_base::binary
                                     : std::ios_base::out));
-      KALDIIO_ASSERT(fb_ != NULL);  // or would be alloc error.
+      KALDIIO_ASSERT(fb_ != nullptr);  // or would be alloc error.
       os_ = new std::ostream(fb_);
 #else
       os_ = new std::ofstream(f_);
@@ -323,23 +328,23 @@ class PipeOutputImpl : public OutputImplBase {
     }
   }
 
-  virtual std::ostream &Stream() {
-    if (os_ == NULL)
+  std::ostream &Stream() override {
+    if (os_ == nullptr)
       KALDIIO_ERR << "PipeOutputImpl::Stream(),"
                      " object not initialized.";
     // I believe this error can only arise from coding error.
     return *os_;
   }
 
-  virtual bool Close() {
-    if (os_ == NULL)
+  bool Close() override {
+    if (os_ == nullptr)
       KALDIIO_ERR << "PipeOutputImpl::Close(), file is not open.";
     bool ok = true;
     os_->flush();
     if (os_->fail()) ok = false;
     delete os_;
-    os_ = NULL;
-    int status;
+    os_ = nullptr;
+    int status = 0;
 #ifdef _MSC_VER
     status = _pclose(f_);
 #else
@@ -348,14 +353,14 @@ class PipeOutputImpl : public OutputImplBase {
     if (status)
       KALDIIO_WARN << "Pipe " << filename_ << " had nonzero return status "
                    << status;
-    f_ = NULL;
+    f_ = nullptr;
 #ifndef _MSC_VER
     delete fb_;
-    fb_ = NULL;
+    fb_ = nullptr;
 #endif
     return ok;
   }
-  virtual ~PipeOutputImpl() {
+  ~PipeOutputImpl() override {  // NOLINT
     if (os_) {
       if (!Close())
         KALDIIO_ERR << "Error writing to pipe "
@@ -365,19 +370,20 @@ class PipeOutputImpl : public OutputImplBase {
 
  private:
   std::string filename_;
-  FILE *f_;
+  FILE *f_ = nullptr;
 #ifndef _MSC_VER
-  PipebufType *fb_;
+  PipebufType *fb_ = {};
 #endif
-  std::ostream *os_;
+  std::ostream *os_ = nullptr;
 };
+}  // namespace
 
 Output::Output(const std::string &wxfilename, bool binary, bool write_header)
-    : impl_(NULL) {
+    : impl_(nullptr) {
   if (!Open(wxfilename, binary, write_header)) {
     if (impl_) {
       delete impl_;
-      impl_ = NULL;
+      impl_ = nullptr;
     }
     KALDIIO_ERR << "Error opening output stream "
                 << PrintableWxfilename(wxfilename);
@@ -390,16 +396,16 @@ bool Output::Close() {
   } else {
     bool ans = impl_->Close();
     delete impl_;
-    impl_ = NULL;
+    impl_ = nullptr;
     return ans;
   }
 }
 
-Output::~Output() {
+Output::~Output() {  // NOLINT
   if (impl_) {
     bool ok = impl_->Close();
     delete impl_;
-    impl_ = NULL;
+    impl_ = nullptr;
     if (!ok)
       KALDIIO_ERR << "Error closing output file "
                   << PrintableWxfilename(filename_)
@@ -428,7 +434,7 @@ bool Output::Open(const std::string &wxfn, bool binary, bool header) {
   filename_ = wxfn;
 
   OutputType type = ClassifyWxfilename(wxfn);
-  KALDIIO_ASSERT(impl_ == NULL);
+  KALDIIO_ASSERT(impl_ == nullptr);
 
   if (type == kFileOutput) {
     impl_ = new FileOutputImpl();
@@ -443,7 +449,7 @@ bool Output::Open(const std::string &wxfn, bool binary, bool header) {
   }
   if (!impl_->Open(wxfn, binary)) {
     delete impl_;
-    impl_ = NULL;
+    impl_ = nullptr;
     return false;  // failed to open.
   } else {         // successfully opened it.
     if (header) {
@@ -451,7 +457,7 @@ bool Output::Open(const std::string &wxfn, bool binary, bool header) {
       bool ok = impl_->Stream().good();  // still OK?
       if (!ok) {
         delete impl_;
-        impl_ = NULL;
+        impl_ = nullptr;
         return false;
       }
       return true;
@@ -480,12 +486,13 @@ class InputImplBase {
                                    // call Open twice
   // (has efficiency benefits).
 
-  virtual ~InputImplBase() {}
+  virtual ~InputImplBase() = default;
 };
 
+namespace {
 class FileInputImpl : public InputImplBase {
  public:
-  virtual bool Open(const std::string &filename, bool binary) {
+  bool Open(const std::string &filename, bool binary) override {
     if (is_.is_open())
       KALDIIO_ERR << "FileInputImpl::Open(), "
                   << "open called on already open file.";
@@ -495,14 +502,14 @@ class FileInputImpl : public InputImplBase {
     return is_.is_open();
   }
 
-  virtual std::istream &Stream() {
+  std::istream &Stream() override {
     if (!is_.is_open())
       KALDIIO_ERR << "FileInputImpl::Stream(), file is not open.";
     // I believe this error can only arise from coding error.
     return is_;
   }
 
-  virtual int32_t Close() {
+  int32_t Close() override {
     if (!is_.is_open())
       KALDIIO_ERR << "FileInputImpl::Close(), file is not open.";
     // I believe this error can only arise from coding error.
@@ -511,12 +518,11 @@ class FileInputImpl : public InputImplBase {
     return 0;
   }
 
-  virtual InputType MyType() { return kFileInput; }
+  InputType MyType() override { return kFileInput; }
 
-  virtual ~FileInputImpl() {
-    // Stream will automatically be closed, and we don't care about
-    // whether it fails.
-  }
+  // Stream will automatically be closed, and we don't care about
+  // whether it fails.
+  ~FileInputImpl() override = default;
 
  private:
   std::ifstream is_;
@@ -524,9 +530,9 @@ class FileInputImpl : public InputImplBase {
 
 class StandardInputImpl : public InputImplBase {
  public:
-  StandardInputImpl() : is_open_(false) {}
+  StandardInputImpl()  = default;
 
-  virtual bool Open(const std::string & /*filename*/, bool binary) {
+  bool Open(const std::string & /*filename*/, bool binary) override {
     if (is_open_)
       KALDIIO_ERR << "StandardInputImpl::Open(), "
                      "open called on already open file.";
@@ -539,42 +545,42 @@ class StandardInputImpl : public InputImplBase {
     // eof, which may be valid input.
   }
 
-  virtual std::istream &Stream() {
+  std::istream &Stream() override {
     if (!is_open_)
       KALDIIO_ERR << "StandardInputImpl::Stream(), object not initialized.";
     // I believe this error can only arise from coding error.
     return std::cin;
   }
 
-  virtual InputType MyType() { return kStandardInput; }
+  InputType MyType() override { return kStandardInput; }
 
-  virtual int32_t Close() {
+  int32_t Close() override {
     if (!is_open_)
       KALDIIO_ERR << "StandardInputImpl::Close(), file is not open.";
     is_open_ = false;
     return 0;
   }
-  virtual ~StandardInputImpl() {}
+  ~StandardInputImpl() override = default;
 
  private:
-  bool is_open_;
+  bool is_open_ = false;
 };
 
 class PipeInputImpl : public InputImplBase {
  public:
-  PipeInputImpl() : f_(NULL), is_(NULL) {}
+  PipeInputImpl() = default;
 
-  virtual bool Open(const std::string &rxfilename, bool binary) {
+  bool Open(const std::string &rxfilename, bool binary) override {
     filename_ = rxfilename;
-    KALDIIO_ASSERT(f_ == NULL);  // Make sure closed.
-    KALDIIO_ASSERT(rxfilename.length() != 0 &&
+    KALDIIO_ASSERT(f_ == nullptr);  // Make sure closed.
+    KALDIIO_ASSERT(!rxfilename.empty() &&
                    rxfilename[rxfilename.length() - 1] ==
                        '|');  // should end with '|'
     std::string cmd_name(rxfilename, 0, rxfilename.length() - 1);
 #if defined(_MSC_VER) || defined(__CYGWIN__)
-    f_ = popen(cmd_name.c_str(), (binary ? "rb" : "r"));
+    f_ = popen(cmd_name.c_str(), (binary ? "rb" : "r"));  // NOLINT
 #else
-    f_ = popen(cmd_name.c_str(), "r");
+    f_ = popen(cmd_name.c_str(), "r");  // NOLINT
 #endif
 
     if (!f_) {  // Failure.
@@ -587,7 +593,7 @@ class PipeInputImpl : public InputImplBase {
                                  // destructor to close the stream.
                             (binary ? std::ios_base::in | std::ios_base::binary
                                     : std::ios_base::in));
-      KALDIIO_ASSERT(fb_ != NULL);  // or would be alloc error.
+      KALDIIO_ASSERT(fb_ != nullptr);  // or would be alloc error.
       is_ = new std::istream(fb_);
 #else
       is_ = new std::ifstream(f_);
@@ -602,18 +608,19 @@ class PipeInputImpl : public InputImplBase {
     }
   }
 
-  virtual std::istream &Stream() {
-    if (is_ == NULL)
+  std::istream &Stream() override {
+    if (is_ == nullptr)
       KALDIIO_ERR << "PipeInputImpl::Stream(), object not initialized.";
     // I believe this error can only arise from coding error.
     return *is_;
   }
 
-  virtual int32_t Close() {
-    if (is_ == NULL) KALDIIO_ERR << "PipeInputImpl::Close(), file is not open.";
+  int32_t Close() override {
+    if (is_ == nullptr)
+      KALDIIO_ERR << "PipeInputImpl::Close(), file is not open.";
     delete is_;
-    is_ = NULL;
-    int32_t status;
+    is_ = nullptr;
+    int32_t status = 0;
 #ifdef _MSC_VER
     status = _pclose(f_);
 #else
@@ -622,25 +629,25 @@ class PipeInputImpl : public InputImplBase {
     if (status)
       KALDIIO_WARN << "Pipe " << filename_ << " had nonzero return status "
                    << status;
-    f_ = NULL;
+    f_ = nullptr;
 #ifndef _MSC_VER
     delete fb_;
-    fb_ = NULL;
+    fb_ = nullptr;
 #endif
     return status;
   }
-  virtual ~PipeInputImpl() {
+  ~PipeInputImpl() override {
     if (is_) Close();
   }
-  virtual InputType MyType() { return kPipeInput; }
+  InputType MyType() override { return kPipeInput; }
 
  private:
   std::string filename_;
-  FILE *f_;
+  FILE *f_ = nullptr;
 #ifndef _MSC_VER
-  PipebufType *fb_;
+  PipebufType *fb_ = {};
 #endif
-  std::istream *is_;
+  std::istream *is_ = nullptr;
 };
 
 /*
@@ -705,13 +712,13 @@ class OffsetFileInputImpl : public InputImplBase {
   // This Open routine is unusual in that it is designed to work even
   // if it was already open.  This for efficiency when seeking multiple
   // times.
-  virtual bool Open(const std::string &rxfilename, bool binary) {
+  bool Open(const std::string &rxfilename, bool binary) override {
     if (is_.is_open()) {
       // We are opening when we have an already-open file.
       // We may have to seek within this file, or else close it and
       // open a different one.
       std::string tmp_filename;
-      size_t offset;
+      size_t offset = 0;
       SplitFilename(rxfilename, &tmp_filename, &offset);
       if (tmp_filename == filename_ && binary == binary_) {  // Just seek
         is_.clear();  // clear fail bit, etc.
@@ -728,7 +735,7 @@ class OffsetFileInputImpl : public InputImplBase {
           return Seek(offset);
       }
     } else {
-      size_t offset;
+      size_t offset = 0;
       SplitFilename(rxfilename, &filename_, &offset);
       binary_ = binary;
       is_.open(MapOsPath(filename_).c_str(),
@@ -741,14 +748,14 @@ class OffsetFileInputImpl : public InputImplBase {
     }
   }
 
-  virtual std::istream &Stream() {
+  std::istream &Stream() override {
     if (!is_.is_open())
       KALDIIO_ERR << "FileInputImpl::Stream(), file is not open.";
     // I believe this error can only arise from coding error.
     return is_;
   }
 
-  virtual int32_t Close() {
+  int32_t Close() override {
     if (!is_.is_open())
       KALDIIO_ERR << "FileInputImpl::Close(), file is not open.";
     // I believe this error can only arise from coding error.
@@ -757,20 +764,20 @@ class OffsetFileInputImpl : public InputImplBase {
     return 0;
   }
 
-  virtual InputType MyType() { return kOffsetFileInput; }
+  InputType MyType() override { return kOffsetFileInput; }
 
-  virtual ~OffsetFileInputImpl() {
-    // Stream will automatically be closed, and we don't care about
-    // whether it fails.
-  }
+  // Stream will automatically be closed, and we don't care about
+  // whether it fails.
+  ~OffsetFileInputImpl() override = default;
 
  private:
   std::string filename_;  // the actual filename
-  bool binary_;           // true if was opened in binary mode.
+  bool binary_ = {};           // true if was opened in binary mode.
   std::ifstream is_;
 };
+}  // namespace
 
-Input::Input(const std::string &rxfilename, bool *binary) : impl_(NULL) {
+Input::Input(const std::string &rxfilename, bool *binary) : impl_(nullptr) {
   if (!Open(rxfilename, binary)) {
     KALDIIO_ERR << "Error opening input stream "
                 << PrintableRxfilename(rxfilename);
@@ -781,7 +788,7 @@ int32_t Input::Close() {
   if (impl_) {
     int32_t ans = impl_->Close();
     delete impl_;
-    impl_ = NULL;
+    impl_ = nullptr;
     return ans;
   } else {
     return 0;
@@ -799,11 +806,11 @@ bool Input::OpenInternal(const std::string &rxfilename, bool file_binary,
       if (!impl_->Open(rxfilename, file_binary)) {  // true is binary mode--
         // always open in binary.
         delete impl_;
-        impl_ = NULL;
+        impl_ = nullptr;
         return false;
       }
       // read the binary header, if requested.
-      if (contents_binary != NULL)
+      if (contents_binary != nullptr)
         return InitKaldiInputStream(impl_->Stream(), contents_binary);
       else
         return true;
@@ -828,10 +835,10 @@ bool Input::OpenInternal(const std::string &rxfilename, bool file_binary,
   if (!impl_->Open(rxfilename, file_binary)) {  // true is binary mode--
     // always read in binary.
     delete impl_;
-    impl_ = NULL;
+    impl_ = nullptr;
     return false;
   }
-  if (contents_binary != NULL)
+  if (contents_binary != nullptr)
     return InitKaldiInputStream(impl_->Stream(), contents_binary);
   else
     return true;
@@ -858,7 +865,7 @@ void ReadKaldiObject(const std::string &filename, Matrix<float> *m) {
           << "while reading matrix: " << filename;
     }
     Matrix<float> temp;
-    bool binary_in;
+    bool binary_in = false;
     Input ki(rxfilename, &binary_in);
     temp.Read(ki.Stream(), binary_in);
     if (!ExtractObjectRange(temp, range, m)) {
@@ -866,7 +873,7 @@ void ReadKaldiObject(const std::string &filename, Matrix<float> *m) {
     }
   } else {
     // The normal case, there is no range.
-    bool binary_in;
+    bool binary_in = false;
     Input ki(filename, &binary_in);
     m->Read(ki.Stream(), binary_in);
   }
@@ -884,7 +891,7 @@ void ReadKaldiObject(const std::string &filename, Matrix<double> *m) {
           << "while reading matrix: " << filename;
     }
     Matrix<double> temp;
-    bool binary_in;
+    bool binary_in = false;
     Input ki(rxfilename, &binary_in);
     temp.Read(ki.Stream(), binary_in);
     if (!ExtractObjectRange(temp, range, m)) {
@@ -892,7 +899,7 @@ void ReadKaldiObject(const std::string &filename, Matrix<double> *m) {
     }
   } else {
     // The normal case, there is no range.
-    bool binary_in;
+    bool binary_in = false;
     Input ki(filename, &binary_in);
     m->Read(ki.Stream(), binary_in);
   }

@@ -52,7 +52,7 @@ class BasicHolder {
 
   // Reads into the holder.
   bool Read(std::istream &is) {
-    bool is_binary;
+    bool is_binary = false;
     if (!InitKaldiInputStream(is, &is_binary)) {
       KALDIIO_WARN
           << "Reading Table object [integer type], failed reading binary"
@@ -60,7 +60,7 @@ class BasicHolder {
       return false;
     }
     try {
-      int c;
+      int c = 0;
       if (!is_binary) {  // This is to catch errors, the class would work
         // without it..
         // Eat up any whitespace and make sure it's not newline.
@@ -112,7 +112,7 @@ class BasicHolder {
     return false;
   }
 
-  ~BasicHolder() {}
+  ~BasicHolder() = default;
 
  private:
   KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicHolder)
@@ -130,7 +130,7 @@ class BasicVectorHolder {
  public:
   typedef std::vector<BasicType> T;
 
-  BasicVectorHolder() {}
+  BasicVectorHolder() = default;
 
   static bool Write(std::ostream &os, bool binary, const T &t) {
     InitKaldiOutputStream(os, binary);  // Puts binary header if binary mode.
@@ -167,7 +167,7 @@ class BasicVectorHolder {
   // Reads into the holder.
   bool Read(std::istream &is) {
     t_.clear();
-    bool is_binary;
+    bool is_binary = false;
     if (!InitKaldiInputStream(is, &is_binary)) {
       KALDIIO_WARN
           << "Reading Table object [integer type], failed reading binary"
@@ -185,7 +185,7 @@ class BasicVectorHolder {
       }
       std::istringstream line_is(line);
       try {
-        while (1) {
+        while (true) {
           line_is >> std::ws;  // eat up whitespace.
           if (line_is.eof()) break;
           BasicType bt;
@@ -203,7 +203,7 @@ class BasicVectorHolder {
     } else {  // binary mode.
       size_t filepos = is.tellg();
       try {
-        int32_t size;
+        int32_t size = 0;
         ReadBasicType(is, true, &size);
         t_.resize(size);
         for (typename std::vector<BasicType>::iterator iter = t_.begin();
@@ -234,7 +234,7 @@ class BasicVectorHolder {
     return false;
   }
 
-  ~BasicVectorHolder() {}
+  ~BasicVectorHolder() = default;
 
  private:
   KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicVectorHolder)
@@ -251,7 +251,7 @@ class BasicVectorVectorHolder {
  public:
   typedef std::vector<std::vector<BasicType>> T;
 
-  BasicVectorVectorHolder() {}
+  BasicVectorVectorHolder() = default;
 
   static bool Write(std::ostream &os, bool binary, const T &t) {
     InitKaldiOutputStream(os, binary);  // Puts binary header if binary mode.
@@ -304,7 +304,7 @@ class BasicVectorVectorHolder {
   // Reads into the holder.
   bool Read(std::istream &is) {
     t_.clear();
-    bool is_binary;
+    bool is_binary = false;
     if (!InitKaldiInputStream(is, &is_binary)) {
       KALDIIO_WARN << "Failed reading binary header\n";
       return false;
@@ -313,7 +313,7 @@ class BasicVectorVectorHolder {
       // In text mode, we terminate with newline.
       try {                        // catching errors from ReadBasicType..
         std::vector<BasicType> v;  // temporary vector
-        while (1) {
+        while (true) {
           int i = is.peek();
           if (i == -1) {
             KALDIIO_WARN << "Unexpected EOF";
@@ -346,13 +346,13 @@ class BasicVectorVectorHolder {
     } else {  // binary mode.
       size_t filepos = is.tellg();
       try {
-        int32_t size;
+        int32_t size = 0;
         ReadBasicType(is, true, &size);
         t_.resize(size);
         for (typename std::vector<std::vector<BasicType>>::iterator iter =
                  t_.begin();
              iter != t_.end(); ++iter) {
-          int32_t size2;
+          int32_t size2 = 0;
           ReadBasicType(is, true, &size2);
           iter->resize(size2);
           for (typename std::vector<BasicType>::iterator iter2 = iter->begin();
@@ -384,7 +384,7 @@ class BasicVectorVectorHolder {
     return false;
   }
 
-  ~BasicVectorVectorHolder() {}
+  ~BasicVectorVectorHolder() = default;
 
  private:
   KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicVectorVectorHolder)
@@ -401,7 +401,7 @@ class BasicPairVectorHolder {
  public:
   typedef std::vector<std::pair<BasicType, BasicType>> T;
 
-  BasicPairVectorHolder() {}
+  BasicPairVectorHolder() = default;
 
   static bool Write(std::ostream &os, bool binary, const T &t) {
     InitKaldiOutputStream(os, binary);  // Puts binary header if binary mode.
@@ -442,7 +442,7 @@ class BasicPairVectorHolder {
   // Reads into the holder.
   bool Read(std::istream &is) {
     t_.clear();
-    bool is_binary;
+    bool is_binary = false;
     if (!InitKaldiInputStream(is, &is_binary)) {
       KALDIIO_WARN
           << "Reading Table object [integer type], failed reading binary"
@@ -453,7 +453,7 @@ class BasicPairVectorHolder {
       // In text mode, we terminate with newline.
       try {                        // catching errors from ReadBasicType..
         std::vector<BasicType> v;  // temporary vector
-        while (1) {
+        while (true) {
           int i = is.peek();
           if (i == -1) {
             KALDIIO_WARN << "Unexpected EOF";
@@ -497,7 +497,7 @@ class BasicPairVectorHolder {
     } else {  // binary mode.
       size_t filepos = is.tellg();
       try {
-        int32_t size;
+        int32_t size = 0;
         ReadBasicType(is, true, &size);
         t_.resize(size);
         for (typename T::iterator iter = t_.begin(); iter != t_.end(); ++iter) {
@@ -528,7 +528,7 @@ class BasicPairVectorHolder {
     return false;
   }
 
-  ~BasicPairVectorHolder() {}
+  ~BasicPairVectorHolder() = default;
 
  private:
   KALDIIO_DISALLOW_COPY_AND_ASSIGN(BasicPairVectorHolder)
@@ -542,7 +542,7 @@ class TokenHolder {
  public:
   typedef std::string T;
 
-  TokenHolder() {}
+  TokenHolder() = default;
 
   static bool Write(std::ostream &os, bool, const T &t) {  // ignore binary-mode
     KALDIIO_ASSERT(IsToken(t));
@@ -556,7 +556,7 @@ class TokenHolder {
   bool Read(std::istream &is) {
     is >> t_;
     if (is.fail()) return false;
-    char c;
+    char c = 0;
     while (isspace(c = is.peek()) && c != '\n') is.get();
     if (is.peek() != '\n') {
       KALDIIO_WARN << "TokenHolder::Read, expected newline, got char "
@@ -574,7 +574,7 @@ class TokenHolder {
 
   T &Value() { return t_; }
 
-  ~TokenHolder() {}
+  ~TokenHolder() = default;
 
   void Swap(TokenHolder *other) { t_.swap(other->t_); }
 
@@ -595,15 +595,14 @@ class TokenVectorHolder {
  public:
   typedef std::vector<std::string> T;
 
-  TokenVectorHolder() {}
+  TokenVectorHolder() = default;
 
   static bool Write(std::ostream &os, bool, const T &t) {  // ignore binary-mode
     std::string sep = "";
-    for (std::vector<std::string>::const_iterator iter = t.begin();
-         iter != t.end(); ++iter) {
-      KALDIIO_ASSERT(IsToken(*iter));  // make sure it's whitespace-free,
+    for (const auto & iter : t) {
+      KALDIIO_ASSERT(IsToken(iter));  // make sure it's whitespace-free,
       // printable and nonempty.
-      os << sep << *iter;
+      os << sep << iter;
       sep = " ";
     }
     os << '\n';
@@ -685,7 +684,7 @@ class KaldiObjectHolder {
     t_ = new T;
     // Don't want any existing state to complicate the read function: get new
     // object.
-    bool is_binary;
+    bool is_binary = false;
     if (!InitKaldiInputStream(is, &is_binary)) {
       KALDIIO_WARN << "Reading Table object, failed reading binary header\n";
       return false;
@@ -737,7 +736,7 @@ class HtkMatrixHolder {
  public:
   typedef std::pair<Matrix<float>, HtkHeader> T;
 
-  HtkMatrixHolder() {}
+  HtkMatrixHolder() = default;
 
   static bool Write(std::ostream &os, bool binary, const T &t) {
     if (!binary) KALDIIO_ERR << "Non-binary HTK-format write not supported.";

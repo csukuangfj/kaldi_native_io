@@ -33,12 +33,16 @@ platforms:
 | Linux    | x86_64, aarch64, armv7l |
 | macOS    | x86_64, arm64, universal2 |
 | Windows  | x86 (win32), x64, ARM64 |
+| Android (Termux) | arm64-v8a, armeabi-v7a, x86, x86_64 |
 
 Notes:
 
 * Windows ARM64 wheels are provided for CPython 3.11 and later only
   (CPython has no native Windows ARM64 builds before 3.11).
 * Linux armv7l wheels are provided for CPython 3.9 and later only.
+* Android wheels target **Termux**, not an APK. numpy has no Android wheels on
+  PyPI, so on Termux install it with `pkg install python-numpy` before
+  `pip install --no-deps kaldi_native_io`.
 
 
 # Features

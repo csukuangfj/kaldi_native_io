@@ -10,6 +10,8 @@
 
 #include "kaldi_native_io/csrc/posterior.h"
 
+#include <cmath>
+
 #include <string>
 #include <vector>
 
@@ -18,32 +20,27 @@
 
 namespace kaldiio {
 
-void WritePosterior(std::ostream &os, bool binary, const Posterior &post) {
+static void WritePosterior(std::ostream &os, bool binary,
+                            const Posterior &post) {
   if (binary) {
     int32_t sz = post.size();
     WriteBasicType(os, binary, sz);
-    for (Posterior::const_iterator iter = post.begin(); iter != post.end();
-         ++iter) {
-      int32_t sz2 = iter->size();
+    for (const auto & iter : post) {
+      int32_t sz2 = iter.size();
       WriteBasicType(os, binary, sz2);
-      for (std::vector<std::pair<int32_t, float>>::const_iterator iter2 =
-               iter->begin();
-           iter2 != iter->end(); ++iter2) {
-        WriteBasicType(os, binary, iter2->first);
-        WriteBasicType(os, binary, iter2->second);
+      for (const auto & iter2 : iter) {
+        WriteBasicType(os, binary, iter2.first);
+        WriteBasicType(os, binary, iter2.second);
       }
     }
   } else {  // In text-mode, choose a human-friendly, script-friendly format.
     // format is [ 1235 0.6 12 0.4 ] [ 34 1.0 ] ...
     // We could have used the same code as in the binary case above,
     // but this would have resulted in less readable output.
-    for (Posterior::const_iterator iter = post.begin(); iter != post.end();
-         ++iter) {
+    for (const auto & iter : post) {
       os << "[ ";
-      for (std::vector<std::pair<int32_t, float>>::const_iterator iter2 =
-               iter->begin();
-           iter2 != iter->end(); iter2++) {
-        os << iter2->first << ' ' << iter2->second << ' ';
+      for (const auto & iter2 : iter) {
+        os << iter2.first << ' ' << iter2.second << ' ';
       }
       os << "] ";
     }
@@ -52,26 +49,23 @@ void WritePosterior(std::ostream &os, bool binary, const Posterior &post) {
   if (!os.good()) KALDIIO_ERR << "Output stream error writing Posterior.";
 }
 
-void ReadPosterior(std::istream &is, bool binary, Posterior *post) {
+static void ReadPosterior(std::istream &is, bool binary, Posterior *post) {
   post->clear();
   if (binary) {
-    int32_t sz;
+    int32_t sz = 0;
     ReadBasicType(is, true, &sz);
     if (sz < 0 || sz > 10000000)
       KALDIIO_ERR << "Reading posterior: got negative or improbably large size"
                   << sz;
     post->resize(sz);
-    for (Posterior::iterator iter = post->begin(); iter != post->end();
-         ++iter) {
-      int32_t sz2;
+    for (auto & iter : *post) {
+      int32_t sz2 = 0;
       ReadBasicType(is, true, &sz2);
       if (sz2 < 0) KALDIIO_ERR << "Reading posteriors: got negative size";
-      iter->resize(sz2);
-      for (std::vector<std::pair<int32_t, float>>::iterator iter2 =
-               iter->begin();
-           iter2 != iter->end(); iter2++) {
-        ReadBasicType(is, true, &(iter2->first));
-        ReadBasicType(is, true, &(iter2->second));
+      iter.resize(sz2);
+      for (auto & iter2 : iter) {
+        ReadBasicType(is, true, &(iter2.first));
+        ReadBasicType(is, true, &(iter2.second));
       }
     }
   } else {
@@ -82,13 +76,13 @@ void ReadPosterior(std::istream &is, bool binary, Posterior *post) {
       KALDIIO_ERR << "holder of Posterior: error reading line "
                   << (is.eof() ? "[eof]" : "");
     std::istringstream line_is(line);
-    while (1) {
+    while (true) {
       std::string str;
       line_is >> std::ws;  // eat up whitespace.
       if (line_is.eof()) break;
       line_is >> str;
       if (str != "[") {
-        int32_t str_int;
+        int32_t str_int = 0;
         // if str is an integer, we can give a slightly more concrete suggestion
         // of what might have gone wrong.
         KALDIIO_ERR
@@ -98,19 +92,19 @@ void ReadPosterior(std::istream &is, bool binary, Posterior *post) {
                     : "'.");
       }
       std::vector<std::pair<int32_t, float>> this_vec;
-      while (1) {
+      while (true) {
         line_is >> std::ws;
         if (line_is.peek() == ']') {
           line_is.get();
           break;
         }
-        int32_t i;
-        float p;
+        int32_t i = 0;
+        float p = NAN;
         line_is >> i >> p;
         if (line_is.fail())
           KALDIIO_ERR << "Error reading Posterior object (could not get data "
                          "after \"[\");";
-        this_vec.push_back(std::make_pair(i, p));
+        this_vec.emplace_back(i, p);
       }
       post->push_back(this_vec);
     }
@@ -133,7 +127,7 @@ bool PosteriorHolder::Write(std::ostream &os, bool binary, const T &t) {
 bool PosteriorHolder::Read(std::istream &is) {
   t_.clear();
 
-  bool is_binary;
+  bool is_binary = false;
   if (!InitKaldiInputStream(is, &is_binary)) {
     KALDIIO_WARN << "Reading Table object, failed reading binary header";
     return false;
@@ -156,14 +150,12 @@ bool GaussPostHolder::Write(std::ostream &os, bool binary, const T &t) {
     // We don't bother making this a one-line format.
     int32_t sz = t.size();
     WriteBasicType(os, binary, sz);
-    for (GaussPost::const_iterator iter = t.begin(); iter != t.end(); ++iter) {
-      int32_t sz2 = iter->size();
+    for (const auto & iter : t) {
+      int32_t sz2 = iter.size();
       WriteBasicType(os, binary, sz2);
-      for (std::vector<std::pair<int32_t, Vector<float>>>::const_iterator
-               iter2 = iter->begin();
-           iter2 != iter->end(); iter2++) {
-        WriteBasicType(os, binary, iter2->first);
-        iter2->second.Write(os, binary);
+      for (const auto & iter2 : iter) {
+        WriteBasicType(os, binary, iter2.first);
+        iter2.second.Write(os, binary);
       }
     }
     if (!binary) os << '\n';
@@ -178,26 +170,24 @@ bool GaussPostHolder::Write(std::ostream &os, bool binary, const T &t) {
 bool GaussPostHolder::Read(std::istream &is) {
   t_.clear();
 
-  bool is_binary;
+  bool is_binary = false;
   if (!InitKaldiInputStream(is, &is_binary)) {
     KALDIIO_WARN << "Reading Table object, failed reading binary header";
     return false;
   }
   try {
-    int32_t sz;
+    int32_t sz = 0;
     ReadBasicType(is, is_binary, &sz);
     if (sz < 0) KALDIIO_ERR << "Reading posteriors: got negative size";
     t_.resize(sz);
-    for (GaussPost::iterator iter = t_.begin(); iter != t_.end(); ++iter) {
-      int32_t sz2;
+    for (auto & iter : t_) {
+      int32_t sz2 = 0;
       ReadBasicType(is, is_binary, &sz2);
       if (sz2 < 0) KALDIIO_ERR << "Reading posteriors: got negative size";
-      iter->resize(sz2);
-      for (std::vector<std::pair<int32_t, Vector<float>>>::iterator iter2 =
-               iter->begin();
-           iter2 != iter->end(); iter2++) {
-        ReadBasicType(is, is_binary, &(iter2->first));
-        iter2->second.Read(is, is_binary);
+      iter.resize(sz2);
+      for (auto & iter2 : iter) {
+        ReadBasicType(is, is_binary, &(iter2.first));
+        iter2.second.Read(is, is_binary);
       }
     }
     return true;

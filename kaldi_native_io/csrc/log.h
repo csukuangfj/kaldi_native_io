@@ -41,7 +41,8 @@ class Logger {
     return *this;
   }
 
-  ~Logger() noexcept(false) {
+  // The destructor throws for kError: that is how KALDIIO_ERR propagates.
+  ~Logger() noexcept(false) {  // NOLINT
     if (level_ == LogLevel::kError) {
       throw std::runtime_error(os_.str());
     } else {

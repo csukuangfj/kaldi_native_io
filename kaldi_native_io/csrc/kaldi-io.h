@@ -101,7 +101,7 @@ class Output {
   // with these arguments.
   Output(const std::string &filename, bool binary, bool write_header = true);
 
-  Output() : impl_(NULL) {}
+  Output() : impl_(nullptr) {}
 
   /// This opens the stream, with the given mode (binary or text).  It returns
   /// true on success and false on failure.  However, it will throw if something
@@ -163,9 +163,10 @@ class Input {
   /// Equivalent to calling the default constructor followed by Open(); then, if
   /// binary != NULL, it calls ReadHeader(), putting the output in "binary"; it
   /// throws on error.
-  explicit Input(const std::string &rxfilename, bool *contents_binary = NULL);
+  explicit Input(const std::string &rxfilename,
+                 bool *contents_binary = nullptr);
 
-  Input() : impl_(NULL) {}
+  Input() : impl_(nullptr) {}
 
   // Open opens the stream for reading (the mode, where relevant, is binary; use
   // OpenTextMode for text-mode, we made this a separate function rather than a
@@ -176,7 +177,8 @@ class Input {
   // not be open.  You may call Open even if it is already open; it will close
   // the existing stream and reopen (however if closing the old stream failed it
   // will throw).
-  inline bool Open(const std::string &rxfilename, bool *contents_binary = NULL);
+  inline bool Open(const std::string &rxfilename,
+                   bool *contents_binary = nullptr);
 
   // As Open but (if the file system has text/binary modes) opens in text mode;
   // you shouldn't ever have to use this as in Kaldi we read even text files in
@@ -209,7 +211,7 @@ class Input {
 
 template <class C>
 void ReadKaldiObject(const std::string &filename, C *c) {
-  bool binary_in;
+  bool binary_in = false;
   Input ki(filename, &binary_in);
   c->Read(ki.Stream(), binary_in);
 }

@@ -8,13 +8,13 @@
 #ifndef KALDI_NATIVE_IO_CSRC_KALDI_MATRIX_INL_H_
 #define KALDI_NATIVE_IO_CSRC_KALDI_MATRIX_INL_H_
 
-#include "kaldi_native_io/csrc/kaldi-matrix.h"
+// Included by kaldi-matrix.h; do not include this file directly.
 
 namespace kaldiio {
 
 /// Empty constructor
 template <typename Real>
-Matrix<Real>::Matrix() : MatrixBase<Real>(NULL, 0, 0, 0) {}
+Matrix<Real>::Matrix() : MatrixBase<Real>(nullptr, 0, 0, 0) {}
 
 }  // namespace kaldiio
 

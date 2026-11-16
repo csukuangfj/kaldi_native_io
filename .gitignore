@@ -12,3 +12,4 @@ build*/
 # Scratch files written by the tests in kaldi_native_io/python/tests/
 *.ark
 *.scp
+plan.md

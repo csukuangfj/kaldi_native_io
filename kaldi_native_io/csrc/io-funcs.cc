@@ -7,7 +7,8 @@
 
 #include "kaldi_native_io/csrc/io-funcs.h"
 
-#include <string.h>
+#include <cmath>
+#include <cstring>
 
 #include <string>
 
@@ -25,7 +26,7 @@ void WriteBasicType<bool>(std::ostream &os, bool binary, bool b) {
 
 template <>
 void ReadBasicType<bool>(std::istream &is, bool binary, bool *b) {
-  KALDIIO_PARANOID_ASSERT(b != NULL);
+  KALDIIO_PARANOID_ASSERT(b != nullptr);
   if (!binary) is >> std::ws;  // eat up whitespace.
   char c = is.peek();
   if (c == 'T') {
@@ -64,9 +65,9 @@ void WriteBasicType<double>(std::ostream &os, bool binary, double f) {
 
 template <>
 void ReadBasicType<float>(std::istream &is, bool binary, float *f) {
-  KALDIIO_PARANOID_ASSERT(f != NULL);
+  KALDIIO_PARANOID_ASSERT(f != nullptr);
   if (binary) {
-    double d;
+    double d = NAN;
     int c = is.peek();
     if (c == sizeof(*f)) {
       is.get();
@@ -89,9 +90,9 @@ void ReadBasicType<float>(std::istream &is, bool binary, float *f) {
 
 template <>
 void ReadBasicType<double>(std::istream &is, bool binary, double *d) {
-  KALDIIO_PARANOID_ASSERT(d != NULL);
+  KALDIIO_PARANOID_ASSERT(d != nullptr);
   if (binary) {
-    float f;
+    float f = NAN;
     int c = is.peek();
     if (c == sizeof(*d)) {
       is.get();
@@ -112,7 +113,7 @@ void ReadBasicType<double>(std::istream &is, bool binary, double *d) {
   }
 }
 
-void CheckToken(const char *token) {
+static void CheckToken(const char *token) {
   if (*token == '\0') KALDIIO_ERR << "Token is empty (not a valid token)";
   const char *orig_token = token;
   while (*token != '\0') {
@@ -126,7 +127,7 @@ void CheckToken(const char *token) {
 void WriteToken(std::ostream &os, bool /*binary*/, const char *token) {
   // binary mode is ignored;
   // we use space as termination character in either case.
-  KALDIIO_ASSERT(token != NULL);
+  KALDIIO_ASSERT(token != nullptr);
   CheckToken(token);  // make sure it's valid (can be read back)
   os << token << " ";
   if (os.fail()) {
@@ -139,7 +140,7 @@ void WriteToken(std::ostream &os, bool binary, const std::string &token) {
 }
 
 void ReadToken(std::istream &is, bool binary, std::string *str) {
-  KALDIIO_ASSERT(str != NULL);
+  KALDIIO_ASSERT(str != nullptr);
   if (!binary) is >> std::ws;  // consume whitespace.
   is >> *str;
   if (is.fail()) {
@@ -156,7 +157,7 @@ void ReadToken(std::istream &is, bool binary, std::string *str) {
 
 int PeekToken(std::istream &is, bool binary) {
   if (!binary) is >> std::ws;  // consume whitespace.
-  bool read_bracket;
+  bool read_bracket = false;
   if (static_cast<char>(is.peek()) == '<') {
     read_bracket = true;
     is.get();
@@ -176,7 +177,7 @@ int PeekToken(std::istream &is, bool binary) {
 
 void ExpectToken(std::istream &is, bool binary, const char *token) {
   int pos_at_start = is.tellg();
-  KALDIIO_ASSERT(token != NULL);
+  KALDIIO_ASSERT(token != nullptr);
   CheckToken(token);           // make sure it's valid (can be read back)
   if (!binary) is >> std::ws;  // consume whitespace.
   std::string str;

@@ -41,9 +41,9 @@ void SplitStringToVector(const std::string &full, const char *delim,
 /// true.
 template <class Int>
 bool ConvertStringToInteger(const std::string &str, Int *out) {
-  static_assert(std::is_integral<Int>::value, "");
+  static_assert(std::is_integral_v<Int>);
   const char *this_str = str.c_str();
-  char *end = NULL;
+  char *end = nullptr;
   errno = 0;
   int64_t i = KALDIIO_STRTOLL(this_str, &end);
   if (end != this_str)
@@ -89,8 +89,8 @@ bool SplitStringToIntegers(const std::string &full, const char *delim,
                                                      // should probably be true
                                                      // if "delim" is spaces].
                            std::vector<I> *out) {
-  KALDIIO_ASSERT(out != NULL);
-  static_assert(std::is_integral<I>::value, "");
+  KALDIIO_ASSERT(out != nullptr);
+  static_assert(std::is_integral_v<I>);
   if (*(full.c_str()) == '\0') {
     out->clear();
     return true;
@@ -100,7 +100,7 @@ bool SplitStringToIntegers(const std::string &full, const char *delim,
   out->resize(split.size());
   for (size_t i = 0; i < split.size(); i++) {
     const char *this_str = split[i].c_str();
-    char *end = NULL;
+    char *end = nullptr;
     int64_t j = 0;
     j = KALDIIO_STRTOLL(this_str, &end);
     if (end == this_str || *end != '\0') {

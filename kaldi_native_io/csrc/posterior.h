@@ -41,7 +41,7 @@ class PosteriorHolder {
  public:
   typedef Posterior T;
 
-  PosteriorHolder() {}
+  PosteriorHolder() = default;
 
   static bool Write(std::ostream &os, bool binary, const T &t);
 
@@ -81,7 +81,7 @@ class GaussPostHolder {
  public:
   typedef GaussPost T;
 
-  GaussPostHolder() {}
+  GaussPostHolder() = default;
 
   static bool Write(std::ostream &os, bool binary, const T &t);
 

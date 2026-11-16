@@ -17,7 +17,9 @@
 namespace kaldiio {
 
 // We currently do not support any other options.
+namespace {
 enum ShellType { kBash = 0 };
+}  // namespace
 
 // This can be changed in the code if it ever does need to be changed (as it's
 // unlikely that one compilation of this tool-set would use both shells).
@@ -55,7 +57,7 @@ static bool MustBeQuoted(const std::string &str, ShellType st) {
       // are OK. All others are forbidden (this is easier since the shell
       // interprets most non-alphanumeric characters).
       if (!isalnum(*c)) {
-        const char *d;
+        const char *d = nullptr;
         for (d = ok_chars[st]; *d != '\0'; d++)
           if (*c == *d) break;
         // If not alphanumeric or one of the "ok_chars", it must be escaped.

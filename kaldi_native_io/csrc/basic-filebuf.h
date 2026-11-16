@@ -35,11 +35,11 @@ class basic_filebuf : public std::basic_streambuf<CharT, Traits> {
     typedef typename traits_type::state_type state_type;
 
     basic_filebuf();
-    basic_filebuf(basic_filebuf&& rhs);
-    virtual ~basic_filebuf();
+    basic_filebuf(basic_filebuf&& rhs) noexcept ;
+    ~basic_filebuf() override;
 
-    basic_filebuf& operator=(basic_filebuf&& rhs);
-    void swap(basic_filebuf& rhs);
+    basic_filebuf& operator=(basic_filebuf&& rhs) noexcept ;
+    void swap(basic_filebuf& rhs) noexcept ;
 
     bool is_open() const;
     basic_filebuf* open(const char* s, std::ios_base::openmode mode);
@@ -67,22 +67,22 @@ class basic_filebuf : public std::basic_streambuf<CharT, Traits> {
     void imbue(const std::locale& loc) override;
 
  protected:
-    char*       _M_extbuf;
-    const char* _M_extbufnext;
-    const char* _M_extbufend;
-    char _M_extbuf_min[8];
-    size_t _M_ebs;
+    char*       _M_extbuf = nullptr;
+    const char* _M_extbufnext = nullptr;
+    const char* _M_extbufend = nullptr;
+    char _M_extbuf_min[8]{};
+    size_t _M_ebs = 0;
     char_type* _M_intbuf;
-    size_t _M_ibs;
-    FILE* _M_file;
+    size_t _M_ibs = 0;
+    FILE* _M_file = nullptr;
     const std::codecvt<char_type, char, state_type>* _M_cv;
     state_type _M_st;
     state_type _M_st_last;
-    std::ios_base::openmode _M_om;
-    std::ios_base::openmode _M_cm;
-    bool _M_owns_eb;
-    bool _M_owns_ib;
-    bool _M_always_noconv;
+    std::ios_base::openmode _M_om = static_cast<std::ios_base::openmode>(0);
+    std::ios_base::openmode _M_cm = static_cast<std::ios_base::openmode>(0);
+    bool _M_owns_eb = false;
+    bool _M_owns_ib = false;
+    bool _M_always_noconv = false;
 
     const char* _M_get_mode(std::ios_base::openmode mode);
     bool _M_read_mode();
@@ -92,34 +92,26 @@ class basic_filebuf : public std::basic_streambuf<CharT, Traits> {
 ///////////////////////////////////////////////////////////////////////////////
 template <class CharT, class Traits>
 basic_filebuf<CharT, Traits>::basic_filebuf()
-    : _M_extbuf(nullptr),
-      _M_extbufnext(nullptr),
-      _M_extbufend(nullptr),
-      _M_ebs(0),
+    :
       _M_intbuf(nullptr),
-      _M_ibs(0),
-      _M_file(nullptr),
+
       _M_cv(nullptr),
       _M_st(),
-      _M_st_last(),
-      _M_om(std::ios_base::openmode(0)),
-      _M_cm(std::ios_base::openmode(0)),
-      _M_owns_eb(false),
-      _M_owns_ib(false),
-      _M_always_noconv(false) {
+      _M_st_last()
+      {
     if (std::has_facet<std::codecvt<char_type, char, state_type> >
         (this->getloc())) {
         _M_cv = &std::use_facet<std::codecvt<char_type, char, state_type> >
           (this->getloc());
         _M_always_noconv = _M_cv->always_noconv();
     }
-    setbuf(0, 4096);
+    setbuf(nullptr, 4096);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 template <class CharT, class Traits>
 basic_filebuf<CharT, Traits>::basic_filebuf(basic_filebuf&& rhs)
-    : std::basic_streambuf<CharT, Traits>(rhs) {
+ noexcept     : std::basic_streambuf<CharT, Traits>(rhs) {
     if (rhs._M_extbuf == rhs._M_extbuf_min) {
         _M_extbuf = _M_extbuf_min;
         _M_extbufnext = _M_extbuf + (rhs._M_extbufnext - rhs._M_extbuf);
@@ -169,8 +161,8 @@ basic_filebuf<CharT, Traits>::basic_filebuf(basic_filebuf&& rhs)
     rhs._M_file = nullptr;
     rhs._M_st = state_type();
     rhs._M_st_last = state_type();
-    rhs._M_om = std::ios_base::openmode(0);
-    rhs._M_cm = std::ios_base::openmode(0);
+    rhs._M_om = static_cast<std::ios_base::openmode>(0);
+    rhs._M_cm = static_cast<std::ios_base::openmode>(0);
     rhs._M_owns_eb = false;
     rhs._M_owns_ib = false;
     rhs.setg(0, 0, 0);
@@ -181,7 +173,7 @@ basic_filebuf<CharT, Traits>::basic_filebuf(basic_filebuf&& rhs)
 template <class CharT, class Traits>
 inline
 basic_filebuf<CharT, Traits>&
-basic_filebuf<CharT, Traits>::operator=(basic_filebuf&& rhs) {
+basic_filebuf<CharT, Traits>::operator=(basic_filebuf&& rhs)  noexcept {  // NOLINT
     close();
     swap(rhs);
     return *this;
@@ -206,7 +198,7 @@ basic_filebuf<CharT, Traits>::~basic_filebuf() {
 ///////////////////////////////////////////////////////////////////////////////
 template <class CharT, class Traits>
 void
-basic_filebuf<CharT, Traits>::swap(basic_filebuf& rhs) {
+basic_filebuf<CharT, Traits>::swap(basic_filebuf& rhs)  noexcept {
     std::basic_streambuf<char_type, traits_type>::swap(rhs);
     if (_M_extbuf != _M_extbuf_min && rhs._M_extbuf != rhs._M_extbuf_min) {
         std::swap(_M_extbuf, rhs._M_extbuf);
@@ -275,7 +267,7 @@ basic_filebuf<CharT, Traits>::swap(basic_filebuf& rhs) {
 template <class CharT, class Traits>
 inline
 void
-swap(basic_filebuf<CharT, Traits>& x, basic_filebuf<CharT, Traits>& y) {
+swap(basic_filebuf<CharT, Traits>& x, basic_filebuf<CharT, Traits>& y)  noexcept {
     x.swap(y);
 }
 
@@ -440,7 +432,7 @@ basic_filebuf<CharT, Traits>::underflow() {
             size_t nmemb = std::min(static_cast<size_t>(_M_ibs - unget_sz),
                                     static_cast<size_t>
                                     (_M_extbufend - _M_extbufnext));
-            std::codecvt_base::result r;
+            std::codecvt_base::result r = std::codecvt_base::ok;
             _M_st_last = _M_st;
             size_t nr = fread(
                 reinterpret_cast<void*>(const_cast<char_type*>(_M_extbufnext)),
@@ -449,7 +441,7 @@ basic_filebuf<CharT, Traits>::underflow() {
                 if (!_M_cv)
                     throw std::bad_cast();
                 _M_extbufend = _M_extbufnext + nr;
-                char_type*  inext;
+                char_type*  inext = nullptr;
                 r = _M_cv->in(_M_st, _M_extbuf, _M_extbufend, _M_extbufnext,
                               this->eback() + unget_sz,
                               this->eback() + _M_ibs, inext);
@@ -468,7 +460,7 @@ basic_filebuf<CharT, Traits>::underflow() {
         c = traits_type::to_int_type(*this->gptr());
     }
     if (this->eback() == &buf)
-        this->setg(0, 0, 0);
+        this->setg(nullptr, nullptr, nullptr);
     return c;
 }
 
@@ -515,11 +507,11 @@ basic_filebuf<CharT, Traits>::overflow(int_type c) {
                 return traits_type::eof();
         } else {
             char* extbe = _M_extbuf;
-            std::codecvt_base::result r;
+            std::codecvt_base::result r = std::codecvt_base::ok;
             do {
                 if (!_M_cv)
                     throw std::bad_cast();
-                const char_type* e;
+                const char_type* e = nullptr;
                 r = _M_cv->out(_M_st, this->pbase(), this->pptr(), e,
                                _M_extbuf, _M_extbuf + _M_ebs, extbe);
                 if (e == this->pbase())
@@ -553,8 +545,8 @@ basic_filebuf<CharT, Traits>::overflow(int_type c) {
 template <class CharT, class Traits>
 std::basic_streambuf<CharT, Traits>*
 basic_filebuf<CharT, Traits>::setbuf(char_type* s, std::streamsize n) {
-    this->setg(0, 0, 0);
-    this->setp(0, 0);
+    this->setg(nullptr, nullptr, nullptr);
+    this->setp(nullptr, nullptr);
     if (_M_owns_eb)
         delete [] _M_extbuf;
     if (_M_owns_ib)
@@ -584,7 +576,7 @@ basic_filebuf<CharT, Traits>::setbuf(char_type* s, std::streamsize n) {
         }
     } else {
         _M_ibs = 0;
-        _M_intbuf = 0;
+        _M_intbuf = nullptr;
         _M_owns_ib = false;
     }
     return this;
@@ -601,7 +593,7 @@ basic_filebuf<CharT, Traits>::seekoff(off_type off, std::ios_base::seekdir way,
     if (_M_file == nullptr || (width <= 0 && off != 0) || sync())
         return pos_type(off_type(-1));
     // width > 0 || off == 0
-    int whence;
+    int whence = 0;
     switch (way) {
     case std::ios_base::beg:
         whence = SEEK_SET;
@@ -657,9 +649,9 @@ basic_filebuf<CharT, Traits>::sync() {
         if (this->pptr() != this->pbase())
             if (overflow() == traits_type::eof())
                 return -1;
-        std::codecvt_base::result r;
+        std::codecvt_base::result r = std::codecvt_base::ok;
         do {
-            char* extbe;
+            char* extbe = nullptr;
             r = _M_cv->unshift(_M_st, _M_extbuf, _M_extbuf + _M_ebs, extbe);
             size_t nmemb = static_cast<size_t>(extbe - _M_extbuf);
             if (fwrite(_M_extbuf, 1, nmemb, _M_file) != nmemb)
@@ -700,8 +692,8 @@ basic_filebuf<CharT, Traits>::sync() {
         if (update_st)
             _M_st = state;
         _M_extbufnext = _M_extbufend = _M_extbuf;
-        this->setg(0, 0, 0);
-        _M_cm = std::ios_base::openmode(0);
+        this->setg(nullptr, nullptr, nullptr);
+        _M_cm = static_cast<std::ios_base::openmode>(0);
     }
     return 0;
 }
@@ -715,8 +707,8 @@ basic_filebuf<CharT, Traits>::imbue(const std::locale& loc) {
     bool old_anc = _M_always_noconv;
     _M_always_noconv = _M_cv->always_noconv();
     if (old_anc != _M_always_noconv) {
-        this->setg(0, 0, 0);
-        this->setp(0, 0);
+        this->setg(nullptr, nullptr, nullptr);
+        this->setp(nullptr, nullptr);
         // invariant, char_type is char, else we couldn't get here
         // need to dump _M_intbuf
         if (_M_always_noconv) {
@@ -750,7 +742,7 @@ template <class CharT, class Traits>
 bool
 basic_filebuf<CharT, Traits>::_M_read_mode() {
     if (!(_M_cm & std::ios_base::in)) {
-        this->setp(0, 0);
+        this->setp(nullptr, nullptr);
         if (_M_always_noconv)
             this->setg(reinterpret_cast<char_type*>(_M_extbuf),
                        reinterpret_cast<char_type*>(_M_extbuf) + _M_ebs,
@@ -768,7 +760,7 @@ template <class CharT, class Traits>
 void
 basic_filebuf<CharT, Traits>::_M_write_mode() {
     if (!(_M_cm & std::ios_base::out)) {
-        this->setg(0, 0, 0);
+        this->setg(nullptr, nullptr, nullptr);
         if (_M_ebs > sizeof(_M_extbuf_min)) {
             if (_M_always_noconv)
                 this->setp(reinterpret_cast<char_type*>(_M_extbuf),
@@ -777,7 +769,7 @@ basic_filebuf<CharT, Traits>::_M_write_mode() {
             else
                 this->setp(_M_intbuf, _M_intbuf + (_M_ibs - 1));
         } else {
-            this->setp(0, 0);
+            this->setp(nullptr, nullptr);
         }
         _M_cm = std::ios_base::out;
     }
