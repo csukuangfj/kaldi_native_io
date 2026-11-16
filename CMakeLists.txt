@@ -25,7 +25,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
   cmake_policy(SET CMP0135 NEW)
 endif()
 
-set(KALDI_NATIVE_IO_VERSION "1.23.1")
+set(KALDI_NATIVE_IO_VERSION "1.23.2")
 
 if(NOT CMAKE_BUILD_TYPE)
   message(STATUS "No CMAKE_BUILD_TYPE given, default to Release")

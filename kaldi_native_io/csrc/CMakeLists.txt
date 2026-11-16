@@ -63,9 +63,13 @@ foreach(s IN LISTS srcs)
   list(APPEND srcs_to_check ${CMAKE_CURRENT_LIST_DIR}/${s})
 endforeach()
 
-add_custom_target(
-  clang-tidy-check
-  clang-tidy -p ${CMAKE_BINARY_DIR}/compile_commands.json --config-file ${PROJECT_SOURCE_DIR}/.clang-tidy ${srcs_to_check}
-)
+# Only when kaldi_native_io is the top-level project: downstream projects
+# (e.g. sherpa-onnx) define their own targets with these names.
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+  add_custom_target(
+    clang-tidy-check
+    clang-tidy -p ${CMAKE_BINARY_DIR}/compile_commands.json --config-file ${PROJECT_SOURCE_DIR}/.clang-tidy ${srcs_to_check}
+  )
 
-add_custom_target(check DEPENDS clang-tidy-check)
+  add_custom_target(check DEPENDS clang-tidy-check)
+endif()
